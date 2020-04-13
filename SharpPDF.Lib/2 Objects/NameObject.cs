@@ -1,7 +1,7 @@
 using System.Text;
 
 namespace SharpPDF.Lib {
-    public class NameObject : IPdfObject {
+    public class NameObject : PdfObject {
         private readonly string value;
 
         public NameObject(string value) {
@@ -26,9 +26,7 @@ namespace SharpPDF.Lib {
         }
 
         public string Value => value;
-
-        public ObjectType ObjectType => Lib.ObjectType.Name;
-
+        
         private string Escape(string literalString)
         {
             StringBuilder literalStringEscaped = new StringBuilder();
@@ -50,8 +48,6 @@ namespace SharpPDF.Lib {
             }
             return literalStringEscaped.ToString();
         }
-
-        public IPdfObject[] Childs() => new IPdfObject[0];
 
         public override string ToString() {
             return $"/{value}";

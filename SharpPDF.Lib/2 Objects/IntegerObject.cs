@@ -1,7 +1,7 @@
 using System.Globalization;
 
 namespace SharpPDF.Lib {
-    public class IntegerObject : IPdfObject {
+    public class IntegerObject : PdfObject {
         private readonly int value;
 
         public IntegerObject(int value) {
@@ -17,8 +17,7 @@ namespace SharpPDF.Lib {
 
 
         public int Value => value;
-        public ObjectType ObjectType => Lib.ObjectType.Integer;
-        public IPdfObject[] Childs() => new IPdfObject[0];
+        public PdfObject[] Childs() => new PdfObject[0];
 
         public override string ToString() {
             return value.ToString();

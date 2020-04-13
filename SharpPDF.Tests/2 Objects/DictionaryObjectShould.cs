@@ -63,38 +63,37 @@ namespace SharpPDF.Tests
             Objectizer objectizer = new Objectizer(feed);
            
             DictionaryObject actual = (DictionaryObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Dictionary, actual.ObjectType);
             Assert.Equal(12, actual.Childs().Length);
 
 
-            Assert.Equal("Type", ((NameObject)actual.Childs()[0]).Value);
-            Assert.Equal("Example", ((NameObject)actual.Childs()[1]).Value);        
+            Assert.Equal("Type", actual.Child<NameObject>(0).Value);
+            Assert.Equal("Example", actual.Child<NameObject>(1).Value);        
 
-            Assert.Equal("Subtype", ((NameObject)actual.Childs()[2]).Value);
-            Assert.Equal("DictionaryExample", ((NameObject)actual.Childs()[3]).Value);        
+            Assert.Equal("Subtype", actual.Child<NameObject>(2).Value);
+            Assert.Equal("DictionaryExample", actual.Child<NameObject>(3).Value);
 
-            Assert.Equal("Version", ((NameObject)actual.Childs()[4]).Value);
-            Assert.Equal(0.01f, ((RealObject)actual.Childs()[5]).Value);        
+            Assert.Equal("Version", actual.Child<NameObject>(4).Value);
+            Assert.Equal(0.01f, actual.Child<RealObject>(5).Value);        
 
-            Assert.Equal("IntegerItem", ((NameObject)actual.Childs()[6]).Value);
-            Assert.Equal(12, ((IntegerObject)actual.Childs()[7]).Value); 
+            Assert.Equal("IntegerItem", actual.Child<NameObject>(6).Value);
+            Assert.Equal(12, actual.Child<IntegerObject>(7).Value); 
 
-            Assert.Equal("StringItem", ((NameObject)actual.Childs()[8]).Value);
-            Assert.Equal("a string", ((StringObject)actual.Childs()[9]).Value);        
+            Assert.Equal("StringItem", actual.Child<NameObject>(8).Value);
+            Assert.Equal("a string", actual.Child<StringObject>(9).Value);        
 
-            Assert.Equal("Subdictionary", ((NameObject)actual.Childs()[10]).Value);
+            Assert.Equal("Subdictionary", actual.Child<NameObject>(10).Value);
 
-            Assert.Equal("Item1", ((NameObject)actual.Childs()[11].Childs()[0]).Value);
-            Assert.Equal(0.4f, ((RealObject)actual.Childs()[11].Childs()[1]).Value);
+            Assert.Equal("Item1", actual.Child<DictionaryObject>(11).Child<NameObject>(0).Value);
+            Assert.Equal(0.4f, actual.Child<DictionaryObject>(11).Child<RealObject>(1).Value);
 
-            Assert.Equal("Item2", ((NameObject)actual.Childs()[11].Childs()[2]).Value);
-            Assert.True(((BooleanObject)actual.Childs()[11].Childs()[3]).Value);
+            Assert.Equal("Item2", actual.Child<DictionaryObject>(11).Child<NameObject>(2).Value);
+            Assert.True(actual.Child<DictionaryObject>(11).Child<BooleanObject>(3).Value);
 
-            Assert.Equal("LastItem", ((NameObject)actual.Childs()[11].Childs()[4]).Value);
-            Assert.Equal("not!", ((StringObject)actual.Childs()[11].Childs()[5]).Value);
+            Assert.Equal("LastItem", actual.Child<DictionaryObject>(11).Child<NameObject>(4).Value);
+            Assert.Equal("not!", actual.Child<DictionaryObject>(11).Child<StringObject>(5).Value);
 
-            Assert.Equal("VeryLastItem", ((NameObject)actual.Childs()[11].Childs()[6]).Value);
-            Assert.Equal("OK", ((StringObject)actual.Childs()[11].Childs()[7]).Value);
+            Assert.Equal("VeryLastItem", actual.Child<DictionaryObject>(11).Child<NameObject>(6).Value);
+            Assert.Equal("OK", actual.Child<DictionaryObject>(11).Child<StringObject>(7).Value);
         }
         
         [Theory]
@@ -102,7 +101,6 @@ namespace SharpPDF.Tests
         [InlineData("<</Length /10>>other")]
         [InlineData("<</Length /10>>")]
         [InlineData("<</Length 10>>stream0123456789\nendstream")]
-        [InlineData("<</Length 10>>stream\n0123456789endstream")]
         [InlineData("<</Length 10>>stream\r0123456789endstream")]
         [InlineData("<</Length 10>>stream 0123456789endstream")]
         [InlineData("<</Length 10>>stream\n0123456789\nendstrea")]
@@ -122,6 +120,7 @@ namespace SharpPDF.Tests
         [Theory]
         [InlineData("<</Length 10>>stream\r\n0123456789\r\nendstream")]
         [InlineData("<</Length 10>>stream\n0123456789\nendstream")]
+        [InlineData("<</Length 10>>stream\n0123456789endstream")] // is not completely valid, but some writers do
         public void ReadStreams(string fragment)
         {
             // 7.3.8 Stream Objects            
@@ -130,7 +129,6 @@ namespace SharpPDF.Tests
             Objectizer objectizer = new Objectizer(feed);
            
             DictionaryObject actual = (DictionaryObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Dictionary, actual.ObjectType);
             Assert.Equal(2, actual.Childs().Length);
 
 

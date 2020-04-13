@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 
 namespace SharpPDF.Lib {
-    public class ArrayObject : IPdfObject {        
-        private readonly List<IPdfObject> childs = new  List<IPdfObject>();
-
-        public ArrayObject(List<IPdfObject> childs) {
+    public class ArrayObject : PdfObject {
+        public ArrayObject(List<PdfObject> childs) {
             this.childs = childs;
         }
 
@@ -20,11 +18,7 @@ namespace SharpPDF.Lib {
 
             if (!validator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), "]"))
                 throw new PdfException(PdfExceptionCodes.INVALID_ARRAY, "Expected ]");
-        }
-
-        public ObjectType ObjectType => Lib.ObjectType.Array;
-
-        public IPdfObject[] Childs() => childs.ToArray();
+        }    
 
         public override string ToString() {
             return $"[{string.Join(" ", childs)}]";

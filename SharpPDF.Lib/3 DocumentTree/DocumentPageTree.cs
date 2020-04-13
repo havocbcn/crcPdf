@@ -3,30 +3,37 @@ using System.Linq;
 
 namespace SharpPDF.Lib {
     public class DocumentPageTree : IDocumentTree {
-        private readonly SharpPdf pdf;
-        private readonly IndirectObject indirectObject;
         private DocumentPageTree parent;
-        private List<DocumentPageTree> pageTreeSons;
-        private List<DocumentPage> pageSons;
+        private List<DocumentPageTree> pageTreeSons = new List<DocumentPageTree>();
+        private List<DocumentPage> pageSons = new List<DocumentPage>();
 
-        public DocumentPageTree(SharpPdf pdf)
-        {
-            this.pdf = pdf;
-            pageSons = new List<DocumentPage>();
-            pageTreeSons = new List<DocumentPageTree>();
-            indirectObject = pdf.CreateIndirectObject();
-            pdf.SaveEvent += new SharpPdf.LoadCompleteHandler(onSaveEvent);
-            pdf.AddChild(indirectObject, this);
+        public DocumentPageTree(PDFObjects pdf) : base(pdf) {     
         }
 
-        private void onSaveEvent()
-        {            
-            List<IPdfObject> kids = new List<IPdfObject>();
+        public DocumentPageTree(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
+            var dic = pdf.GetObject<DictionaryObject>(pdfObject);
+            if (dic.Dictionary.ContainsKey("Parent")) {                
+                parent = pdf.GetDocument<DocumentPageTree>(dic.Dictionary["Parent"]);
+            }
+
+            var dicKids = pdf.GetObject<ArrayObject>(dic.Dictionary["Kids"]);            
+            foreach (var kid in dicKids.Childs<IndirectReferenceObject>()) {
+                if (pdf.GetType(kid) == "Pages") {
+                    pageTreeSons.Add(pdf.GetDocument<DocumentPageTree>(kid));
+                } else {
+                    pageSons.Add(pdf.GetDocument<DocumentPage>(kid));
+                }
+            }
+        }
+
+        public override void OnSaveEvent(IndirectObject indirectObject)
+        {
+            List<PdfObject> kids = new List<PdfObject>();
             kids.AddRange(pageTreeSons.Select(p => p.IndirectReferenceObject));
             kids.AddRange(pageSons.Select(p => p.IndirectReferenceObject));            
 
-            this.indirectObject.SetChild(new DictionaryObject(
-                new Dictionary<string, IPdfObject>
+            indirectObject.SetChild(new DictionaryObject(
+                new Dictionary<string, PdfObject>
                 {
                     { "Type", new NameObject("Pages") },
                     { "Kids", new ArrayObject(kids) },
@@ -35,70 +42,16 @@ namespace SharpPDF.Lib {
             ));
         }
 
-        public DocumentPageTree(IndirectObject indirectObject, SharpPdf pdf)
-        {
-            this.pdf = pdf;
-            this.indirectObject = indirectObject;
-
-            pdf.LoadCompleteEvent += new SharpPdf.LoadCompleteHandler(onLoadComplete);
-        }
-
-        private void onLoadComplete()
-        {
-            var dic = indirectObject.Childs()[0] as DictionaryObject;            
-
-            if (dic.Dictionary.ContainsKey("Parent")) {
-                var parentReference = (IndirectReferenceObject)dic.Dictionary["Parent"];
-                parent = (DocumentPageTree)pdf.Childs[parentReference];
-            }
-
-            var dicKids = (ArrayObject)dic.Dictionary["Kids"];
-            var KidsIndirect = dicKids.Childs();
-
-            var kidsReference = new IndirectReferenceObject[KidsIndirect.Length];
-
-            for (int i = 0; i < ((IntegerObject)dic.Dictionary["Count"]).Value; i++)
-                kidsReference[i] = (IndirectReferenceObject)KidsIndirect[i];
-
-            pageTreeSons = new List<DocumentPageTree>();
-            foreach (var kid in kidsReference)
-            {
-                var child = pdf.Childs[kid];
-                if (child is DocumentPageTree)
-                    pageTreeSons.Add((DocumentPageTree)child);
-            }
-
-            pageSons = new List<DocumentPage>();
-            foreach (var kid in kidsReference)
-            {
-                var child = pdf.Childs[kid];
-                if (child is DocumentPage)
-                    pageSons.Add((DocumentPage)child);
-            }
-        }
-
         public DocumentPageTree[] PageTreeSons => pageTreeSons.ToArray();
         public DocumentPage[] PageSons => pageSons.ToArray();
-
         public DocumentPageTree Parent => parent;
-
-        public IndirectReferenceObject IndirectReferenceObject => indirectObject;
-
-        public Document AddPage()
-        {
-            var page = new DocumentPage(pdf, this);
+        public DocumentPage AddPage(){
+            var page = new DocumentPage(pdfObjects, this);
             pageSons.Add(page);            
 
-            return page.Contents;
-
-            /*
-            XrefResources resources = new XrefResources();
-			contents = new XrefContents(m_useCompression);
-            XrefPage page = new XrefPage(resources, contents, width, height);
-            pageTree.AddPage(page);
-            */
+            return page;
         }
 
-
+        
     }
 }

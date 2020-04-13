@@ -12,8 +12,8 @@ namespace SharpPDF.Lib {
             this.reader = new Objectizer(new Tokenizer(stream));
         }
 
-        private static readonly Dictionary<string, Func<List<IPdfObject>, ITextOperator>> textOperators = 
-            new Dictionary<string, Func<List<IPdfObject>, ITextOperator>>()
+        private static readonly Dictionary<string, Func<List<PdfObject>, ITextOperator>> textOperators = 
+            new Dictionary<string, Func<List<PdfObject>, ITextOperator>>()
         {
             { "Tj", (t) => { 
                     if (t.Count != 1)
@@ -21,7 +21,7 @@ namespace SharpPDF.Lib {
 
                     var parameter = t[0] as StringObject;
                     if (parameter == null)
-                        throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, $"Expected a string but {parameter.ObjectType.ToString()} found");
+                        throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, $"Expected a string but {t[0].ToString()} is found");
                                     
                     return new TextOperator(parameter.Value);
                 }
@@ -30,10 +30,11 @@ namespace SharpPDF.Lib {
                     if (t.Count != 2)
                         throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, "Unknown graphic objectizer found in strem content");
 
-                    var x = t[0] as IntegerObject;
-                    var y = t[1] as IntegerObject;
-                    if (x == null || y == null)
-                        throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, $"Expected: int int Td, but {x.ObjectType.ToString()} {y.ObjectType.ToString()} Td found");
+                    
+                    float? x = (t[0] as IntegerObject)?.Value ?? (t[0] as RealObject)?.Value;
+                    float? y = (t[1] as IntegerObject)?.Value ?? (t[1] as RealObject)?.Value;
+                    if (!x.HasValue || !y.HasValue)
+                        throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, $"Expected: real real Td, but {t[0].GetType()} {t[1].GetType()} Td found");
                                     
                     return new TextPositioningOperator(x.Value, y.Value);
                 }
@@ -45,19 +46,33 @@ namespace SharpPDF.Lib {
                     var font = t[0] as NameObject;
                     var size = t[1] as IntegerObject;
                     if (font == null || size == null)
-                        throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, $"Expected: name integer Tf, but {font.ObjectType.ToString()} {size.ObjectType.ToString()} Td found");
-                                    
-// TODO
-                    return new TextOperator("hola");
+                        throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, $"Expected: name integer Tf, but {font.GetType()} {size.GetType()} Td found");
+                                
+                    return new FontOperator(font.Value, size.Value);
                 }
             }
         };
 
-        private readonly Dictionary<string, Func<Objectizer, IGraphicObject>> objects = 
-            new Dictionary<string, Func<Objectizer, IGraphicObject>>() {
-            { "BT", (t) => { 
+        // Table 51 – Operator Categories
+        private readonly Dictionary<string, Func<Objectizer, List<PdfObject>, IGraphicObject>> objects = 
+            new Dictionary<string, Func<Objectizer, List<PdfObject>, IGraphicObject>>() {
+            // Table 107 – Text object operators0
+            { "J", (t, tParameters) => {                 
+                    if (tParameters.Count != 1)
+                         throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, 
+                            $"Unknown content found");
+
+                    var lineCap = (tParameters[0] as IntegerObject).Value;
+                    return new LineCapObject(lineCap);
+                }
+            },
+            { "BT", (t, tParameters) => {                 
+                    if (tParameters.Count != 0)
+                         throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, 
+                            $"Unknown content found");
+
                     var textObject = new TextObject();
-                    List<IPdfObject> parameters = new List<IPdfObject>();
+                    List<PdfObject> parameters = new List<PdfObject>();
 
                     var o = t.NextObject(true);
                     while (o.ToString() != "ET")
@@ -80,18 +95,17 @@ namespace SharpPDF.Lib {
         };
 
         internal List<IGraphicObject> ReadObjects() {
-
             List<IGraphicObject> objs = new List<IGraphicObject>();
+            List<PdfObject> parameters = new List<PdfObject>();
             var o = reader.NextObject(true);
 
-            while (!reader.IsEOF()) {
-                if (!(o is OperatorObject))
-                  throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, "Expected an object operator like BT");
-            
-                if (objects.ContainsKey(o.ToString()))
-                    objs.Add(objects[o.ToString()].Invoke(reader));
+            while (!reader.IsEOF()) {           
+                if (objects.ContainsKey(o.ToString())) {
+                    objs.Add(objects[o.ToString()].Invoke(reader, parameters));
+                    parameters.Clear();
+                }
                 else 
-                    throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, $"Unknown operator {o.ToString()}");                        
+                    parameters.Add(o);
                 
                 if (!reader.IsEOF())
                     o = reader.NextObject(true);                

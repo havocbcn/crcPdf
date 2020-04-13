@@ -1,7 +1,7 @@
 using System.Globalization;
 
 namespace SharpPDF.Lib {
-    public class RealObject : IPdfObject {
+    public class RealObject : PdfObject {
         private readonly float value;
 
         public RealObject(Tokenizer tokenizer) {
@@ -16,8 +16,6 @@ namespace SharpPDF.Lib {
                                 out value))
                 throw new PdfException(PdfExceptionCodes.INVALID_NUMBER_TOKEN, $"Number {tokenContent} cannot be cast to a float number");
         }
-        public float Value => value;
-        public ObjectType ObjectType => Lib.ObjectType.Real;
-        public IPdfObject[] Childs() => new IPdfObject[0];
+        public float Value => value;        
     }
 }

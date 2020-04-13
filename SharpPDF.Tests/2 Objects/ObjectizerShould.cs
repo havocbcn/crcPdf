@@ -20,7 +20,6 @@ namespace SharpPDF.Tests
             Objectizer objectizer = new Objectizer(feed);
                         
             BooleanObject actual = (BooleanObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Boolean, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -53,7 +52,6 @@ namespace SharpPDF.Tests
             Objectizer objectizer = new Objectizer(feed); 
 
             IntegerObject actual = (IntegerObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Integer, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -69,7 +67,6 @@ namespace SharpPDF.Tests
             Objectizer objectizer = new Objectizer(feed); 
 
             IntegerObject actual = (IntegerObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Integer, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -106,7 +103,6 @@ namespace SharpPDF.Tests
             var objectizer = new Objectizer(feed); 
 
             var actual = (RealObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Real, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -122,7 +118,6 @@ namespace SharpPDF.Tests
             var objectizer = new Objectizer(feed); 
 
             var actual = (StringObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.String, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -144,7 +139,6 @@ and such . ")]
             var objectizer = new Objectizer(feed); 
 
             var actual = (StringObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.String, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -168,7 +162,6 @@ and such . ")]
             var objectizer = new Objectizer(feed); 
 
             var actual = (StringObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.String, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }           
 
@@ -188,7 +181,6 @@ are the same.)", "These two strings are the same.")]
             var objectizer = new Objectizer(feed); 
 
             var actual = (StringObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.String, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -204,11 +196,10 @@ are the same.)", "These two strings are the same.")]
             var objectizer = new Objectizer(feed); 
 
             var actual = (StringObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.String, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }   
 
-         [Theory]
+        [Theory]
         [InlineData(@"(\0533)", "+3")]
         [InlineData(@"(\053)", "+")]
         [InlineData(@"(\53)", "+")]
@@ -222,7 +213,6 @@ are the same.)", "These two strings are the same.")]
             var objectizer = new Objectizer(feed); 
 
             var actual = (StringObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.String, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
         
@@ -240,7 +230,6 @@ are the same.)", "These two strings are the same.")]
             var objectizer = new Objectizer(feed); 
 
             var actual = (StringObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.String, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -261,7 +250,6 @@ are the same.)", "These two strings are the same.")]
             var objectizer = new Objectizer(feed); 
 
             var actual = (StringObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.String, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -277,7 +265,6 @@ are the same.)", "These two strings are the same.")]
             var objectizer = new Objectizer(feed); 
 
             var actual = (StringObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.String, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -303,7 +290,6 @@ are the same.)", "These two strings are the same.")]
             Objectizer objectizer = new Objectizer(feed);
             
             NameObject actual = (NameObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Name, actual.ObjectType);
             Assert.Equal(expected, actual.Value);
         }
 
@@ -317,15 +303,12 @@ are the same.)", "These two strings are the same.")]
             Objectizer objectizer = new Objectizer(feed);
             
             IndirectObject actual = (IndirectObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Indirect, actual.ObjectType);
             Assert.Equal(12, actual.Number);
             Assert.Equal(0, actual.Generation);
 
-            var childs = actual.Childs();
+            var childs = actual.Childs<BooleanObject>();
             Assert.Single(childs);
-
-            Assert.Equal(ObjectType.Boolean, childs[0].ObjectType);
-            Assert.True(((BooleanObject)(childs[0])).Value);
+            Assert.True(childs[0].Value);
         }
 
           [Fact]
@@ -350,7 +333,6 @@ are the same.)", "These two strings are the same.")]
             var objectizer = new Objectizer(feed);
            
             var actual = (IndirectReferenceObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.IndirectReference, actual.ObjectType);
             Assert.Empty(actual.Childs());            
 
             Assert.Equal(1, actual.Number);
@@ -385,14 +367,13 @@ are the same.)", "These two strings are the same.")]
             var objectizer = new Objectizer(feed);
            
             var actual = (ArrayObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Array, actual.ObjectType);
-            Assert.Equal(5, actual.Childs().Length);
+            Assert.Equal(5, actual.Childs<PdfObject>().Length);
 
-            Assert.Equal(549, ((IntegerObject)actual.Childs()[0]).Value);
-            Assert.Equal(3.14f, ((RealObject)actual.Childs()[1]).Value);
-            Assert.False(((BooleanObject)actual.Childs()[2]).Value);
-            Assert.Equal("Ralph", ((StringObject)actual.Childs()[3]).Value);
-            Assert.Equal("SomeName", ((NameObject)actual.Childs()[4]).Value);        
+            Assert.Equal(549, actual.Child<IntegerObject>(0).Value);
+            Assert.Equal(3.14f, actual.Child<RealObject>(1).Value);
+            Assert.False(actual.Child<BooleanObject>(2).Value);
+            Assert.Equal("Ralph", actual.Child<StringObject>(3).Value);
+            Assert.Equal("SomeName", actual.Child<NameObject>(4).Value);        
         }
 
         [Fact]
@@ -405,8 +386,8 @@ are the same.)", "These two strings are the same.")]
             Objectizer objectizer = new Objectizer(feed);
            
             var actual = (ArrayObject)objectizer.NextObject();
-            Assert.Equal(ObjectType.Array, actual.ObjectType);
-            Assert.Empty(actual.Childs());
+            
+            actual.Childs<PdfObject>().Should().BeEmpty();
         }
         
         

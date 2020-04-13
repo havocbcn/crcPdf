@@ -24,5 +24,10 @@ namespace SharpPDF.Lib
         INDIRECT_REFERENCE_MISSING,
         INVALID_TRAILER,
         INVALID_CONTENT,
+        INVALID_FONT,
+        INVALID_RESOURCE,
+        UNKNOWN_ENTRY,
+        INVALID_PROCSET,
+        INVALID_TYPE,
     }  
 }

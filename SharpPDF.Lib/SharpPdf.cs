@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
-namespace SharpPDF.Lib
-{
-    public class SharpPdf
-    {
+namespace SharpPDF.Lib {
+    public class SharpPdf {
         readonly Tokenizer tokenizer;
 
         readonly TokenValidator validator = new TokenValidator();
 
-        private Dictionary<IndirectObject, IDocumentTree> childs = new Dictionary<IndirectObject, IDocumentTree>();
+        PDFObjects pdfObjects = new PDFObjects();
+
+        public DocumentCatalog Catalog { get; private set; }
         
         public SharpPdf(MemoryStream ms) {
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -19,27 +16,18 @@ namespace SharpPDF.Lib
             Analyze();
         }
 
-        private int lastNumber = 0;
-        internal IndirectObject CreateIndirectObject() => new IndirectObject(++lastNumber);
-        internal void AddChild(IndirectObject id, IDocumentTree obj ) {
-            childs.Add(id, obj);
-        }
         public SharpPdf() {      
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);      
-            Catalog = new DocumentCatalog(this);
+            Catalog = new DocumentCatalog(pdfObjects);
         }
 
-        public IDictionary<IndirectObject, IDocumentTree> Childs => childs;
-
-        private void Analyze()
-        {
+        private void Analyze() {
             AnalyzeHeader();
             long xrefPosition = XrefPosition();
             ReadXRef(xrefPosition);
         }
 
-        private void ReadXRef(long xrefPosition)
-        {
+        private void ReadXRef(long xrefPosition) {
             tokenizer.MoveToPosition(xrefPosition);
 
             Token token;
@@ -76,22 +64,17 @@ namespace SharpPDF.Lib
                 tokenizer.MoveToPosition(pos);
 
                 IndirectObject obj = new IndirectObject(tokenizer);
-                childs.Add(obj, DocumentTreeFactory.Analyze(obj, this));
+                pdfObjects.AddObject(obj);
                 tokenizer.RestorePosition();
             }
 
-            // TODO: no se porque se ha leido ya el trailer, no debería
             if ( tokenizer.Token().ToString() != "trailer")
                 throw new PdfException(PdfExceptionCodes.INVALID_TRAILER, "expected trailer");
-            
-            //if (!validator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), "trailer"))
-              //  throw new PdfException(PdfExceptionCodes.INVALID_TRAILER, "Expected trailer");
 
-            DictionaryObject trailer = new DictionaryObject(tokenizer);
+            var trailer = new DictionaryObject(tokenizer);
             var rootIndirect = (IndirectReferenceObject)trailer.Dictionary["Root"];
-            Catalog = (DocumentCatalog)this.childs[rootIndirect];
 
-            LoadCompleteEvent();  
+            Catalog = pdfObjects.GetDocument<DocumentCatalog>(rootIndirect);
         }
 
         private long XrefPosition()
@@ -148,38 +131,9 @@ namespace SharpPDF.Lib
                 throw new PdfException(PdfExceptionCodes.HEADER_NOT_FOUND, "Header not found");            
         }
 
-        public DocumentCatalog Catalog { get; private set; }
-    
-        internal delegate void LoadCompleteHandler();
-        internal event LoadCompleteHandler LoadCompleteEvent;
-        internal event LoadCompleteHandler SaveEvent;
-
         public void WriteTo(MemoryStream ms)
         {
-            SaveEvent();
-            
-            string pdf = "%PDF-1.6\n";
-            List<int> childPos = new List<int>();
-            
-            foreach (var child in childs) {
-                childPos.Add(pdf.Length);
-                pdf += child.Key.ToString();
-            }
-
-            int xrefPos = pdf.Length;
-
-            
-            pdf += $"xref\n0 {childs.Count + 1}\n0000000000 65535 f\n"; // +1 for the free record
-            int i = 0;
-            foreach (var child in childs) {
-                pdf += $"{childPos[i++].ToString("D10")} 00000 n\n";
-            }
-
-            pdf += $"trailer <</Root {Catalog.IndirectReferenceObject} /Size {childs.Count + 1}>>\nstartxref\n{xrefPos}\n%%EOF";
-
-            Console.WriteLine(pdf);
-            byte[] existingData = System.Text.Encoding.UTF8.GetBytes(pdf);            
-            ms.Write(existingData, 0, existingData.Length); 
+            pdfObjects.WriteTo(ms, Catalog);
         }
     }
 }

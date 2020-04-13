@@ -1,15 +1,12 @@
 using FluentAssertions;
 using System;
 using System.IO;
-using System.Linq;
 using SharpPDF.Lib;
 using Xunit;
 using System.Text;
 
-namespace SharpPDF.Tests
-{
-    public class PdfShould
-    {     
+namespace SharpPDF.Tests {
+    public class PdfShould {     
         [Theory]
         [InlineData("%PDF-1.1")]
         [InlineData("%PDF-1.2")]
@@ -22,7 +19,7 @@ namespace SharpPDF.Tests
         {
             // 7.5.2 File Header
             SharpPdfShould(
-                Given: header + @"
+                Given: System.Text.UTF8Encoding.UTF8.GetBytes(header + @"
 %¥±ë
 1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
 2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 300 144] >> endobj
@@ -43,7 +40,7 @@ xref
 trailer << /Root 1 0 R /Size 5 >>
 startxref
 392
-%%EOF",
+%%EOF"),
                 When: pdf => {  },
                 Then: pdf => { pdf.Catalog.Should().NotBeNull(); }
             );
@@ -166,66 +163,11 @@ startxref
             });
         }
 
-        
-        [Fact]
-        public void ReadASimpleObjectTree()
-        {
-            string pdfFile = @"%PDF-1.1
-%¥±ë
-1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
-2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 300 144] >> endobj
-3 0 obj << /Type /Page /Parent 2 0 R /Resources 
-<< /Font 
- << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >> >>
->> /Contents 4 0 R >> endobj
-4 0 obj << /Length 39 >> stream
-BT /F1 18 Tf 0 0 Td (Hello World) Tj ET
-endstream endobj
-xref
-0 5
-0000000000 65535 f 
-0000000017 00000 n 
-0000000066 00000 n 
-0000000147 00000 n 
-0000000303 00000 n 
-trailer << /Root 1 0 R /Size 5 >>
-startxref
-392
-%%EOF";
-            
-            byte[] bytes = UTF8Encoding.UTF8.GetBytes(pdfFile);
-            var pdf = new SharpPdf(new MemoryStream(bytes));
-
-            pdf.Childs.Should().HaveCount(4);
-        }      
-
-
         [Fact]
         public void ObtainASimpleCatalog() =>
             // 7.7.2 Document Catalog
             SharpPdfShould(
-                Given: @"%PDF-1.1
-%¥±ë
-1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
-2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 300 144] >> endobj
-3 0 obj << /Type /Page /Parent 2 0 R /Resources 
-<< /Font 
- << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >> >>
->> /Contents 4 0 R >> endobj
-4 0 obj << /Length 39 >> stream
-BT /F1 18 Tf 0 0 Td (Hello World) Tj ET
-endstream endobj
-xref
-0 5
-0000000000 65535 f 
-0000000017 00000 n 
-0000000066 00000 n 
-0000000147 00000 n 
-0000000303 00000 n 
-trailer << /Root 1 0 R /Size 5 >>
-startxref
-392
-%%EOF",
+                Given: File.ReadAllBytes("samples/microsample.pdf"),
                 When: pdf => { },
                 Then: pdf => {                     
                     pdf.Catalog.Should().NotBeNull();
@@ -236,28 +178,7 @@ startxref
         public void ObtainASimplePageTree() =>
             // 7.7.3 Page Tree
             SharpPdfShould(
-                Given: @"%PDF-1.1
-%¥±ë
-1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
-2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 300 144] >> endobj
-3 0 obj << /Type /Page /Parent 2 0 R /Resources 
-<< /Font 
- << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >> >>
->> /Contents 4 0 R >> endobj
-4 0 obj << /Length 39 >> stream
-BT /F1 18 Tf 0 0 Td (Hello World) Tj ET
-endstream endobj
-xref
-0 5
-0000000000 65535 f 
-0000000017 00000 n 
-0000000066 00000 n 
-0000000147 00000 n 
-0000000303 00000 n 
-trailer << /Root 1 0 R /Size 5 >>
-startxref
-392
-%%EOF",
+                Given: File.ReadAllBytes("samples/microsample.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(1);
                     pdf.Catalog.Pages.PageSons[0].Parent.Should().Be(pdf.Catalog.Pages);
@@ -268,7 +189,7 @@ startxref
         public void ObtainAHierarchyPageTree() =>
             // 7.7.3 Page Tree
             SharpPdfShould(
-                Given: @"%PDF-1.1
+                Given: System.Text.UTF8Encoding.UTF8.GetBytes(@"%PDF-1.1
 1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
 2 0 obj << /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 /MediaBox [0 0 100 200] >> endobj
 3 0 obj << /Type /Pages /Kids [4 0 R] /Count 1 /MediaBox [0 0 300 144] >> endobj
@@ -289,7 +210,7 @@ xref
 trailer << /Root 1 0 R /Size 7 >>
 startxref
 441
-%%EOF",
+%%EOF"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(1);
                     pdf.Catalog.Pages.PageTreeSons.Should().HaveCount(1);
@@ -301,51 +222,82 @@ startxref
         public void ObtainAPageContent() =>
             // 7.7.3 Page Tree
             SharpPdfShould(
-                Given: @"%PDF-1.1
-%¥±ë
-1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
-2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 300 144] >> endobj
-3 0 obj << /Type /Page /Parent 2 0 R /Resources 
-<< /Font 
- << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >> >>
->> /Contents 4 0 R >> endobj
-4 0 obj << /Length 39 >> stream
-BT /F1 18 Tf 0 0 Td (Hello World) Tj ET
-endstream endobj
-xref
-0 5
-0000000000 65535 f 
-0000000017 00000 n 
-0000000066 00000 n 
-0000000147 00000 n 
-0000000303 00000 n 
-trailer << /Root 1 0 R /Size 5 >>
-startxref
-392
-%%EOF",
+                Given: File.ReadAllBytes("samples/microsample.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons[0].Contents.Should().NotBeNull();
                 }
             );
 
         [Fact]
-        public void WriteAnEmptyPdf() =>
-            // 7.5.2 File Header
+        public void WriteASimplePdf() =>
             SharpPdf(
                 Given: pdf => { pdf.Catalog.Pages
                     .AddPage()                        
+                        .SetFont("Times roman", 12, false, false)
                         .SetPosition(10, 15)
                         .AddLabel("Hola"); },
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(1);
                     pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject.Should().HaveCount(1);
                     pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0].Should().BeOfType<TextObject>();
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations.Should().HaveCount(2);
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations[0].ToString().Should().Be("10 15 Td");
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations[1].ToString().Should().Be("(Hola) Tj");
+                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations.Should().HaveCount(3);
+                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations[0].ToString().Should().Be("/F0 12 Tf");
+                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations[1].ToString().Should().Be("10 15 Td");
+                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations[2].ToString().Should().Be("(Hola) Tj");
                 }
             );
- 
+
+        [Theory]
+        [InlineData("Times-Roman", false, false)]
+        [InlineData("Times-Roman", false, true)]
+        [InlineData("Times-Roman", true, false)]
+        [InlineData("Times-Roman", true, true)]
+        [InlineData("Courier", false, false)]
+        [InlineData("Courier", false, true)]
+        [InlineData("Courier", true, false)]
+        [InlineData("Courier", true, true)]
+        [InlineData("Helvetica", false, false)]
+        [InlineData("Helvetica", false, true)]
+        [InlineData("Helvetica", true, false)]
+        [InlineData("Helvetica", true, true)]
+        [InlineData("Symbol", false, false)]
+        [InlineData("Symbol", false, true)]
+        [InlineData("Symbol", true, false)]
+        [InlineData("Symbol", true, true)]
+        [InlineData("ZapfDingbats", false, false)]
+        [InlineData("ZapfDingbats", false, true)]
+        [InlineData("ZapfDingbats", true, false)]
+        [InlineData("ZapfDingbats", true, true)]        
+        public void UseSimpleFonts(string fontName, bool bold, bool italic) =>
+            SharpPdf(
+                Given: pdf => { pdf.Catalog.Pages
+                    .AddPage()                        
+                        .SetFont(fontName, 12, bold, italic)
+                        .SetPosition(10, 15)
+                        .AddLabel("Hola"); },
+                Then: pdf => { 
+                    pdf.Catalog.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentBaseFont>();
+                    if (bold || italic)
+                        fontName += "-";
+                    if (bold)
+                        fontName += "Bold";
+                    if (italic)
+                        fontName += "Italic";
+                    pdf.Catalog.Pages.PageSons[0].Font[0].Name = fontName;
+                    }
+            );
+
+        [Fact]
+        public void ReadBaseFontResourceDirect() =>
+            // 7.7.3 Page Tree
+            SharpPdfShould(
+                Given: File.ReadAllBytes("samples/microsample.pdf"),
+                Then: pdf => { 
+                    pdf.Catalog.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentBaseFont>();
+                    pdf.Catalog.Pages.PageSons[0].Font[0].Name = "Times-Roman";
+                }
+            );
+
         private void SharpPdfShouldGiveAnError(string Given, Action<SharpPdf> When)
         {            
             string pdfFile = Given;
@@ -356,12 +308,9 @@ startxref
             Assert.Throws<PdfException>(() => { When(pdf); });
         }
 
-        private void SharpPdfShould(string Given, Action<SharpPdf> When = null, Action<SharpPdf> Then = null)
+        private void SharpPdfShould(byte[] Given, Action<SharpPdf> When = null, Action<SharpPdf> Then = null)
         {            
-            string pdfFile = Given;
-
-            byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(pdfFile);
-            SharpPdf pdf = new SharpPdf(new MemoryStream(bytes));
+            SharpPdf pdf = new SharpPdf(new MemoryStream(Given));
 
             if (When != null)
                 When(pdf);

@@ -2,43 +2,38 @@ using System.Collections.Generic;
 
 namespace SharpPDF.Lib {
     // 7.7.2 Document Catalog
-    public class DocumentCatalog : IDocumentTree
-    {
-        private readonly SharpPdf pdf;
+    public class DocumentCatalog : IDocumentTree {
         private DocumentPageTree pageTree;
-        private readonly IndirectObject indirectObject;
+        private DocumentOutline outlines;
         
-        public DocumentCatalog(SharpPdf pdf) {
-            this.pdf = pdf;
+        public DocumentCatalog(PDFObjects pdf) : base(pdf) {            
             this.pageTree = new DocumentPageTree(pdf);
-
-            this.indirectObject = pdf.CreateIndirectObject();
-            this.indirectObject.SetChild(new DictionaryObject(
-                new Dictionary<string, IPdfObject>
-                {
-                    { "Type", new NameObject("Catalog") },
-                    { "Pages", pageTree.IndirectReferenceObject },
-                }
-            ));
-
-            pdf.AddChild(indirectObject, this);
         }
 
-        public DocumentCatalog(IndirectObject indirectObject, SharpPdf pdf) {
-            this.indirectObject = indirectObject;
-            this.pdf = pdf;        
-            pdf.LoadCompleteEvent += new SharpPdf.LoadCompleteHandler(onLoadComplete);    
+        public DocumentCatalog(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
+            var dictionary = pdf.GetObject<DictionaryObject>(pdfObject);
+            pageTree = pdf.GetDocument<DocumentPageTree>(dictionary.Dictionary["Pages"]);
+
+            if (dictionary.Dictionary.ContainsKey("Outlines")) {
+                outlines = pdf.GetDocument<DocumentOutline>(dictionary.Dictionary["Outlines"]);
+            }
         }
 
-        private void onLoadComplete() {
-            var dic = indirectObject.Childs()[0] as DictionaryObject;
+        public override void OnSaveEvent(IndirectObject indirectObject)
+        {
+             var dic = new Dictionary<string, PdfObject> {
+                { "Type", new NameObject("Catalog") },
+                { "Pages", pageTree.IndirectReferenceObject }
+            };
 
-            var pageReference = (IndirectReferenceObject)dic.Dictionary["Pages"];
-            pageTree = (DocumentPageTree)pdf.Childs[pageReference];
+            if (Outlines != null) {
+                dic.Add("Outlines", outlines.IndirectReferenceObject);
+            }
+
+            indirectObject.SetChild(new DictionaryObject(dic));
         }
 
-        public IndirectReferenceObject IndirectReferenceObject => indirectObject;
-        
         public DocumentPageTree Pages => pageTree;
+        public DocumentOutline Outlines => outlines;
     }
 }

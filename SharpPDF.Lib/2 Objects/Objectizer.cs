@@ -10,8 +10,8 @@ namespace SharpPDF.Lib {
             this.tokenizer = tokenizer;
         }
 
-        private readonly Dictionary<string, Func<Tokenizer, IPdfObject>> tokenToObject = 
-            new Dictionary<string, Func<Tokenizer, IPdfObject>>()
+        private readonly Dictionary<string, Func<Tokenizer, PdfObject>> tokenToObject = 
+            new Dictionary<string, Func<Tokenizer, PdfObject>>()
         {
             { "true", (t) => { return new BooleanObject(t); }},
             { "false", (t) => { return new BooleanObject(t); }},
@@ -34,7 +34,7 @@ namespace SharpPDF.Lib {
             }
         };
 
-        public IPdfObject NextObject(bool allowOperators = false)
+        public PdfObject NextObject(bool allowOperators = false)
         {
             tokenizer.SavePosition();            
             Token token = tokenizer.TokenExcludedCommentsAndWhitespaces();

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 namespace SharpPDF.Lib {
-    public class BooleanObject : IPdfObject {
+    public class BooleanObject : PdfObject {
         private readonly bool value;
 
         public BooleanObject(Tokenizer tokenizer)
@@ -13,7 +13,6 @@ namespace SharpPDF.Lib {
         }
         
         public bool Value => value;
-        public ObjectType ObjectType => Lib.ObjectType.Boolean;
-        public IPdfObject[] Childs() => new IPdfObject[0];
+        public PdfObject[] Childs() => new PdfObject[0];
     }
 }

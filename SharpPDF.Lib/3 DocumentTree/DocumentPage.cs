@@ -1,62 +1,123 @@
-using System;
 using System.Collections.Generic;
+using SharpPDF.Lib.Fonts;
 using System.Linq;
 
 namespace SharpPDF.Lib {
     public class DocumentPage : IDocumentTree {        
-        private Document contents;
+        private DocumentText contents;
         private DocumentPageTree parent;
-        private readonly SharpPdf pdf;
-        private readonly IndirectObject indirectObject;
-        DictionaryObject resources;
+        private IndirectReferenceObject parentReference;
+        private readonly Dictionary<DocumentFont, string> fonts = new Dictionary<DocumentFont, string>();
+        public DocumentFont[] Font => fonts.Keys.ToArray();
+        private List<string> procsets = new List<string>();
+        public string[] Procsets => procsets.ToArray();
 
-        public IndirectReferenceObject IndirectReferenceObject => indirectObject;
+        public DocumentPage(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
+            var dic = pdf.GetObject<DictionaryObject>(pdfObject);            
 
-        public DocumentPage(IndirectObject indirectObject, SharpPdf pdf) {            
-            this.indirectObject = indirectObject;
-            this.pdf = pdf;                       
-            pdf.LoadCompleteEvent += new SharpPdf.LoadCompleteHandler(onLoadComplete);
+            if (dic.Dictionary.ContainsKey("Parent")) {                
+                parentReference = (IndirectReferenceObject)dic.Dictionary["Parent"];
+            }
+
+            if (dic.Dictionary.ContainsKey("Resources")) {
+                var resources = pdf.GetObject<DictionaryObject>(dic.Dictionary["Resources"]);
+
+                foreach (var resource in resources.Dictionary) {
+                    switch (resource.Key) {
+                        case "Font":
+                            foreach (var font in pdf.GetObject<DictionaryObject>(resource.Value).Dictionary) {
+                                var documentFont = XrefFontFactory.GetFont(pdfObjects, font.Value);
+                                fonts.Add(documentFont, font.Key);
+                            }
+                            break;
+                        case "ProcSet":
+                            //14.2 Procedure Sets
+                            var arrayobject = pdf.GetObject<ArrayObject>(resource.Value);
+                            foreach (var item in arrayobject.Childs<NameObject>()) {
+                                procsets.Add(item.Value);
+                            }
+                            break;
+                        default:
+                            // TODO
+                            throw new PdfException(PdfExceptionCodes.INVALID_RESOURCE, $"Not supported resource found {resource.Key}");
+                    } 
+                }
+            }
+
+            contents = pdf.GetDocument<DocumentText>(dic.Dictionary["Contents"]);
         }
     
-        public DocumentPage(SharpPdf pdf, DocumentPageTree parent) {
-            this.pdf = pdf;
+        public DocumentPage(PDFObjects pdf, DocumentPageTree parent) : base(pdf) {   
             this.parent = parent;
-            this.contents = new Document(pdf);
-            this.indirectObject = pdf.CreateIndirectObject();
-            pdf.SaveEvent += new SharpPdf.LoadCompleteHandler(onSaveEvent);            
-            pdf.AddChild(indirectObject, this);
+            this.contents = new DocumentText(pdf);
         }
 
-        private void onSaveEvent()
-        {
-            this.indirectObject.SetChild(new DictionaryObject(
-                new Dictionary<string, IPdfObject>
-                {
-                    { "Type", new NameObject("Page") },
-                    { "Parent", parent.IndirectReferenceObject },
-                    { "Contents", contents.IndirectReferenceObject },
-                }
-            ));
-        }
+        public DocumentText Contents => contents;
 
-        private void onLoadComplete() {
-            var dic = indirectObject.Childs()[0] as DictionaryObject;
-            var contentsReference = (IndirectReferenceObject)dic.Dictionary["Contents"];
-            if (dic.Dictionary.ContainsKey("Parent")) {
-                var parentReference = (IndirectReferenceObject)dic.Dictionary["Parent"];
-                parent = (DocumentPageTree)pdf.Childs[parentReference];
+        public DocumentPageTree Parent {
+            get { 
+                return parent ?? pdfObjects.GetDocument<DocumentPageTree>(parentReference);
             }
-            if (dic.Dictionary.ContainsKey("Resources"))
-                resources = (DictionaryObject)dic.Dictionary["Resources"];
+        }
+            
 
-            if (!pdf.Childs.ContainsKey(contentsReference))
-                throw new PdfException(PdfExceptionCodes.INDIRECT_REFERENCE_MISSING, $"{Contents} is missing");
-                    
-            contents = (Document)pdf.Childs[contentsReference];
+         public DocumentPage AddLabel(string text) {
+            contents.AddLabel(text);        
+            return this;
         }
 
-        public Document Contents => contents;
+        public DocumentPage SetPosition(int x, int y) {            
+            contents.SetPosition(x, y);
+            return this;
+        }
 
-        public DocumentPageTree Parent => parent;      
+        public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, EEmbedded embedded = EEmbedded.Embedded) {
+            var font = XrefFontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
+
+            if (!fonts.ContainsKey(font)) {
+                fonts.Add(font, "F" + fonts.Count);
+            }
+
+            contents.SetFont(fonts[font], size);
+            return this;
+        }
+
+        public override void OnSaveEvent(IndirectObject indirectObject)
+        {
+            var resourceEntries = new Dictionary<string, PdfObject>();
+
+            if (fonts.Count > 0) {                
+                var dicFonts = new Dictionary<string, PdfObject>();
+
+                foreach (var font in fonts) {
+                    dicFonts.Add(font.Value, font.Key.IndirectReferenceObject);
+                }
+
+                resourceEntries.Add("Font", new DictionaryObject(dicFonts));
+            }
+
+            if (procsets.Count > 0) {
+                List<PdfObject> lstObjects = new List<PdfObject>();
+                foreach (var procSet in procsets) {
+                    lstObjects.Add(new NameObject(procSet));
+                }
+                resourceEntries.Add("ProcSet", new ArrayObject(lstObjects));
+            }
+
+            if (parentReference != null)
+                parent = pdfObjects.GetDocument<DocumentPageTree>(parentReference);
+
+            var entries = new Dictionary<string, PdfObject> {
+                { "Type", new NameObject("Page") },
+                { "Parent", parent.IndirectReferenceObject },
+                { "Contents", contents.IndirectReferenceObject }
+            };            
+
+            if (resourceEntries.Count > 0) {                
+                entries.Add("Resources", new DictionaryObject(resourceEntries));
+            }
+
+            indirectObject.SetChild(new DictionaryObject(entries));
+        }
     }
 }

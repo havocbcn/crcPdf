@@ -1,11 +1,10 @@
 using System.Globalization;
 
 namespace SharpPDF.Lib {
-    public class IndirectObject : IPdfObject
+    public class IndirectObject : PdfObject
     {
         private readonly int number;
         private readonly int generation;
-        private IPdfObject child;
 
         public IndirectObject(Tokenizer tokenizer) 
         {
@@ -21,7 +20,7 @@ namespace SharpPDF.Lib {
 
             Objectizer analyzeChilds = new Objectizer(tokenizer);
 
-            child = analyzeChilds.NextObject();
+            childs.Add(analyzeChilds.NextObject());
 
             ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
             ExpectAText(tokenizer.TokenExcludedComments(), "endobj");
@@ -29,12 +28,11 @@ namespace SharpPDF.Lib {
 
         public IndirectObject(int number) {
             this.number = number;
-            generation = 0;
-            this.child = null;
+            generation = 0;            
         }
 
-        public void SetChild(IPdfObject child) {
-            this.child = child;
+        public void SetChild(PdfObject child) {
+            childs.Add(child);
         }
 
         public override int GetHashCode() => number.GetHashCode();
@@ -50,8 +48,6 @@ namespace SharpPDF.Lib {
 
         public int Number => number;
         public int Generation => generation;
-
-        public IPdfObject[] Childs() => new IPdfObject[1] { child };
 
         public static implicit operator IndirectReferenceObject(IndirectObject a) => new IndirectReferenceObject(a.Number);
         
@@ -74,10 +70,8 @@ namespace SharpPDF.Lib {
                 throw new PdfException(PdfExceptionCodes.INVALID_INDIRECTOBJECT_TOKEN, "Expected a number");
         }
 
-        public ObjectType ObjectType => Lib.ObjectType.Indirect;
-
         public override string ToString() {
-            return $"{number} {generation} obj {child.ToString()} endobj\n";
+            return $"{number} {generation} obj {childs[0].ToString()} endobj\n";
         }
     }
 }

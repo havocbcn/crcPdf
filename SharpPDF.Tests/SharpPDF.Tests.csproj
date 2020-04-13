@@ -20,4 +20,10 @@
     <ProjectReference Include="..\SharpPDF.Lib\SharpPDF.Lib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="samples\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>  
+  </ItemGroup>
+
 </Project>

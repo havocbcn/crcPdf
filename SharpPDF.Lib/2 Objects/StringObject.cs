@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace SharpPDF.Lib {
-    public class StringObject : IPdfObject {
+    public class StringObject : PdfObject {
         public StringObject(Tokenizer tokenizer) {            
             Token delimiter = tokenizer.TokenExcludedCommentsAndWhitespaces();
             if (delimiter.characterSetClass != CharacterSetType.Delimiter)
@@ -33,8 +33,6 @@ namespace SharpPDF.Lib {
         };
 
         public string Value => value;
-        public ObjectType ObjectType => Lib.ObjectType.String;
-
         private void GetLiteralString(Tokenizer tokenizer)
         {
             int depth = 1;
@@ -169,8 +167,6 @@ namespace SharpPDF.Lib {
                 return false;
 
             return literalString[i] >= '0' && literalString[i] <= '9';
-        }
-
-        public IPdfObject[] Childs() => new IPdfObject[0];
+        }        
     }
 }
