@@ -27,8 +27,9 @@ namespace SharpPDF.Lib
         private readonly Stream fragment;
 
         internal bool IsNextTokenExcludedCommentsAndWhitespaces(string text) {
-            if (IsEOF())
+            if (IsEOF()) {
                 return false;
+            }
 
             SavePosition();
             Token t = TokenExcludedCommentsAndWhitespaces();
@@ -41,8 +42,9 @@ namespace SharpPDF.Lib
         }
 
         internal bool IsNextTokenExcludedCommentsRegular() {
-            if (IsEOF())
+            if (IsEOF()) {
                 return false;
+            }
 
             SavePosition();
             Token t = TokenExcludedComments();
@@ -59,8 +61,9 @@ namespace SharpPDF.Lib
         public int GetInteger() {
             string nextString = TokenExcludedComments().ToString();
             int value;
-            if (!int.TryParse(nextString, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value))
+            if (!int.TryParse(nextString, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value)) {
                 throw new PdfException(PdfExceptionCodes.INVALID_NUMBER_TOKEN, "Number cannot be cast to integer");
+            }
             
             return value;
         }
@@ -72,11 +75,11 @@ namespace SharpPDF.Lib
         public void MoveToPreviousLine() {
             fragment.Seek(-2, SeekOrigin.Current);
 
-            while (fragment.ReadByte() != LineFeed)
-            {
+            while (fragment.ReadByte() != LineFeed) {
                 fragment.Seek(-2, SeekOrigin.Current);
-                if (fragment.Position == 0)
+                if (fragment.Position == 0) {
                     throw new PdfException(PdfExceptionCodes.BOF, "Beginning Of File detected, but a LineFeed was expected");
+                }
             }
         }
 
@@ -85,8 +88,9 @@ namespace SharpPDF.Lib
         internal byte[] ReadStream(int streamLength) {
             byte[] buffer = new byte[streamLength];
             int readLength = fragment.Read(buffer, 0, streamLength);
-            if (readLength != streamLength)
+            if (readLength != streamLength) {
                 throw new PdfException(PdfExceptionCodes.INVALID_STREAM, "Trying to read " + streamLength + " bytes, but only " + readLength + "read");
+            }
             return buffer;
         }
 
@@ -98,8 +102,9 @@ namespace SharpPDF.Lib
 
         public Token TokenExcludedCommentsAndWhitespaces() {
             var token = TokenExcludedComments();
-            while (token.characterSetClass == CharacterSetType.WhiteSpace)
+            while (token.characterSetClass == CharacterSetType.WhiteSpace) {
                 token = TokenExcludedComments();
+            }
 
             return token;
         } 
@@ -112,27 +117,22 @@ namespace SharpPDF.Lib
             int byteRead;            
             CharacterSetType type = CharacterSetType.Unknown;
 
-            while ((byteRead = fragment.ReadByte()) != -1)
-            {
-                if (ignoreComments && (byteRead == CommentDelimiter))
-                {
+            while ((byteRead = fragment.ReadByte()) != -1) {
+                if (ignoreComments && (byteRead == CommentDelimiter)) {
                     IgnoreComment();
                     continue;
                 }
                 
                 CharacterSetType byteReadType = GetCharacterSetClass(byteRead);
-                if (type == CharacterSetType.Unknown)
-                {
+                if (type == CharacterSetType.Unknown) {
                     type = byteReadType;
                     bytesRead.Add((byte)byteRead);
 
-                    if (type == CharacterSetType.Delimiter)
-                    {
+                    if (type == CharacterSetType.Delimiter) {
                         return new Token(bytesRead.ToArray(), type);    
                     }
                 }
-                else if (type != byteReadType)
-                {
+                else if (type != byteReadType) {
                     fragment.Seek(-1, SeekOrigin.Current);
                     return new Token(bytesRead.ToArray(), type);
                 }
@@ -149,10 +149,12 @@ namespace SharpPDF.Lib
         }
 
         private CharacterSetType GetCharacterSetClass(int byteRead) {
-            if (WhiteSpaceCharacters.Contains(byteRead))
+            if (WhiteSpaceCharacters.Contains(byteRead)) {
                 return CharacterSetType.WhiteSpace;
-            if (DelimiterCharacters.Contains(byteRead))
+            }
+            if (DelimiterCharacters.Contains(byteRead)) {
                 return CharacterSetType.Delimiter;
+            }
             return CharacterSetType.Regular;
         }
 
@@ -162,8 +164,9 @@ namespace SharpPDF.Lib
             while ((byteRead = fragment.ReadByte()) != -1)
             {
                 if (WhiteSpaceCharacters.Contains(byteRead) &&
-                    !CommentSpecialCharacters.Contains(byteRead))
+                    !CommentSpecialCharacters.Contains(byteRead)) {
                     return;
+                }
             }
         }
     }
