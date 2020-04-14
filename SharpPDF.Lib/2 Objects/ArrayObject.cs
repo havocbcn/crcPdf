@@ -7,17 +7,18 @@ namespace SharpPDF.Lib {
         }
 
         public ArrayObject(Tokenizer tokenizer) {
-            var validator = new TokenValidator();
-
-            if (!validator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), "["))
+            if (!TokenValidator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), "[")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_ARRAY, "Expected [");
+            }
 
             var read = new Objectizer(tokenizer);
-            while (!tokenizer.IsNextTokenExcludedCommentsAndWhitespaces("]"))
+            while (!tokenizer.IsNextTokenExcludedCommentsAndWhitespaces("]")) {
                 childs.Add(read.NextObject());        
+            }
 
-            if (!validator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), "]"))
+            if (!TokenValidator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), "]")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_ARRAY, "Expected ]");
+            }
         }    
 
         public override string ToString() {

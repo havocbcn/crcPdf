@@ -6,13 +6,13 @@ namespace SharpPDF.Lib {
         private readonly int number;
         private readonly int generation;
 
-        public IndirectObject(Tokenizer tokenizer) 
-        {
+        public IndirectObject(Tokenizer tokenizer) {
             ReadNumber(tokenizer.TokenExcludedCommentsAndWhitespaces(), ref number);
             ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
             ReadNumber(tokenizer.TokenExcludedComments(), ref generation);
-            if (generation < 0)
+            if (generation < 0) {
                 throw new PdfException(PdfExceptionCodes.INVALID_GENERATION, "Generation must be positive");
+            }
 
             ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
             ExpectAText(tokenizer.TokenExcludedComments(), "obj");
@@ -31,17 +31,14 @@ namespace SharpPDF.Lib {
             generation = 0;            
         }
 
-        public void SetChild(PdfObject child) {
-            childs.Add(child);
-        }
-
         public override int GetHashCode() => number.GetHashCode();
 
         public override bool Equals(object obj)
         {
             var indirect = (obj as IndirectObject);
-            if (indirect == null)
+            if (indirect == null) {
                 return false;
+            }
             
             return indirect.number == this.number;
         }
@@ -51,23 +48,22 @@ namespace SharpPDF.Lib {
 
         public static implicit operator IndirectReferenceObject(IndirectObject a) => new IndirectReferenceObject(a.Number);
         
-        private void ExpectAText(Token token, string expected)
-        {
-            if (token.characterSetClass != CharacterSetType.Regular || token.ToString() != expected)
+        private static void ExpectAText(Token token, string expected) {
+            if (token.characterSetClass != CharacterSetType.Regular || token.ToString() != expected) {
                 throw new PdfException(PdfExceptionCodes.INVALID_INDIRECTOBJECT_TOKEN, "Expected '" + expected + "' but '" + token.ToString() + "' appeared");
+            }
         }
 
-        private void ExpectAWhiteSpace(Token token)
-        {
-            if (token.characterSetClass != CharacterSetType.WhiteSpace)
+        private static void ExpectAWhiteSpace(Token token) {
+            if (token.characterSetClass != CharacterSetType.WhiteSpace) {
                 throw new PdfException(PdfExceptionCodes.INVALID_INDIRECTOBJECT_TOKEN, "Expected a whitespace");
-
+            }
         }
 
-        private void ReadNumber(Token token, ref int number)
-        {
-            if (!int.TryParse(token.ToString(), NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out number))
+        private static void ReadNumber(Token token, ref int number) {
+            if (!int.TryParse(token.ToString(), NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out number)) {
                 throw new PdfException(PdfExceptionCodes.INVALID_INDIRECTOBJECT_TOKEN, "Expected a number");
+            }
         }
 
         public override string ToString() {

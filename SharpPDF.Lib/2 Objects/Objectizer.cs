@@ -39,14 +39,12 @@ namespace SharpPDF.Lib {
             tokenizer.SavePosition();            
             Token token = tokenizer.TokenExcludedCommentsAndWhitespaces();
 
-            var validator = new TokenValidator();                
-
             if (tokenToObject.ContainsKey(token.ToString())) {                
                 tokenizer.RestorePosition();
                 return tokenToObject[token.ToString()].Invoke(tokenizer);
             }
 
-            if (validator.IsRegularNumber(token)) {
+            if (TokenValidator.IsRegularNumber(token)) {
                 if (tokenizer.IsEOF())
                 {
                     tokenizer.RestorePosition();
@@ -57,12 +55,12 @@ namespace SharpPDF.Lib {
                 Token secondToken = tokenizer.TokenExcludedCommentsAndWhitespaces();
                 Token thirdToken = tokenizer.TokenExcludedCommentsAndWhitespaces();
 
-                if (validator.IsRegularNumber(secondToken) && thirdToken.ToString() == "obj")
+                if (TokenValidator.IsRegularNumber(secondToken) && thirdToken.ToString() == "obj")
                 {
                     tokenizer.RestorePosition();
                     return new IndirectObject(tokenizer);
                 }
-                else if (validator.IsRegularNumber(secondToken) && thirdToken.ToString() == "R")
+                else if (TokenValidator.IsRegularNumber(secondToken) && thirdToken.ToString() == "R")
                 {
                     tokenizer.RestorePosition();
                     return new IndirectReferenceObject(tokenizer);
@@ -71,11 +69,11 @@ namespace SharpPDF.Lib {
                 tokenizer.RestorePosition();
                 return new IntegerObject(tokenizer);
             }
-            else if (validator.IsIntegerNumber(token)) {
+            else if (TokenValidator.IsIntegerNumber(token)) {
                 tokenizer.RestorePosition();
                 return new IntegerObject(tokenizer);
             }
-            else if (validator.IsRealNumber(token)) {
+            else if (TokenValidator.IsRealNumber(token)) {
                 tokenizer.RestorePosition();
                 return new RealObject(tokenizer);
             }

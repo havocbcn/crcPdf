@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-
 namespace SharpPDF.Lib {
     public class DocumentOutline : IDocumentTree {
 
@@ -40,13 +37,13 @@ namespace SharpPDF.Lib {
             }
         } 
 
-        private DocumentOutline first;
-        private DocumentOutline last;
-        private DocumentOutline parent;
-        private DocumentOutline prev;
-        private DocumentOutline next;
-        public int Count { get; private set; }
-        private string title;
+        public DocumentOutline first { get; }
+        public DocumentOutline last { get; }
+        public DocumentOutline parent { get; }
+        public DocumentOutline prev { get; }
+        public DocumentOutline next { get; }
+        public int Count { get; }
+        public string title { get; }
 
         public override void OnSaveEvent(IndirectObject indirectObject)
         {

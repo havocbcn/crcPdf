@@ -14,9 +14,14 @@ namespace SharpPDF.Lib {
         }
 
          public T Child<T>(int pos) where T : PdfObject {
-             if (pos >= childs.Count)
+            if (pos >= childs.Count) {
                 return null;
+            }
             return childs[pos] as T;
+        }
+
+        public void SetChild(PdfObject child) {
+            childs.Add(child);
         }
     }
 }

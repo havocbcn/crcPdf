@@ -25,13 +25,12 @@ namespace SharpPDF.Lib {
         }
         
         public DictionaryObject(Tokenizer tokenizer) {
-            var validator = new TokenValidator();
             Token token;
 
-            if (!validator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), "<")) {
+            if (!TokenValidator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), "<")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY, "Expected <");
             }
-            if (!validator.IsDelimiter(tokenizer.TokenExcludedComments(), "<")) {
+            if (!TokenValidator.IsDelimiter(tokenizer.TokenExcludedComments(), "<")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY, "Expected <");
             }
 
@@ -39,26 +38,26 @@ namespace SharpPDF.Lib {
                 ReadKeyValue(tokenizer);            
             }
             
-            if (!validator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), ">")) {
+            if (!TokenValidator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), ">")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY, "Expected >");
             }
-            if (!validator.IsDelimiter(tokenizer.TokenExcludedComments(), ">")) {
+            if (!TokenValidator.IsDelimiter(tokenizer.TokenExcludedComments(), ">")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY, "Expected >");
             }
 
             if (HasStream) {
-                if (!validator.Validate(tokenizer.TokenExcludedCommentsAndWhitespaces(), "stream")) {
+                if (!TokenValidator.Validate(tokenizer.TokenExcludedCommentsAndWhitespaces(), "stream")) {
                     throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY_STREAM, "A dictionary with Lenght hasnt stream object");
                 }                
 
-                if (!validator.IsWhiteSpace(tokenizer.Token(), "\n", "\r\n")) {
+                if (!TokenValidator.IsWhiteSpace(tokenizer.Token(), "\n", "\r\n")) {
                     throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY_STREAM, "A stream must be followed by \\n or \\r\\n");
                 }
 
                 stream = tokenizer.ReadStream(streamLength.Value);
 
                 token = tokenizer.TokenExcludedCommentsAndWhitespaces();
-                if (!validator.Validate(token, "endstream")) {
+                if (!TokenValidator.Validate(token, "endstream")) {
                     throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY_STREAM, $"Expected endstream but {token} found");
                 }
             }

@@ -3,9 +3,7 @@ using System.IO;
 namespace SharpPDF.Lib {
     public class SharpPdf {
         readonly Tokenizer tokenizer;
-
-        readonly TokenValidator validator = new TokenValidator();
-
+        
         PDFObjects pdfObjects = new PDFObjects();
 
         public DocumentCatalog Catalog { get; private set; }
@@ -33,12 +31,12 @@ namespace SharpPDF.Lib {
             Token token;
 
             token = tokenizer.Token();
-            if (!validator.Validate(token, CharacterSetType.Regular, "xref")) {
+            if (!TokenValidator.Validate(token, CharacterSetType.Regular, "xref")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_XREF, "Expected xref");
             }
 
             token = tokenizer.Token();
-            if (!validator.IsWhiteSpace(token)) { 
+            if (!TokenValidator.IsWhiteSpace(token)) { 
                 throw new PdfException(PdfExceptionCodes.INVALID_XREF, "after xref must be a whitspace");
             }
 
@@ -92,39 +90,39 @@ namespace SharpPDF.Lib {
             Token token;
 
             token = tokenizer.Token();
-            if (!validator.Validate(token, CharacterSetType.Regular, "startxref")) {
+            if (!TokenValidator.Validate(token, CharacterSetType.Regular, "startxref")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected startxref");
             }
 
             token = tokenizer.Token();
-            if (!validator.IsWhiteSpace(token)) {
+            if (!TokenValidator.IsWhiteSpace(token)) {
                 throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected a whitespace between starxref and position");
             }
 
             token = tokenizer.Token();
-            if (!validator.IsRegularNumber(token)) {
+            if (!TokenValidator.IsRegularNumber(token)) {
                 throw new PdfException(PdfExceptionCodes.INVALID_EOF, "startxref position expected");
             }
 
             long xrefPosition = token.ToLong();
 
             token = tokenizer.Token();
-            if (!validator.IsWhiteSpace(token)) {
+            if (!TokenValidator.IsWhiteSpace(token)) {
                 throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected a whitespace between starxref position and EOF");
             }
 
             token = tokenizer.Token();
-            if (!validator.IsDelimiter(token, "%")) {
+            if (!TokenValidator.IsDelimiter(token, "%")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected %%EOF at end of the file");
             }
 
             token = tokenizer.Token();
-            if (!validator.IsDelimiter(token, "%")) {
+            if (!TokenValidator.IsDelimiter(token, "%")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected %%EOF at end of the file");
             }
 
             token = tokenizer.Token();
-            if (!validator.Validate(token, CharacterSetType.Regular, "EOF")) {
+            if (!TokenValidator.Validate(token, CharacterSetType.Regular, "EOF")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected %%EOF at end of the file");
             }
 
@@ -134,13 +132,13 @@ namespace SharpPDF.Lib {
         private void AnalyzeHeader()
         {
             Token token = tokenizer.Token();
-            if (!validator.IsDelimiter(token, "%")) {
+            if (!TokenValidator.IsDelimiter(token, "%")) {
                 throw new PdfException(PdfExceptionCodes.HEADER_NOT_FOUND, "Header not found");
             }
 
             token = tokenizer.Token();
 
-            if (!validator.Validate(token, CharacterSetType.Regular, "PDF-1.1", "PDF-1.2", "PDF-1.3", "PDF-1.4", "PDF-1.5", "PDF-1.6", "PDF-1.7")) {
+            if (!TokenValidator.Validate(token, CharacterSetType.Regular, "PDF-1.1", "PDF-1.2", "PDF-1.3", "PDF-1.4", "PDF-1.5", "PDF-1.6", "PDF-1.7")) {
                 throw new PdfException(PdfExceptionCodes.HEADER_NOT_FOUND, "Header not found");            
             }
         }

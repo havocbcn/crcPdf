@@ -142,8 +142,9 @@ namespace SharpPDF.Lib
                 }
             }
 
-            if (bytesRead.Count == 0)
+            if (bytesRead.Count == 0) {
                 throw new PdfException(PdfExceptionCodes.FILE_ABRUPTLY_TERMINATED, "EOF detected");
+            }
 
             return new Token(bytesRead.ToArray());
         }
