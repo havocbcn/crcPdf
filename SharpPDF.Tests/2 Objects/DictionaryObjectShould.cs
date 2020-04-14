@@ -36,11 +36,11 @@ namespace SharpPDF.Tests
             Tokenizer feed = new Tokenizer(new MemoryStream(bytes));            
             
             var actual = new DictionaryObject(feed); 
-            actual.Childs().Should().HaveCount(2);
-            actual.Childs()[0].Should().BeOfType<NameObject>();
+            actual.Childs<PdfObject>().Should().HaveCount(2);
+            actual.Childs<PdfObject>()[0].Should().BeOfType<NameObject>();
 
-            Assert.Equal("Type", ((NameObject)actual.Childs()[0]).Value);
-            Assert.Equal("Example", ((NameObject)actual.Childs()[1]).Value);
+            Assert.Equal("Type", actual.Child<NameObject>(0).Value);
+            Assert.Equal("Example", actual.Child<NameObject>(1).Value);
         }        
 
         [Fact]
@@ -63,7 +63,7 @@ namespace SharpPDF.Tests
             Objectizer objectizer = new Objectizer(feed);
            
             DictionaryObject actual = (DictionaryObject)objectizer.NextObject();
-            Assert.Equal(12, actual.Childs().Length);
+            Assert.Equal(12, actual.Childs<PdfObject>().Length);
 
 
             Assert.Equal("Type", actual.Child<NameObject>(0).Value);
@@ -73,10 +73,10 @@ namespace SharpPDF.Tests
             Assert.Equal("DictionaryExample", actual.Child<NameObject>(3).Value);
 
             Assert.Equal("Version", actual.Child<NameObject>(4).Value);
-            Assert.Equal(0.01f, actual.Child<RealObject>(5).Value);        
+            Assert.Equal(0.01f, actual.Child<RealObject>(5).FloatValue);        
 
             Assert.Equal("IntegerItem", actual.Child<NameObject>(6).Value);
-            Assert.Equal(12, actual.Child<IntegerObject>(7).Value); 
+            Assert.Equal(12, actual.Child<IntegerObject>(7).IntValue); 
 
             Assert.Equal("StringItem", actual.Child<NameObject>(8).Value);
             Assert.Equal("a string", actual.Child<StringObject>(9).Value);        
@@ -84,7 +84,7 @@ namespace SharpPDF.Tests
             Assert.Equal("Subdictionary", actual.Child<NameObject>(10).Value);
 
             Assert.Equal("Item1", actual.Child<DictionaryObject>(11).Child<NameObject>(0).Value);
-            Assert.Equal(0.4f, actual.Child<DictionaryObject>(11).Child<RealObject>(1).Value);
+            Assert.Equal(0.4f, actual.Child<DictionaryObject>(11).Child<RealObject>(1).FloatValue);
 
             Assert.Equal("Item2", actual.Child<DictionaryObject>(11).Child<NameObject>(2).Value);
             Assert.True(actual.Child<DictionaryObject>(11).Child<BooleanObject>(3).Value);
@@ -129,11 +129,11 @@ namespace SharpPDF.Tests
             Objectizer objectizer = new Objectizer(feed);
            
             DictionaryObject actual = (DictionaryObject)objectizer.NextObject();
-            Assert.Equal(2, actual.Childs().Length);
+            Assert.Equal(2, actual.Childs<PdfObject>().Length);
 
 
-            Assert.Equal("Length", ((NameObject)actual.Childs()[0]).Value);
-            Assert.Equal(10, ((IntegerObject)actual.Childs()[1]).Value);        
+            Assert.Equal("Length", actual.Child<NameObject>(0).Value);
+            Assert.Equal(10, actual.Child<IntegerObject>(1).IntValue);        
 
             Assert.Equal(System.Text.UTF8Encoding.UTF8.GetBytes("0123456789"), actual.Stream);
         }

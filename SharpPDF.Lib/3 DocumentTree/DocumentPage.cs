@@ -26,7 +26,7 @@ namespace SharpPDF.Lib {
                     switch (resource.Key) {
                         case "Font":
                             foreach (var font in pdf.GetObject<DictionaryObject>(resource.Value).Dictionary) {
-                                var documentFont = XrefFontFactory.GetFont(pdfObjects, font.Value);
+                                var documentFont = FontFactory.GetFont(pdfObjects, font.Value);
                                 fonts.Add(documentFont, font.Key);
                             }
                             break;
@@ -72,7 +72,7 @@ namespace SharpPDF.Lib {
         }
 
         public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, EEmbedded embedded = EEmbedded.Embedded) {
-            var font = XrefFontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
+            var font = FontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
 
             if (!fonts.ContainsKey(font)) {
                 fonts.Add(font, "F" + fonts.Count);

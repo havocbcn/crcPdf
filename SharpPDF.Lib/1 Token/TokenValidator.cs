@@ -18,15 +18,10 @@ namespace SharpPDF.Lib {
             => Validate(token, CharacterSetType.Regular, contents);
 
         public bool IsDelimiter(Token token, params string[] contents)
-            => token.characterSetClass ==  CharacterSetType.Delimiter &&
-                contents.Contains(token.ToString());
+            => token.characterSetClass == CharacterSetType.Delimiter && contents.Contains(token.ToString());
 
-        internal bool IsRegularNumber(Token token) {
-             if (token.characterSetClass != CharacterSetType.Regular)
-                return false;
-
-            return IsRegularNumber(token.ToString());
-        }
+        internal bool IsRegularNumber(Token token) 
+            => token.characterSetClass == CharacterSetType.Regular && IsRegularNumber(token.ToString());        
 
         private bool IsRegularNumber(string token) 
             => token.All(ch => ch >= '0' && ch <= '9');

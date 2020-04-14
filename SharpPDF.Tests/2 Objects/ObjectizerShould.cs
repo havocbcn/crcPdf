@@ -52,7 +52,7 @@ namespace SharpPDF.Tests
             Objectizer objectizer = new Objectizer(feed); 
 
             IntegerObject actual = (IntegerObject)objectizer.NextObject();
-            Assert.Equal(expected, actual.Value);
+            Assert.Equal(expected, actual.IntValue);
         }
 
         [Theory]
@@ -67,7 +67,7 @@ namespace SharpPDF.Tests
             Objectizer objectizer = new Objectizer(feed); 
 
             IntegerObject actual = (IntegerObject)objectizer.NextObject();
-            Assert.Equal(expected, actual.Value);
+            Assert.Equal(expected, actual.IntValue);
         }
 
         [Theory]
@@ -103,7 +103,7 @@ namespace SharpPDF.Tests
             var objectizer = new Objectizer(feed); 
 
             var actual = (RealObject)objectizer.NextObject();
-            Assert.Equal(expected, actual.Value);
+            Assert.Equal(expected, actual.FloatValue);
         }
 
          [Theory]
@@ -333,7 +333,7 @@ are the same.)", "These two strings are the same.")]
             var objectizer = new Objectizer(feed);
            
             var actual = (IndirectReferenceObject)objectizer.NextObject();
-            Assert.Empty(actual.Childs());            
+            Assert.Empty(actual.Childs<PdfObject>());            
 
             Assert.Equal(1, actual.Number);
             Assert.Equal(0, actual.Generation);
@@ -369,8 +369,8 @@ are the same.)", "These two strings are the same.")]
             var actual = (ArrayObject)objectizer.NextObject();
             Assert.Equal(5, actual.Childs<PdfObject>().Length);
 
-            Assert.Equal(549, actual.Child<IntegerObject>(0).Value);
-            Assert.Equal(3.14f, actual.Child<RealObject>(1).Value);
+            Assert.Equal(549, actual.Child<IntegerObject>(0).IntValue);
+            Assert.Equal(3.14f, actual.Child<RealObject>(1).FloatValue);
             Assert.False(actual.Child<BooleanObject>(2).Value);
             Assert.Equal("Ralph", actual.Child<StringObject>(3).Value);
             Assert.Equal("SomeName", actual.Child<NameObject>(4).Value);        

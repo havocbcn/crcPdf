@@ -5,11 +5,11 @@ using System.Text;
 
 namespace SharpPDF.Lib {
     public class PDFObjects {
-        private HashSet<IndirectObject> objects = new HashSet<IndirectObject>();
+        private readonly HashSet<IndirectObject> objects = new HashSet<IndirectObject>();
 
-        private List<IndirectObject> objectsToSave = new List<IndirectObject>();
+        private readonly List<IndirectObject> objectsToSave = new List<IndirectObject>();
 
-        private Dictionary<IndirectObject, IDocumentTree> cache = new Dictionary<IndirectObject, IDocumentTree>();
+        private readonly Dictionary<IndirectObject, IDocumentTree> cache = new Dictionary<IndirectObject, IDocumentTree>();
 
         private int lastNumber = 0;
         internal IndirectObject CreateIndirectObject() {
@@ -20,8 +20,9 @@ namespace SharpPDF.Lib {
 
         internal void AddObject(IndirectObject id) {
             objects.Add(id);
-            if (id.Number > lastNumber)
+            if (id.Number > lastNumber) {
                 lastNumber = id.Number + 1;
+            }
         }        
 
         /// <summary>
@@ -29,8 +30,9 @@ namespace SharpPDF.Lib {
         /// construct a Document -DocumentCatalog in the example-
         /// </summary>
         public T GetDocument<T>(IndirectObject obj) where T : IDocumentTree {
-            if (cache.ContainsKey(obj))
+            if (cache.ContainsKey(obj)) {
                 return cache[obj] as T;
+            }
 
             var a = (T)Activator.CreateInstance(typeof(T), this, obj.childs[0]);
 
@@ -49,8 +51,9 @@ namespace SharpPDF.Lib {
         /// </summary>
         public string GetType(IndirectReferenceObject indirectObj) {
             IndirectObject obj;
-            if (!objects.TryGetValue(indirectObj, out obj))
+            if (!objects.TryGetValue(indirectObj, out obj)) {
                 return null;
+            }
             return GetType(obj);
         }
 
@@ -64,10 +67,12 @@ namespace SharpPDF.Lib {
         /// </summary>
         public string GetType(IndirectObject obj) {        
             var dic = obj.Child<DictionaryObject>(0);
-            if (dic == null) 
+            if (dic == null) {
                 return null;
-            if (dic.Dictionary.ContainsKey("Type"))
+            }
+            if (dic.Dictionary.ContainsKey("Type")) {
                 return GetObject<NameObject>(dic.Dictionary["Type"]).Value;
+            }
             return null;
         }
 
@@ -78,8 +83,9 @@ namespace SharpPDF.Lib {
         /// </summary>
         public T GetDocument<T>(IndirectReferenceObject indirectObj) where T : IDocumentTree {
             IndirectObject obj;
-            if (!objects.TryGetValue(indirectObj, out obj))
+            if (!objects.TryGetValue(indirectObj, out obj)) {
                 return null;            
+            }
             return GetDocument<T>(obj);
         } 
 
@@ -89,10 +95,12 @@ namespace SharpPDF.Lib {
         /// previously loaded
         /// </summary>
         public T GetDocument<T>(PdfObject obj) where T : IDocumentTree {
-            if (obj is IndirectObject)
+            if (obj is IndirectObject) {
                 return GetDocument<T>(obj as IndirectObject);
-            if (obj is IndirectReferenceObject)
+            }
+            if (obj is IndirectReferenceObject) {
                 return GetDocument<T>(obj as IndirectReferenceObject);
+            }
 
             var a = (T)Activator.CreateInstance(typeof(T), this, obj);
             return a;
@@ -105,10 +113,12 @@ namespace SharpPDF.Lib {
         /// if is impossible to convert, an error is throw
         /// </summary>
         public T GetObject<T>(PdfObject obj) where T : PdfObject {
-            if (obj is IndirectObject)
+            if (obj is IndirectObject) {
                 return GetObject<T>(obj as IndirectObject);
-            if (obj is IndirectReferenceObject)
+            }
+            if (obj is IndirectReferenceObject) {
                 return GetObject<T>(obj as IndirectReferenceObject);
+            }
 
             return obj as T;
         } 
@@ -118,18 +128,14 @@ namespace SharpPDF.Lib {
         } 
         public T GetObject<T>(IndirectReferenceObject indirectObj) where T : PdfObject {
             IndirectObject obj;
-            if (!objects.TryGetValue(indirectObj, out obj))
+            if (!objects.TryGetValue(indirectObj, out obj)) {
                 throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, $"Impossible to cast");
+            }
 
             return GetObject<T>(obj);
         } 
 
-        //internal delegate void LoadCompleteHandler();
-        //internal event LoadCompleteHandler SaveEvent;
-        public void WriteTo(MemoryStream ms, DocumentCatalog catalog)
-        {
-        //    SaveEvent();
-            
+        public void WriteTo(MemoryStream ms, DocumentCatalog catalog) {   
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("%PDF-1.6");
             List<int> childPos = new List<int>();
@@ -151,7 +157,6 @@ namespace SharpPDF.Lib {
 
             sb.Append($"trailer <</Root {catalogIndirectReference} /Size {objectsToSave.Count + 1}>>\nstartxref\n{xrefPos}\n%%EOF");
 
-            Console.WriteLine(sb.ToString());
             byte[] existingData = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
             ms.Write(existingData, 0, existingData.Length); 
         }

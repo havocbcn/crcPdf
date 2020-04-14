@@ -32,7 +32,7 @@ namespace SharpPDF.Lib {
                         next = pdf.GetDocument<DocumentOutline>(value.Value);
                         break;
                     case "Count":
-                        Count = pdf.GetObject<IntegerObject>(value.Value).Value;
+                        Count = pdf.GetObject<IntegerObject>(value.Value).IntValue;
                         break;
                     default:
                         throw new PdfException(PdfExceptionCodes.UNKNOWN_ENTRY, $"Outlines contain an unknown entry: {value.Key}");                        

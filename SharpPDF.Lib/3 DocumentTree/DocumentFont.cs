@@ -12,7 +12,6 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with SharpPDF.  If not, see <http://www.gnu.org/licenses/>.
-
 using System.Collections.Generic;
 using SharpPDF.Lib.Fonts;
 
@@ -37,14 +36,9 @@ namespace SharpPDF.Lib {
 
 		public string FullFileName { get; set; }
 
+		public float GetAscendent(float size) => Ascendent * 0.001f * size;
 
-		public float GetAscendent(float size) {
-			return Ascendent * 0.001f * size;
-		}
-
-		public float GetDescendent(float size) {
-			return Descendent * 0.001f * size;
-		}
+		public float GetDescendent(float size) => Descendent * 0.001f * size;
 
 		public float GetWidthPointKerned(string text, float size) {
 			float currentSize = 0.0f;
@@ -52,13 +46,15 @@ namespace SharpPDF.Lib {
 			int previousChar = -1;
 
 			foreach (char ch in text) {
-				if (dctCharCodeToGlyphID.ContainsKey((int)ch))
+				if (dctCharCodeToGlyphID.ContainsKey((int)ch)) {
 					currentSize += Glypth[dctCharCodeToGlyphID[(int)ch]].width;
+				}
 
 				if (previousChar >= 0) {
 					int key = (previousChar << 16) + (int)ch;
-					if (dctKerning.ContainsKey(key))
+					if (dctKerning.ContainsKey(key)) {
 						kerning += dctKerning[key];
+					}
 				}
 
 				previousChar = ch;
@@ -127,13 +123,9 @@ namespace SharpPDF.Lib {
 
         internal bool isUnicode = false;
 
-        internal virtual int GetGlyphId(int ch) {
-            return dctCharCodeToGlyphID[ch];
-        }
+        internal virtual int GetGlyphId(int ch) => dctCharCodeToGlyphID[ch];        
 
-        internal virtual FontGlyph GetGlyph(int gliphtId) {
-            return Glypth[gliphtId];
-        }
+        internal virtual FontGlyph GetGlyph(int gliphtId) => Glypth[gliphtId];
 
         /// <summary>
         /// Escriben texto con esta fuente, me apunto cosas
@@ -156,10 +148,12 @@ namespace SharpPDF.Lib {
         protected void AddNewChar(char c) {
             hashChar.Add((int)c);
 
-            if (FirstChar == null || c < FirstChar)
+            if (FirstChar == null || c < FirstChar) {
                 FirstChar = c;
-            if (c > LastChar)
+			}
+			if (c > LastChar) {
                 LastChar = c;
+			}
         }
     }
 }

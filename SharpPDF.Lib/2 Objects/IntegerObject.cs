@@ -1,26 +1,27 @@
 using System.Globalization;
 
 namespace SharpPDF.Lib {
-    public class IntegerObject : PdfObject {
-        private readonly int value;
+    public class IntegerObject : RealObject {
+        private readonly int intValue;
 
-        public IntegerObject(int value) {
-            this.value = value;
+        public IntegerObject(int value) : base(value) {
+            this.intValue = value;
         }
 
-        public IntegerObject(Tokenizer tokenizer) {
+        public IntegerObject(Tokenizer tokenizer) : base(0) {
             string tokenContent = tokenizer.TokenExcludedCommentsAndWhitespaces().ToString();
 
-            if (!int.TryParse(tokenContent, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value))                
+            if (!int.TryParse(tokenContent, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out intValue)) {
                 throw new PdfException(PdfExceptionCodes.INVALID_NUMBER_TOKEN, "Number cannot be cast to integer");
+            }
+
+            this.floatValue = intValue;
         }
 
-
-        public int Value => value;
-        public PdfObject[] Childs() => new PdfObject[0];
+        public int IntValue => intValue;
 
         public override string ToString() {
-            return value.ToString();
+            return intValue.ToString();
         }
 
     }

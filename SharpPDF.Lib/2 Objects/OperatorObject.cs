@@ -8,7 +8,6 @@ namespace SharpPDF.Lib {
         }
 
         public string Value { get; private set; }
-        public PdfObject[] Childs() => new PdfObject[0];
 
         public override string ToString() {
             return Value;

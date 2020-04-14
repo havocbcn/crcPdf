@@ -15,15 +15,15 @@ namespace SharpPDF.Lib {
             if (number <= 0) {
                 throw new PdfException(PdfExceptionCodes.INVALID_NUMBER, "Indirect number must be positive");
             }
-
-            ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
-
-            ReadNumber(tokenizer.TokenExcludedComments(), ref generation);
-            if (generation < 0)
-                throw new PdfException(PdfExceptionCodes.INVALID_GENERATION, "Generation must be positive");
-
+            
             ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
             
+            ReadNumber(tokenizer.TokenExcludedComments(), ref generation);
+            if (generation < 0) {
+                throw new PdfException(PdfExceptionCodes.INVALID_GENERATION, "Generation must be positive");
+            }
+
+            ExpectAWhiteSpace(tokenizer.TokenExcludedComments());            
             ExpectAText(tokenizer.TokenExcludedComments(), "R");
         }
 
@@ -42,7 +42,6 @@ namespace SharpPDF.Lib {
 
         public int Number => number;
         public int Generation => generation;
-        public PdfObject[] Childs() => new PdfObject[0];
         public static implicit operator IndirectObject(IndirectReferenceObject a) => new IndirectObject(a.Number);    
         private void ExpectAText(Token token, string expected) {
             if (token.characterSetClass != CharacterSetType.Regular || token.ToString() != expected) {
@@ -61,6 +60,5 @@ namespace SharpPDF.Lib {
                 throw new PdfException(PdfExceptionCodes.INVALID_INDIRECTOBJECT_TOKEN, "Expected a number");
             }
         }
-
     }
 }

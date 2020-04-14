@@ -27,21 +27,18 @@ namespace SharpPDF.Lib {
 
         public string Value => value;
         
-        private string Escape(string literalString)
-        {
+        private static string Escape(string literalString) {
             StringBuilder literalStringEscaped = new StringBuilder();
             int i = 0;
             while (i < literalString.Length)
             {
-                if (literalString[i] == '#' && i < literalString.Length - 2)
-                {
+                if (literalString[i] == '#' && i < literalString.Length - 2) {
                     HexadecimalEscaper hexEscaper = new HexadecimalEscaper();
 
                     literalStringEscaped.Append(hexEscaper.GetValue(literalString.Substring(i+1, 2)));
                     i+=3;
                 }
-                else
-                {
+                else {
                     literalStringEscaped.Append(literalString[i]);
                     i++;
                 }

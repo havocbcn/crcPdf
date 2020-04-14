@@ -10,7 +10,6 @@ namespace SharpPDF.Lib
         INVALID_INDIRECTOBJECT_TOKEN,
         INVALID_GENERATION,
         HEADER_NOT_FOUND,
-        HEADER_INCORRECT_VERSION,
         BOF,
         INVALID_EOF,
         INVALID_XREF,
@@ -21,13 +20,11 @@ namespace SharpPDF.Lib
         INVALID_DICTIONARY_STREAM,
         INVALID_STREAM,
         INVALID_NUMBER,
-        INDIRECT_REFERENCE_MISSING,
         INVALID_TRAILER,
         INVALID_CONTENT,
         INVALID_FONT,
         INVALID_RESOURCE,
         UNKNOWN_ENTRY,
-        INVALID_PROCSET,
-        INVALID_TYPE,
+        FONT_NOT_FOUND
     }  
 }

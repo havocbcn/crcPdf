@@ -5,7 +5,7 @@ using SharpPDF.Lib;
 using Xunit;
 
 namespace SharpPDF.Tests.Outline {   
-    public class PdfOutlineShould {    
+    public class PdfOutlineShould : SharpPdfTest {    
         [Fact]
         public void ReadEmptyOutlines() =>            
             // 12.3.3 Document outline
@@ -15,18 +15,5 @@ namespace SharpPDF.Tests.Outline {
                     pdf.Catalog.Outlines.Count.Should().Be(0);
                 }
             );
-
-        private void SharpPdfShould(byte[] Given, 
-                                    Action<SharpPdf> When = null, 
-                                    Action<SharpPdf> Then = null)
-        {            
-            SharpPdf pdf = new SharpPdf(new MemoryStream(Given));
-
-            if (When != null)
-                When(pdf);
-
-            if (Then != null)
-                Then(pdf);
-        }
     }
 }
