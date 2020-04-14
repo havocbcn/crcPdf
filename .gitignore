@@ -352,3 +352,4 @@ MigrationBackup/
 .sonarqube
 coverage.json
 coverage.opencover.xml
+.codacy-coverage

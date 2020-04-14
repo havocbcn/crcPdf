@@ -1,6 +1,6 @@
 namespace SharpPDF.Lib {
     // 9 Text
-    public class TextOperator : ITextOperator {
+    public class TextOperator : Operator {
         readonly string text;
         
         public TextOperator(string text) {

@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using SharpPDF.Lib;
 using Xunit;
-using System.Text;
 
 namespace SharpPDF.Tests {
     public class SharpPdfTest { 
@@ -28,6 +27,8 @@ namespace SharpPDF.Tests {
             MemoryStream ms = new MemoryStream();
             pdfWriter.WriteTo(ms);
             ms.Seek(0, SeekOrigin.Begin);
+            Console.WriteLine(System.Text.UTF8Encoding.UTF8.GetString(ms.ToArray()));
+            ms.Seek(0, SeekOrigin.Begin);
             SharpPdf pdfRead = new SharpPdf(ms);
 
             if (When != null) {
@@ -37,16 +38,6 @@ namespace SharpPDF.Tests {
             if (Then != null) {
                 Then(pdfRead);
             }
-        }
-
-        internal void SharpPdfShouldGiveAnError(string Given, Action<SharpPdf> When)
-        {            
-            string pdfFile = Given;
-
-            byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(pdfFile);
-            SharpPdf pdf = new SharpPdf(new MemoryStream(bytes));
-
-            Assert.Throws<PdfException>(() => { When(pdf); });
         }
     }
 }

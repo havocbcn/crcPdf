@@ -21,5 +21,9 @@ namespace SharpPDF.Lib {
                 throw new PdfException(PdfExceptionCodes.INVALID_NUMBER_TOKEN, $"Number {tokenContent} cannot be cast to a float number");
         }
         public float FloatValue => floatValue;    
+
+        public override string ToString() {
+            return FloatValue.ToString(CultureInfo.InvariantCulture);
+        }
     }
 }

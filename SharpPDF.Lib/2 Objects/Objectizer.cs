@@ -51,8 +51,11 @@ namespace SharpPDF.Lib {
                     return new IntegerObject(tokenizer);
                 }
 
-                
                 Token secondToken = tokenizer.TokenExcludedCommentsAndWhitespaces();
+                if (tokenizer.IsEOF() && allowOperators) {
+                    tokenizer.RestorePosition();
+                    return new IntegerObject(tokenizer);
+                }
                 Token thirdToken = tokenizer.TokenExcludedCommentsAndWhitespaces();
 
                 if (TokenValidator.IsRegularNumber(secondToken) && thirdToken.ToString() == "obj")

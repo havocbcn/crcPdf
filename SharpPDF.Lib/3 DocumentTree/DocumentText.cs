@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SharpPDF.Lib {
     public class DocumentText : IDocumentTree {        
-        List<IGraphicObject> graphicObjects = new List<IGraphicObject>();
+        List<Operator> pageOperators = new List<Operator>();
 
         public DocumentText(PDFObjects pdf) : base(pdf) {
         }
@@ -12,15 +13,18 @@ namespace SharpPDF.Lib {
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);
                 
             if (dic.Stream != null)
-                this.graphicObjects = new GraphicObjectizer(dic.Stream).ReadObjects();                    
+                this.pageOperators = new PageOperator(dic.Stream).ReadObjects();                    
         } 
 
+        private bool IsLastOperatorATextObject()
+            => pageOperators.LastOrDefault() is TextObject;
+
         private TextObject GetOrAddLastTextObject() {
-            var textObject = graphicObjects.LastOrDefault() as TextObject;
+            var textObject = pageOperators.LastOrDefault() as TextObject;
 
             if (textObject == null) {
                 textObject = new TextObject();
-                graphicObjects.Add(textObject);
+                pageOperators.Add(textObject);
             }
 
             return textObject;
@@ -32,12 +36,29 @@ namespace SharpPDF.Lib {
 
         public void SetFont(string code, int size) => GetOrAddLastTextObject().SetFont(code, size);
 
+        public void SetLineCap(LineCapStyle lineCap) {
+            if (IsLastOperatorATextObject())
+                GetOrAddLastTextObject().SetLineCap(lineCap);
+            else
+                pageOperators.Add(new LineCapOperator(lineCap));
+        }
+
+        public void SetNonStrokingColour(float r, float g, float b)
+        {
+            if (IsLastOperatorATextObject())
+                GetOrAddLastTextObject().SetNonStrokingColour(r, g, b);
+            else
+                pageOperators.Add(new NonStrokingColourOperator(r, g, b));
+        }      
+
         public override void OnSaveEvent(IndirectObject indirectObject)
         {
-            string text = string.Join("\n", graphicObjects);
+            string text = string.Join("\n", pageOperators);
             indirectObject.SetChild(new DictionaryObject(text));
         }
 
-        public IGraphicObject[] GraphicObject => graphicObjects.ToArray();
+        public Operator[] PageOperators => pageOperators.ToArray();
+
+
     }
 }

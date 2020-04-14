@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using SharpPDF.Lib.Fonts;
 using System.Linq;
+using System;
 
 namespace SharpPDF.Lib {
     public class DocumentPage : IDocumentTree {        
@@ -46,7 +47,7 @@ namespace SharpPDF.Lib {
 
             contents = pdf.GetDocument<DocumentText>(dic.Dictionary["Contents"]);
         }
-    
+
         public DocumentPage(PDFObjects pdf, DocumentPageTree parent) : base(pdf) {   
             this.parent = parent;
             this.contents = new DocumentText(pdf);
@@ -71,6 +72,13 @@ namespace SharpPDF.Lib {
             return this;
         }
 
+        public DocumentPage SetNonStrokingColour(float r, float g, float b)
+        {
+            contents.SetNonStrokingColour(r, g, b);
+            return this;
+        }
+
+
         public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, EEmbedded embedded = EEmbedded.Embedded) {
             var font = FontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
 
@@ -79,6 +87,11 @@ namespace SharpPDF.Lib {
             }
 
             contents.SetFont(fonts[font], size);
+            return this;
+        }
+
+        public DocumentPage SetLineCap(LineCapStyle lineCap)  {
+            contents.SetLineCap(lineCap);
             return this;
         }
 

@@ -1,7 +1,5 @@
 using FluentAssertions;
-using System;
 using System.IO;
-using SharpPDF.Lib;
 using Xunit;
 
 namespace SharpPDF.Tests.Outline {   

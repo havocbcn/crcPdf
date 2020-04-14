@@ -238,12 +238,29 @@ startxref
                         .AddLabel("Hola"); },
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(1);
-                    pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject.Should().HaveCount(1);
-                    pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0].Should().BeOfType<TextObject>();
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations.Should().HaveCount(3);
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations[0].ToString().Should().Be("/F0 12 Tf");
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations[1].ToString().Should().Be("10 15 Td");
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.GraphicObject[0]).Operations[2].ToString().Should().Be("(Hola) Tj");
+                    pdf.Catalog.Pages.PageSons[0].Contents.PageOperators.Should().HaveCount(1);
+                    pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0].Should().BeOfType<TextObject>();
+                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators.Should().HaveCount(3);
+                    ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators[0]).Code.Should().Be("F0");
+                    ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators[0]).Size.Should().Be(12);
+                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators[1].ToString().Should().Be("10 15 Td");
+                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators[2].ToString().Should().Be("(Hola) Tj");
+                }
+            );
+
+         [Fact]
+        public void ReadSample() =>            
+            // 12.3.3 Document outline
+            SharpPdfShould(
+                Given: File.ReadAllBytes("samples/sample.pdf"),
+                Then: pdf => { 
+                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+                    ((LineCapOperator)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).LineCap.Should().Be(LineCapStyle.ProjectingSquareCap);
+                    ((NonStrokingColourOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).R.Should().Be(0);
+                    ((NonStrokingColourOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).G.Should().Be(0);
+                    ((NonStrokingColourOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).B.Should().Be(0);
+                    ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[1]).Code.Should().Be("F1");
+                    ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[1]).Size.Should().Be(27);
                 }
             );
 

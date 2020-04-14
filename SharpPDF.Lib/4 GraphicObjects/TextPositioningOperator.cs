@@ -1,16 +1,16 @@
 namespace SharpPDF.Lib {
     // 9.4.2 Text-Positioning Operators
-    public class TextPositioningOperator : ITextOperator {
-        readonly float x;
-        readonly float y;
+    public class TextPositioningOperator : Operator {
+        public float X { get; }
+        public float Y { get; }
         
         public TextPositioningOperator(float x, float y) {
-            this.x = x;
-            this.y = y;
+            this.X = x;
+            this.Y = y;
         }
 
         public override string ToString() {
-            return $"{x} {y} Td";
+            return $"{X} {Y} Td";
         }
     }
 }

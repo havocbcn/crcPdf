@@ -1,16 +1,16 @@
 namespace SharpPDF.Lib {
     // 9 Text
-    public class FontOperator : ITextOperator {
-        readonly string code;
-        readonly int size;
+    public class FontOperator : Operator {
+        public string Code { get; }
+        public int Size { get; }
         
         public FontOperator(string code, int size) {
-            this.code = code;
-            this.size = size;
+            Code = code;
+            Size = size;
         }
 
         public override string ToString() {
-            return $"/{code} {size} Tf";
+            return $"/{Code} {Size} Tf";
         }
     }
 }

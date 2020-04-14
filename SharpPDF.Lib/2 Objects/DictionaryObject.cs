@@ -83,7 +83,7 @@ namespace SharpPDF.Lib {
             var value = read.NextObject();
             childs.Add(value);
 
-            dictionary.Add(((NameObject)key).Value, value);
+            dictionary.Add(key.Value, value);
 
             if (((NameObject)key).Value == "Length") {
                 var lengthObject = value as IntegerObject;
