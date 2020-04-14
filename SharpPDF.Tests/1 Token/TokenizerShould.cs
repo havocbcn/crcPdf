@@ -12,24 +12,16 @@ namespace SharpPDF.Tests {
             byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(fragment);
             Tokenizer feed = new Tokenizer(new MemoryStream(bytes));
             Assert.Equal("abc", feed.TokenExcludedComments().ToString());
-        }
-
-        [Theory]
-        [InlineData("abc")]
-        public void ThrowAnErrorIfReadBeyondEOF(string fragment) {
-            byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(fragment);
-            Tokenizer feed = new Tokenizer(new MemoryStream(bytes));
-            Assert.Equal("abc", feed.TokenExcludedComments().ToString());
             Assert.Throws<PdfException>(() => {feed.TokenExcludedComments(); });
         }
 
         [Theory]
-        [InlineData("abc\0123>qwe")]
-        [InlineData("abc\t123]qwe")]
-        [InlineData("abc\n123/qwe")]
-        [InlineData("abc\f123[qwe")]
-        [InlineData("abc\r123<qwe")]
-        [InlineData("abc 123>qwe")]
+        [InlineData("abc\0123")]
+        [InlineData("abc\t123")]
+        [InlineData("abc\n123")]
+        [InlineData("abc\f123")]
+        [InlineData("abc\r123")]
+        [InlineData("abc 123")]
         public void SeparateTokenTypes(string fragment)
         {
             // 7.2.2 Character set - White Characters
@@ -38,8 +30,6 @@ namespace SharpPDF.Tests {
             Assert.Equal("abc", feed.TokenExcludedComments().ToString());
             Assert.Equal(CharacterSetType.WhiteSpace, feed.TokenExcludedComments().characterSetClass);
             Assert.Equal("123", feed.TokenExcludedComments().ToString());
-            Assert.Equal(CharacterSetType.Delimiter, feed.TokenExcludedComments().characterSetClass);
-            Assert.Equal("qwe", feed.TokenExcludedComments().ToString());
         }
 
          [Theory]
@@ -49,7 +39,7 @@ namespace SharpPDF.Tests {
         [InlineData("abc\f123[qwe")]
         [InlineData("abc\r123<qwe")]
         [InlineData("abc 123>qwe")]
-        public void SavePosition(string fragment)
+        public void SaveAndRestorePosition(string fragment)
         { 
             // 7.2.2 Character set - White Characters
             byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(fragment);
@@ -72,25 +62,6 @@ namespace SharpPDF.Tests {
             feed.RestorePosition();
             Assert.Equal("abc", feed.TokenExcludedComments().ToString());
         }
-
-
-        [Theory]
-        [InlineData("abc\0123")]
-        [InlineData("abc\t123")]
-        [InlineData("abc\n123")]
-        [InlineData("abc\f123")]
-        [InlineData("abc\r123")]
-        [InlineData("abc 123")]
-        public void SeparateSyntaticConstructsByWhiteSpaces(string fragment)
-        {
-            // 7.2.2 Character set - White Characters
-            byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(fragment);
-            Tokenizer feed = new Tokenizer(new MemoryStream(bytes));
-            Assert.Equal("abc", feed.TokenExcludedComments().ToString());
-            Assert.Equal(CharacterSetType.WhiteSpace, feed.TokenExcludedComments().characterSetClass);
-            Assert.Equal("123", feed.TokenExcludedComments().ToString());
-        }
-        
 
         [Fact]
         public void TreatAnySequenceOfConsecutiveWhiteSpaceAsOneCharacter()
@@ -149,7 +120,6 @@ namespace SharpPDF.Tests {
             Assert.Equal("abc", feed.TokenExcludedComments().ToString());
             Assert.Equal(CharacterSetType.WhiteSpace, feed.TokenExcludedComments().characterSetClass);
             Assert.Equal("123", feed.TokenExcludedComments().ToString());
-        }     
-     
+        }
     }
 }
