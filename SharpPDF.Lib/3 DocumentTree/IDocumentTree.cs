@@ -2,7 +2,7 @@ namespace SharpPDF.Lib {
     public abstract class IDocumentTree {
         internal readonly PDFObjects pdfObjects;
 
-        public IDocumentTree(PDFObjects pdfObject) {
+        protected IDocumentTree(PDFObjects pdfObject) {
             this.pdfObjects = pdfObject;            
         }        
 
@@ -11,8 +11,9 @@ namespace SharpPDF.Lib {
         public IndirectReferenceObject IndirectReferenceObject 
         {
             get {
-                if (cache != null)
+                if (cache != null) {
                     return cache;
+                }
 
                 var indirectObject = pdfObjects.CreateIndirectObject();
                 cache = indirectObject;

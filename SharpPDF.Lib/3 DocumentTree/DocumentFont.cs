@@ -18,6 +18,8 @@ using SharpPDF.Lib.Fonts;
 namespace SharpPDF.Lib {
 	public abstract class DocumentFont : IDocumentTree  {		
 		protected DocumentFont(PDFObjects pdf) : base(pdf) {
+			StemV = 80;
+			boundingBox = new short[4];
 		}
 
 		/// <summary>
@@ -72,7 +74,7 @@ namespace SharpPDF.Lib {
 
         internal FontGlyph[] Glypth;
 
-		public Dictionary<int, short> dctKerning = new Dictionary<int, short>();
+		internal Dictionary<int, short> dctKerning = new Dictionary<int, short>();
 
 		protected Dictionary<int, int> dctCharCodeToGlyphID = new Dictionary<int, int>();
 
@@ -80,7 +82,7 @@ namespace SharpPDF.Lib {
 		/// The boundingBox of all glyphs
 		/// specifying the lower-left x, lower-left y, upper-right x, and upper-right y coordinates of the rectangle.
 		/// </summary>
-		public short[] boundingBox = new short[4];		
+		public short[] boundingBox { get; }
 
 		/// <summary>
 		/// 0 for short offsets (Offset16), 1 for long (Offset32).
@@ -109,7 +111,7 @@ namespace SharpPDF.Lib {
         /// https://stackoverflow.com/questions/35485179/stemv-value-of-the-truetype-font
         /// This value is not used
 		/// </summary>
-		public int StemV = 80;
+		public int StemV { get; }
 
 		/// <summary>
 		/// TTF Font
@@ -121,7 +123,7 @@ namespace SharpPDF.Lib {
         internal int LastChar  = -1;
         internal readonly HashSet<int> hashChar = new HashSet<int>();
 
-        internal bool isUnicode = false;
+        internal bool isUnicode;
 
         internal virtual int GetGlyphId(int ch) => dctCharCodeToGlyphID[ch];        
 
