@@ -2,15 +2,15 @@ namespace SharpPDF.Lib {
     // 9 Text
     public class FontOperator : Operator {
         public string Code { get; }
-        public int Size { get; }
+        public float Size { get; }
         
-        public FontOperator(string code, int size) {
+        public FontOperator(string code, float size) {
             Code = code;
             Size = size;
         }
 
         public override string ToString() {
-            return $"/{Code} {Size} Tf";
+            return $"/{Code} {Number(Size)} Tf";
         }
     }
 }

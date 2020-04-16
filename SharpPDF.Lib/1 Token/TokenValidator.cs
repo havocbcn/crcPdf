@@ -11,6 +11,10 @@ namespace SharpPDF.Lib {
         public static bool IsDelimiter(Token token, params string[] contents)
             => token.characterSetClass == CharacterSetType.Delimiter && contents.Contains(token.ToString());
 
+         public static bool IsDelimiter(Token token)
+            => token.characterSetClass == CharacterSetType.Delimiter;
+
+
         internal static bool IsRegularNumber(Token token) 
             => token.characterSetClass == CharacterSetType.Regular && IsRegularNumber(token.ToString());        
 

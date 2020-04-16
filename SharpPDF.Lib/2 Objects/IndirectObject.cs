@@ -14,16 +14,16 @@ namespace SharpPDF.Lib {
                 throw new PdfException(PdfExceptionCodes.INVALID_GENERATION, "Generation must be positive");
             }
 
-            ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
-            ExpectAText(tokenizer.TokenExcludedComments(), "obj");
-            ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
+            //ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
+            ExpectAText(tokenizer.TokenExcludedCommentsAndWhitespaces(), "obj");
+            //ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
 
             Objectizer analyzeChilds = new Objectizer(tokenizer);
 
             childs.Add(analyzeChilds.NextObject());
 
-            ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
-            ExpectAText(tokenizer.TokenExcludedComments(), "endobj");
+            //ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
+            ExpectAText(tokenizer.TokenExcludedCommentsAndWhitespaces(), "endobj");
         }
 
         public IndirectObject(int number) {

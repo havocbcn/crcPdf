@@ -2,19 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using SharpPDF.Lib.Fonts;
 
 namespace SharpPDF.Lib {
     public class PDFObjects {
         private readonly HashSet<IndirectObject> objects = new HashSet<IndirectObject>();
-
-        private readonly List<IndirectObject> objectsToSave = new List<IndirectObject>();
-
+        public FontFactory fontFactory = new FontFactory();
         private readonly Dictionary<IndirectObject, IDocumentTree> cache = new Dictionary<IndirectObject, IDocumentTree>();
 
         private int lastNumber = 0;
         internal IndirectObject CreateIndirectObject() {
             var indirect =  new IndirectObject(++lastNumber);
-            objectsToSave.Add(indirect);
+            objects.Add(indirect);
             return indirect;
         } 
 
@@ -23,7 +22,12 @@ namespace SharpPDF.Lib {
             if (id.Number > lastNumber) {
                 lastNumber = id.Number + 1;
             }
-        }        
+        }    
+
+        internal void CleanObjects() {
+            objects.Clear();
+            lastNumber = 0;
+        }    
 
         /// <summary>
         /// From an indirect object -1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj-, 
@@ -135,27 +139,35 @@ namespace SharpPDF.Lib {
             return GetObject<T>(obj);
         } 
 
-        public void WriteTo(MemoryStream ms, DocumentCatalog catalog) {   
+        public void WriteTo(Stream ms, DocumentCatalog catalog) {   
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("%PDF-1.6");
             List<int> childPos = new List<int>();
 
+            // if a pdf was loaded, all objects where loaded too
+            // now we will go to save a new pdf with new objects
+            // and objects will be created from catalog, the catalog
+            // will be saved and reference another objects that will
+            // trigger the object generation
+            CleanObjects();
+
             var catalogIndirectReference = catalog.IndirectReferenceObject;            
             
-            foreach (var child in objectsToSave) {
+            // now we can save all generated objects            
+            foreach (var child in objects) {
                 childPos.Add(sb.Length);
                 sb.Append(child.ToString());
             }
 
             int xrefPos = sb.Length;
             
-            sb.AppendLine($"xref\n0 {objectsToSave.Count + 1}\n0000000000 65535 f"); // +1 for the free record
+            sb.AppendLine($"xref\n0 {objects.Count + 1}\n0000000000 65535 f"); // +1 for the free record
             int i = 0;
-            foreach (var child in objectsToSave) {
+            foreach (var child in objects) {
                 sb.AppendLine($"{childPos[i++].ToString("D10")} 00000 n");
             }
 
-            sb.Append($"trailer <</Root {catalogIndirectReference} /Size {objectsToSave.Count + 1}>>\nstartxref\n{xrefPos}\n%%EOF");
+            sb.Append($"trailer <</Root {catalogIndirectReference} /Size {objects.Count + 1}>>\nstartxref\n{xrefPos}\n%%EOF");
 
             byte[] existingData = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
             ms.Write(existingData, 0, existingData.Length); 

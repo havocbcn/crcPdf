@@ -248,7 +248,7 @@ startxref
                 }
             );
 
-         [Fact]
+        [Fact]
         public void ReadSample() =>            
             // 12.3.3 Document outline
             SharpPdfShould(
@@ -261,6 +261,20 @@ startxref
                     ((NonStrokingColourOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).B.Should().Be(0);
                     ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[1]).Code.Should().Be("F1");
                     ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[1]).Size.Should().Be(27);
+                }
+            );
+
+        [Fact]
+        public void ReadSharpReport() =>            
+            // 12.3.3 Document outline
+            SharpPdfShould(
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Then: pdf => { 
+                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+
+                    using (var fs = new FileStream("sharpReport_out.pdf", FileMode.Create)) {
+                        pdf.WriteTo(fs);
+                    }
                 }
             );
 

@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 
 namespace SharpPDF.Lib {
     public class DictionaryObject : PdfObject {
@@ -55,6 +57,17 @@ namespace SharpPDF.Lib {
                 }
 
                 stream = tokenizer.ReadStream(streamLength.Value);
+                if (dictionary.ContainsKey("Filter")) {
+                    if (((NameObject)dictionary["Filter"]).Value == "FlateDecode") {
+                        int predictor = 1;
+                        
+                        if (dictionary.ContainsKey("Predictor")) {
+                            predictor = ((IntegerObject)dictionary["Predictor"]).IntValue;
+                        }
+
+                        stream = Deflate(stream, predictor, 0);
+                    }
+                } 
 
                 token = tokenizer.TokenExcludedCommentsAndWhitespaces();
                 if (!TokenValidator.Validate(token, "endstream")) {
@@ -100,6 +113,87 @@ namespace SharpPDF.Lib {
                 return $"<<{string.Join(" ", childs)}>>stream\n{System.Text.Encoding.GetEncoding(1252).GetString(stream)}\nendstream";    
             }
             return $"<<{string.Join(" ", childs)}>>";
+        }
+        
+        private byte[] Deflate(byte[] b, int predictor, int finalColumnCount)
+        {
+            byte[] result;
+            using (MemoryStream msOut = new MemoryStream())
+            {
+                using (MemoryStream inputStream = new MemoryStream(b))
+                {
+                    inputStream.ReadByte();
+                    inputStream.ReadByte();
+
+                    using (DeflateStream gzip = new DeflateStream(inputStream, CompressionMode.Decompress))
+                    {
+                        gzip.CopyTo(msOut);
+                    }
+                }
+
+                result = msOut.ToArray();
+            }
+
+            if (predictor == 1)
+                return result;
+            else if (predictor > 10)
+            {
+                int deflatedColumnCount = finalColumnCount + 1;
+                int rowsCount = result.Length / deflatedColumnCount;
+                if (rowsCount * (finalColumnCount + 1) != result.Length)
+                    throw new PdfException(PdfExceptionCodes.INVALID_FILTER, "decompressed stream length are not correct to use png filter");
+
+                byte[] finalResult = new byte[rowsCount * finalColumnCount];
+                // https://stackoverflow.com/questions/23813941/reading-a-pdf-version-1-5-how-to-handle-cross-reference-stream-dictionary
+                // https://www.w3.org/TR/PNG-Filters.html
+                // byte[] forms a bidimensional array, width is worBytesWidth
+                // first byte is a filter:
+                // 0: None    |0|123  => 123
+                // 1: sub     not implemented
+                // 2: Up:     |2|123  => 246
+                // 3: Average not implemented
+                // 4: Paeth   not implemented
+
+
+                int rowIndex = 0;
+                while (rowIndex < rowsCount)
+                {
+                    switch (result[rowIndex * deflatedColumnCount])
+                    {
+                        case 0:
+                            for (int j = 0; j < finalColumnCount; j++)
+                            {
+                                finalResult[rowIndex * finalColumnCount + j] = result[rowIndex * deflatedColumnCount + j + 1];
+                            }
+                            break;
+                        case 2:
+                            for (int j = 0; j < finalColumnCount; j++)
+                            {
+                                int value;
+                                if (rowIndex == 0)
+                                {
+                                    value = result[rowIndex * deflatedColumnCount + j + 1];
+                                }
+                                else
+                                {
+                                    value = result[rowIndex * deflatedColumnCount + j + 1] + finalResult[(rowIndex - 1) * finalColumnCount + j];
+                                }
+                                finalResult[rowIndex * finalColumnCount + j] = (byte)(value % 256);
+                            }
+                            break;
+                        default:
+                            throw new PdfException(PdfExceptionCodes.COMPRESSION_NOT_IMPLEMENTED, "decompress filter " + result[rowIndex * deflatedColumnCount] + " not implemented");
+                    }
+
+                    rowIndex++;
+                }
+
+                return finalResult;
+            }
+            else
+            {
+                throw new PdfException(PdfExceptionCodes.COMPRESSION_NOT_IMPLEMENTED, $"predictor decompress {predictor} not implemented");
+            }
         }
     }
 }

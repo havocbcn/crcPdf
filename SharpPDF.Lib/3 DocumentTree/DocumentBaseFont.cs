@@ -7,15 +7,6 @@ using SharpPDF.Lib.Fonts;
 namespace SharpPDF.Lib {
     public class DocumentBaseFont : DocumentFont {        
         /// <summary>
-        /// When loading a pdf and has an indirect object representing a font (referenced by page resources)
-        /// </summary>
-        public DocumentBaseFont(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
-            var dic = pdf.GetObject<DictionaryObject>(pdfObject);    
-            Name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
-            LoadFont(Name);
-        }
-
-        /// <summary>
         /// When creating a pdf in memory
         /// </summary>
         public DocumentBaseFont(PDFObjects pdf, string fontName) : base(pdf) {
@@ -27,7 +18,7 @@ namespace SharpPDF.Lib {
         {
             var entries = new Dictionary<string, PdfObject> {
                 { "Type", new NameObject("Font") },
-                { "SubType", new NameObject("Type1") },
+                { "Subtype", new NameObject("Type1") },
                 { "BaseFont", new NameObject(this.Name) },
                 { "Encoding", new NameObject("WinAnsiEncoding") }
             };   

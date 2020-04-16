@@ -12,7 +12,7 @@ namespace SharpPDF.Lib {
 
         internal void SetPosition(int x, int y) => operators.Add(new TextPositioningOperator(x, y));
 
-        internal void SetFont(string code, int size) => operators.Add(new FontOperator(code, size));
+        internal void SetFont(string code, float size) => operators.Add(new FontOperator(code, size));
 
         internal void AddOperator(Operator textOperator) => operators.Add(textOperator);
 

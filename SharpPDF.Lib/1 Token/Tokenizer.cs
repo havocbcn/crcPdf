@@ -72,15 +72,14 @@ namespace SharpPDF.Lib
 
         public void MoveToPosition(long xrefPosition) => fragment.Seek(xrefPosition, SeekOrigin.Begin);
 
-        public void MoveToPreviousLine() {
-            fragment.Seek(-2, SeekOrigin.Current);
-
-            while (fragment.ReadByte() != LineFeed) {
+        public void MoveToPrevious(char expected) {
+            while (fragment.ReadByte() != expected) {
                 fragment.Seek(-2, SeekOrigin.Current);
                 if (fragment.Position == 0) {
                     throw new PdfException(PdfExceptionCodes.BOF, "Beginning Of File detected, but a LineFeed was expected");
                 }
             }
+            fragment.Seek(-1, SeekOrigin.Current);
         }
 
         internal bool IsEOF() => fragment.Position == fragment.Length;

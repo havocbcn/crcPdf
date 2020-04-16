@@ -83,13 +83,9 @@ namespace SharpPDF.Lib {
         private long XrefPosition()
         {
             tokenizer.MoveToEnd();
-            tokenizer.MoveToPreviousLine();
-            tokenizer.MoveToPreviousLine();
-            tokenizer.MoveToPreviousLine();
+            tokenizer.MoveToPrevious('s');
            
-            Token token;
-
-            token = tokenizer.Token();
+            Token token = tokenizer.Token();
             if (!TokenValidator.Validate(token, CharacterSetType.Regular, "startxref")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected startxref");
             }
@@ -107,11 +103,11 @@ namespace SharpPDF.Lib {
             long xrefPosition = token.ToLong();
 
             token = tokenizer.Token();
-            if (!TokenValidator.IsWhiteSpace(token)) {
-                throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected a whitespace between starxref position and EOF");
+            if (!TokenValidator.IsDelimiter(token)) {
+                //throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected a whitespace between starxref position and EOF");
+                token = tokenizer.Token();
             }
 
-            token = tokenizer.Token();
             if (!TokenValidator.IsDelimiter(token, "%")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected %%EOF at end of the file");
             }
@@ -143,7 +139,7 @@ namespace SharpPDF.Lib {
             }
         }
 
-        public void WriteTo(MemoryStream ms)
+        public void WriteTo(Stream ms)
         {
             pdfObjects.WriteTo(ms, Catalog);
         }

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using SharpPDF.Lib.Fonts;
 using System.Linq;
-using System;
 
 namespace SharpPDF.Lib {
     public class DocumentPage : IDocumentTree {        
@@ -13,11 +12,23 @@ namespace SharpPDF.Lib {
         private List<string> procsets = new List<string>();
         public string[] Procsets => procsets.ToArray();
 
+        public Rectangle MediaBox;
+
         public DocumentPage(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);            
 
             if (dic.Dictionary.ContainsKey("Parent")) {                
                 parentReference = (IndirectReferenceObject)dic.Dictionary["Parent"];
+            }
+
+            if (dic.Dictionary.ContainsKey("MediaBox")) {                
+                var mediaBox = pdf.GetObject<ArrayObject>(dic.Dictionary["MediaBox"]);
+                
+                MediaBox = new Rectangle(
+                    pdf.GetObject<RealObject>(mediaBox.childs[0]).floatValue,
+                    pdf.GetObject<RealObject>(mediaBox.childs[1]).floatValue,
+                    pdf.GetObject<RealObject>(mediaBox.childs[2]).floatValue,
+                    pdf.GetObject<RealObject>(mediaBox.childs[3]).floatValue);
             }
 
             if (dic.Dictionary.ContainsKey("Resources")) {
@@ -27,7 +38,7 @@ namespace SharpPDF.Lib {
                     switch (resource.Key) {
                         case "Font":
                             foreach (var font in pdf.GetObject<DictionaryObject>(resource.Value).Dictionary) {
-                                var documentFont = FontFactory.GetFont(pdfObjects, font.Value);
+                                var documentFont = pdf.fontFactory.GetFont(pdfObjects, font.Value);
                                 fonts.Add(documentFont, font.Key);
                             }
                             break;
@@ -80,7 +91,7 @@ namespace SharpPDF.Lib {
 
 
         public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, EEmbedded embedded = EEmbedded.Embedded) {
-            var font = FontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
+            var font = pdfObjects.fontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
 
             if (!fonts.ContainsKey(font)) {
                 fonts.Add(font, "F" + fonts.Count);
@@ -94,6 +105,25 @@ namespace SharpPDF.Lib {
             contents.SetLineCap(lineCap);
             return this;
         }
+
+        public DocumentPage AddRectangle(float x, float y, float width, float height)
+        {
+            contents.AddRectangle(x, y, width, height);
+            return this;
+        }
+
+        public DocumentPage AddStroke()
+        {
+            contents.AddStroke();
+            return this;
+        }
+
+        public DocumentPage AddFill()
+        {
+            contents.AddFill();
+            return this;
+        }
+
 
         public override void OnSaveEvent(IndirectObject indirectObject)
         {
@@ -118,7 +148,7 @@ namespace SharpPDF.Lib {
             }
 
             if (parentReference != null)
-                parent = pdfObjects.GetDocument<DocumentPageTree>(parentReference);
+                parent = pdfObjects.GetDocument<DocumentPageTree>(parentReference);            
 
             var entries = new Dictionary<string, PdfObject> {
                 { "Type", new NameObject("Page") },
@@ -129,6 +159,11 @@ namespace SharpPDF.Lib {
             if (resourceEntries.Count > 0) {                
                 entries.Add("Resources", new DictionaryObject(resourceEntries));
             }
+
+            if (MediaBox != null) {
+                entries.Add("MediaBox", new ArrayObject(MediaBox.ToArrayObject()));
+            }
+
 
             indirectObject.SetChild(new DictionaryObject(entries));
         }

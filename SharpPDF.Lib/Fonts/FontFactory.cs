@@ -21,11 +21,11 @@ namespace SharpPDF.Lib.Fonts {
     /// <summary>
     /// Get a font
     /// </summary>
-	public static class FontFactory {
-		private static Dictionary<string, DocumentFont> m_lstFont = new Dictionary<string, DocumentFont>();
-		private static Dictionary<string, string> dctFontRegistered = new Dictionary<string, string>();
-		private static object lck = new object();
-		private static Dictionary<string,string> baseFontsNames = new Dictionary<string, string> {
+	public class FontFactory {
+		private Dictionary<string, DocumentFont> m_lstFont = new Dictionary<string, DocumentFont>();
+		private Dictionary<string, string> dctFontRegistered = new Dictionary<string, string>();
+		private object lck = new object();
+		private Dictionary<string,string> baseFontsNames = new Dictionary<string, string> {
 			{ "timesnewromanbi", "Times-BoldItalic"},
 			{ "timesnewromanb_", "Times-Bold"},
 			{ "timesnewroman_i", "Times-Italic"},
@@ -61,51 +61,51 @@ namespace SharpPDF.Lib.Fonts {
 			{ "symbol__", "Symbol"},
 		};
 
-		private static string GetName(string name, bool IsBold, bool IsItalic) 
+		private string GetName(string name, bool IsBold, bool IsItalic) 
 			=> $"{name.ToLower(CultureInfo.InvariantCulture).Replace(" ","")}{(IsBold ? "b" : "_")}{(IsItalic ? "i" : "_")}";
 
-		private static DocumentFont GetBaseFont(PDFObjects pdf, string normalizedName) 
-			=> new DocumentBaseFont(pdf, baseFontsNames[normalizedName]);
-
-   		internal static DocumentFont GetFont(PDFObjects pdf, PdfObject pdfObject)
+   		internal DocumentFont GetFont(PDFObjects pdf, PdfObject pdfObject)
         {
 			var dic = pdf.GetObject<DictionaryObject>(pdfObject);
 			
-			if (dic.Dictionary.ContainsKey("BaseFont")) {
-				return new DocumentBaseFont(pdf, pdfObject);
+			if (dic.Dictionary.ContainsKey("BaseFont")) {	
+				var fontBaseName = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
+				
+				lock (lck) {					
+					if (m_lstFont.ContainsKey(fontBaseName))
+						return m_lstFont[fontBaseName];
+
+					var font = new DocumentBaseFont(pdf, fontBaseName);
+				    m_lstFont.Add(fontBaseName, font);
+					return font;
+                }				
 			}
 
 			// TODO
 			throw new PdfException(PdfExceptionCodes.INVALID_FONT, $"Not supported font type");
 		}
 
-        internal static DocumentFont GetFont(PDFObjects pdf, string name, bool IsBold, bool IsItalic, EEmbedded embedded)
+        internal DocumentFont GetFont(PDFObjects pdf, string name, bool IsBold, bool IsItalic, EEmbedded embedded)
 		{	
-			string normalizedName = GetName(name, IsBold, IsItalic);
-            
-			// cache
-            lock (lck) {
-    			if (m_lstFont.ContainsKey(normalizedName)) {
-    				return m_lstFont[normalizedName];
-    			}
-            }
+			string normalizedName = GetName(name, IsBold, IsItalic);        			
 
 			// base fonts
 			if (baseFontsNames.ContainsKey(normalizedName)) {
-				DocumentFont font;
+				var fontBaseName = baseFontsNames[normalizedName];
                 lock (lck) {
-					font = GetBaseFont(pdf, normalizedName);				
-				    m_lstFont.Add(normalizedName, font);
-                }
+					
+					if (m_lstFont.ContainsKey(fontBaseName))
+						return m_lstFont[fontBaseName];
 
-				return font;
+					var font = new DocumentBaseFont(pdf, fontBaseName);
+				    m_lstFont.Add(fontBaseName, font);
+					return font;
+                }
 			}
 
             // unknown, or disk or systemfonts
             DocumentFont ttffont = null;
-				lock (lck) {
-
-
+			lock (lck) {
 				switch(embedded) {
 					case EEmbedded.NotEmbedded:
 						if (File.Exists(name)) {
@@ -119,7 +119,7 @@ namespace SharpPDF.Lib.Fonts {
 
 							//ttffont = new XrefFontTtf(dctFontRegistered[name]);
 						}
-						break;
+					break;
 					case EEmbedded.Embedded:
 						if (File.Exists(name)) {
 							//ttffont = new XrefFontTtfSubset(name, useBase64);
@@ -132,15 +132,15 @@ namespace SharpPDF.Lib.Fonts {
 							
 							//ttffont = new XrefFontTtfSubset(dctFontRegistered[name], useBase64);
 						}
-						break;
+					break;
 				}
 
-			    m_lstFont.Add(normalizedName, ttffont);
-            }
+				m_lstFont.Add(normalizedName, ttffont);
+			}
 			return ttffont;
 		}
 
-		private static void LoadSystemFonts() {
+		private void LoadSystemFonts() {
 			if (dctFontRegistered.Count == 0) 
 			{
 				lock (lck) {
@@ -161,7 +161,7 @@ namespace SharpPDF.Lib.Fonts {
 			}
 		}
 
-		private static void LoadFonts(string folder)
+		private void LoadFonts(string folder)
 		{
 			if (!Directory.Exists(folder)) {
 				return;

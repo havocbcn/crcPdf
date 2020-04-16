@@ -26,6 +26,9 @@ namespace SharpPDF.Lib
         INVALID_RESOURCE,
         UNKNOWN_ENTRY,
         FONT_NOT_FOUND,
-        INVALID_COLOR
+        INVALID_COLOR,
+        COMPRESSION_NOT_IMPLEMENTED,
+        INVALID_FILTER,
+        INVALID_OPERATOR
     }  
 }
