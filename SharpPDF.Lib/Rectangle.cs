@@ -2,10 +2,10 @@ using System.Collections.Generic;
 
 namespace SharpPDF.Lib {
     public class Rectangle {
-        public float X;
-        public float Y;
-        public float Width;
-        public float Height;
+        public float X { get; }
+        public float Y { get; }
+        public float Width { get; }
+        public float Height { get; }
 
         public Rectangle(float x, float y, float width, float height) {
             X = x;

@@ -115,18 +115,14 @@ namespace SharpPDF.Lib {
             return $"<<{string.Join(" ", childs)}>>";
         }
         
-        private byte[] Deflate(byte[] b, int predictor, int finalColumnCount)
-        {
+        private byte[] Deflate(byte[] b, int predictor, int finalColumnCount) {
             byte[] result;
-            using (MemoryStream msOut = new MemoryStream())
-            {
-                using (MemoryStream inputStream = new MemoryStream(b))
-                {
+            using (MemoryStream msOut = new MemoryStream()) {
+                using (MemoryStream inputStream = new MemoryStream(b)) {
                     inputStream.ReadByte();
                     inputStream.ReadByte();
 
-                    using (DeflateStream gzip = new DeflateStream(inputStream, CompressionMode.Decompress))
-                    {
+                    using (DeflateStream gzip = new DeflateStream(inputStream, CompressionMode.Decompress)) {
                         gzip.CopyTo(msOut);
                     }
                 }
@@ -134,14 +130,14 @@ namespace SharpPDF.Lib {
                 result = msOut.ToArray();
             }
 
-            if (predictor == 1)
+            if (predictor == 1) {
                 return result;
-            else if (predictor > 10)
-            {
+            } else if (predictor > 10) {
                 int deflatedColumnCount = finalColumnCount + 1;
                 int rowsCount = result.Length / deflatedColumnCount;
-                if (rowsCount * (finalColumnCount + 1) != result.Length)
+                if (rowsCount * (finalColumnCount + 1) != result.Length) {
                     throw new PdfException(PdfExceptionCodes.INVALID_FILTER, "decompressed stream length are not correct to use png filter");
+                }
 
                 byte[] finalResult = new byte[rowsCount * finalColumnCount];
                 // https://stackoverflow.com/questions/23813941/reading-a-pdf-version-1-5-how-to-handle-cross-reference-stream-dictionary
@@ -153,8 +149,6 @@ namespace SharpPDF.Lib {
                 // 2: Up:     |2|123  => 246
                 // 3: Average not implemented
                 // 4: Paeth   not implemented
-
-
                 int rowIndex = 0;
                 while (rowIndex < rowsCount)
                 {

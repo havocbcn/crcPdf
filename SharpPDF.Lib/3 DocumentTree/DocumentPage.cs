@@ -4,15 +4,15 @@ using System.Linq;
 
 namespace SharpPDF.Lib {
     public class DocumentPage : IDocumentTree {        
-        private DocumentText contents;
+        private readonly DocumentText contents;
         private DocumentPageTree parent;
-        private IndirectReferenceObject parentReference;
+        private readonly IndirectReferenceObject parentReference;
         private readonly Dictionary<DocumentFont, string> fonts = new Dictionary<DocumentFont, string>();
         public DocumentFont[] Font => fonts.Keys.ToArray();
         private List<string> procsets = new List<string>();
         public string[] Procsets => procsets.ToArray();
 
-        public Rectangle MediaBox;
+        private Rectangle MediaBox;
 
         public DocumentPage(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);            
@@ -90,7 +90,10 @@ namespace SharpPDF.Lib {
         }
 
 
-        public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, EEmbedded embedded = EEmbedded.Embedded) {
+        public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic) 
+            => SetFont(name, size, isBold, isItalic, EEmbedded.Embedded);
+
+        public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, EEmbedded embedded) {
             var font = pdfObjects.fontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
 
             if (!fonts.ContainsKey(font)) {
@@ -147,8 +150,9 @@ namespace SharpPDF.Lib {
                 resourceEntries.Add("ProcSet", new ArrayObject(lstObjects));
             }
 
-            if (parentReference != null)
+            if (parentReference != null) {
                 parent = pdfObjects.GetDocument<DocumentPageTree>(parentReference);            
+            }
 
             var entries = new Dictionary<string, PdfObject> {
                 { "Type", new NameObject("Page") },

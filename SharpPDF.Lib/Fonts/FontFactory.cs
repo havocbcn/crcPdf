@@ -72,8 +72,9 @@ namespace SharpPDF.Lib.Fonts {
 				var fontBaseName = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
 				
 				lock (lck) {					
-					if (m_lstFont.ContainsKey(fontBaseName))
+					if (m_lstFont.ContainsKey(fontBaseName)) {
 						return m_lstFont[fontBaseName];
+					}
 
 					var font = new DocumentBaseFont(pdf, fontBaseName);
 				    m_lstFont.Add(fontBaseName, font);
@@ -94,8 +95,9 @@ namespace SharpPDF.Lib.Fonts {
 				var fontBaseName = baseFontsNames[normalizedName];
                 lock (lck) {
 					
-					if (m_lstFont.ContainsKey(fontBaseName))
+					if (m_lstFont.ContainsKey(fontBaseName)) {
 						return m_lstFont[fontBaseName];
+					}
 
 					var font = new DocumentBaseFont(pdf, fontBaseName);
 				    m_lstFont.Add(fontBaseName, font);

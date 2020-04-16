@@ -14,15 +14,12 @@ namespace SharpPDF.Lib {
                 throw new PdfException(PdfExceptionCodes.INVALID_GENERATION, "Generation must be positive");
             }
 
-            //ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
             ExpectAText(tokenizer.TokenExcludedCommentsAndWhitespaces(), "obj");
-            //ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
 
             Objectizer analyzeChilds = new Objectizer(tokenizer);
 
             childs.Add(analyzeChilds.NextObject());
 
-            //ExpectAWhiteSpace(tokenizer.TokenExcludedComments());
             ExpectAText(tokenizer.TokenExcludedCommentsAndWhitespaces(), "endobj");
         }
 
@@ -33,8 +30,7 @@ namespace SharpPDF.Lib {
 
         public override int GetHashCode() => number.GetHashCode();
 
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             var indirect = (obj as IndirectObject);
             if (indirect == null) {
                 return false;
