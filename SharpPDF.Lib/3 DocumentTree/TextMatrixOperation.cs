@@ -21,7 +21,7 @@ namespace SharpPDF.Lib {
         }
 
         public override string ToString() {
-            return $"{Number(A)} {Number(B)} {Number(C)} {Number(D)} {Number(E)} {Number(F)} Tm";
+            return $"{floatToString(A)} {floatToString(B)} {floatToString(C)} {floatToString(D)} {floatToString(E)} {floatToString(F)} Tm";
         }
     }
 }

@@ -111,10 +111,12 @@ namespace SharpPDF.Lib {
         public override byte[] Save(Compression compression) {
             if (HasStream) {
                  byte[] a2;
-                if ((compression & Compression.Compress) == Compression.Compress)
+                if ((compression & Compression.Compress) == Compression.Compress) {
                     a2 = Flate(stream);
-                else
+                } else {
                     a2 = stream;
+                }
+
                 byte[] a3 = GetBytes($"\nendstream");
 
                 childs.Add(new NameObject("Length"));
@@ -131,7 +133,7 @@ namespace SharpPDF.Lib {
             return GetBytes($"<<{string.Join(" ", childs)}>>");
         }
         
-        private byte[] Flate(byte[] b) {            
+        private static byte[] Flate(byte[] b) {            
             MemoryStream msOut = new MemoryStream();
 
             msOut.WriteByte(120);
@@ -146,7 +148,7 @@ namespace SharpPDF.Lib {
             return msOut.ToArray();
 		}
 
-        private byte[] Deflate(byte[] b, int predictor, int finalColumnCount) {
+        private static byte[] Deflate(byte[] b, int predictor, int finalColumnCount) {
             byte[] result;
             using (MemoryStream msOut = new MemoryStream()) {
                 using (MemoryStream inputStream = new MemoryStream(b)) {

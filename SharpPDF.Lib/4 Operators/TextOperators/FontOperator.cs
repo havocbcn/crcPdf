@@ -10,7 +10,7 @@ namespace SharpPDF.Lib {
         }
 
         public override string ToString() {
-            return $"/{Code} {Number(Size)} Tf";
+            return $"/{Code} {floatToString(Size)} Tf";
         }
     }
 }

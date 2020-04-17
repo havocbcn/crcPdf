@@ -139,8 +139,7 @@ namespace SharpPDF.Lib {
             return GetObject<T>(obj);
         } 
 
-        private void Write(Stream stream, string text)
-		{			
+        private static void Write(Stream stream, string text) {			
 			byte[] textByte = Encoding.GetEncoding(1252).GetBytes(text);
 			stream.Write(textByte, 0, textByte.Length);
 		}
