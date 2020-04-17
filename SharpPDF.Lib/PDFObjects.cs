@@ -139,10 +139,14 @@ namespace SharpPDF.Lib {
             return GetObject<T>(obj);
         } 
 
-        public void WriteTo(Stream ms, DocumentCatalog catalog) {   
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("%PDF-1.6");
-            List<int> childPos = new List<int>();
+        private void Write(Stream stream, string text)
+		{			
+			byte[] textByte = Encoding.GetEncoding(1252).GetBytes(text);
+			stream.Write(textByte, 0, textByte.Length);
+		}
+
+        public void WriteTo(Stream ms, DocumentCatalog catalog, Compression compression) {   
+            Write(ms, "%PDF-1.3\n");
 
             // if a pdf was loaded, all objects where loaded too
             // now we will go to save a new pdf with new objects
@@ -154,23 +158,21 @@ namespace SharpPDF.Lib {
             var catalogIndirectReference = catalog.IndirectReferenceObject;            
             
             // now we can save all generated objects            
+            var childPos = new List<long>();
             foreach (var child in objects) {
-                childPos.Add(sb.Length);
-                sb.Append(child.ToString());
+                childPos.Add(ms.Length);
+                ms.Write(child.Save(compression));
             }
 
-            int xrefPos = sb.Length;
+            var xrefPos = ms.Length;
             
-            sb.AppendLine($"xref\n0 {objects.Count + 1}\n0000000000 65535 f"); // +1 for the free record
+            Write(ms, $"xref\n0 {objects.Count + 1}\n0000000000 65535 f\n"); // +1 for the free record
             int i = 0;
             foreach (var child in objects) {
-                sb.AppendLine($"{childPos[i++].ToString("D10")} 00000 n");
+                Write(ms, $"{childPos[i++].ToString("D10")} 00000 n\n");
             }
 
-            sb.Append($"trailer <</Root {catalogIndirectReference} /Size {objects.Count + 1}>>\nstartxref\n{xrefPos}\n%%EOF");
-
-            byte[] existingData = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
-            ms.Write(existingData, 0, existingData.Length); 
+            Write(ms, $"trailer <</Root {catalogIndirectReference} /Size {objects.Count + 1}>>\nstartxref\n{xrefPos}\n%%EOF");
         }
     }
 }

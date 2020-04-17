@@ -9,8 +9,9 @@ namespace SharpPDF.Lib {
 
         public string Value { get; private set; }
 
-        public override string ToString() {
-            return Value;
+        public override string ToString() => Value;
+        public override byte[] Save(Compression compression) {            
+            return GetBytes(this.ToString());
         }
     }
 }

@@ -1,7 +1,7 @@
 using System.Linq;
 
 namespace SharpPDF.Lib {
-    public class TokenValidator {    
+    public static class TokenValidator {    
         public static bool Validate(Token token, CharacterSetType tokenType, params string[] contents) 
             => token.characterSetClass == tokenType && contents.Contains(token.ToString());
 
@@ -9,20 +9,22 @@ namespace SharpPDF.Lib {
             => Validate(token, CharacterSetType.Regular, contents);
 
         public static bool IsDelimiter(Token token, params string[] contents)
-            => token.characterSetClass == CharacterSetType.Delimiter && contents.Contains(token.ToString());
+            => IsDelimiter(token) && contents.Contains(token.ToString());
 
-         public static bool IsDelimiter(Token token)
+        public static bool IsDelimiter(Token token)
             => token.characterSetClass == CharacterSetType.Delimiter;
-
+        
+        private static bool IsRegular (Token token)
+            => token.characterSetClass == CharacterSetType.Regular;
 
         internal static bool IsRegularNumber(Token token) 
-            => token.characterSetClass == CharacterSetType.Regular && IsRegularNumber(token.ToString());        
+            => IsRegular(token) && IsRegularNumber(token.ToString());        
 
         private static bool IsRegularNumber(string token) 
             => token.All(ch => ch >= '0' && ch <= '9');
         
         internal static bool IsIntegerNumber(Token token) 
-            => token.characterSetClass == CharacterSetType.Regular && IsIntegerNumber(token.ToString());
+            => IsRegular(token) && IsIntegerNumber(token.ToString());
 
         private static bool IsIntegerNumber(string token) 
             => token.All(ch => (ch >= '0' && ch <= '9') || ch =='+' || ch == '-');
@@ -34,7 +36,7 @@ namespace SharpPDF.Lib {
             => IsWhiteSpace(token) && contents.Contains(token.ToString());
 
         internal static bool IsRealNumber(Token token)
-            => token.characterSetClass == CharacterSetType.Regular && IsRealNumber(token.ToString());
+            => IsRegular(token) && IsRealNumber(token.ToString());
 
         private static bool IsRealNumber(string token)
             => token.All(ch => (ch >= '0' && ch <= '9') || ch =='+' || ch == '-' || ch=='.');

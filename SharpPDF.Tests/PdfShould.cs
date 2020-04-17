@@ -278,6 +278,62 @@ startxref
                 }
             );
 
+        [Fact]
+        public void ReadSharpReportAndSaveUncompressed() =>            
+            // 12.3.3 Document outline
+            SharpPdfShould(
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Then: pdf => { 
+                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+
+                    using (var fs = new FileStream("sharpReport_uncompressed.pdf", FileMode.Create)) {
+                        pdf.WriteTo(fs, Compression.None);
+                    }
+                }
+            );
+        
+        [Fact]
+        public void ReadSharpReportAndSaveSimpleCompressed() =>            
+            // 12.3.3 Document outline
+            SharpPdfShould(
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Then: pdf => { 
+                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+
+                    using (var fs = new FileStream("sharpReport_compressed.pdf", FileMode.Create)) {
+                        pdf.WriteTo(fs, Compression.Compress);
+                    }
+                }
+            );
+
+        [Fact]
+        public void ReadSharpReportAndSaveSimpleOptimized() =>            
+            // 12.3.3 Document outline
+            SharpPdfShould(
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Then: pdf => { 
+                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+
+                    using (var fs = new FileStream("sharpReport_uncompressed_optimized.pdf", FileMode.Create)) {
+                        pdf.WriteTo(fs, Compression.Optimize);
+                    }
+                }
+            );
+
+        [Fact]
+        public void ReadSharpReportAndSaveCompressedAndOptimized() =>
+            // 12.3.3 Document outline
+            SharpPdfShould(
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Then: pdf => { 
+                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+
+                    using (var fs = new FileStream("sharpReport_compressed_optimized.pdf", FileMode.Create)) {
+                        pdf.WriteTo(fs, Compression.Compress | Compression.Optimize);
+                    }
+                }
+            );
+
         [Theory]
         [InlineData("Times-Roman", false, false)]
         [InlineData("Times-Roman", false, true)]

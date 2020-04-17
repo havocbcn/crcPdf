@@ -24,5 +24,8 @@ namespace SharpPDF.Lib {
             return intValue.ToString();
         }
 
+        public override byte[] Save(Compression compression) {            
+            return GetBytes(this.ToString());
+        }
     }
 }

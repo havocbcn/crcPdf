@@ -104,7 +104,6 @@ namespace SharpPDF.Lib {
 
             token = tokenizer.Token();
             if (!TokenValidator.IsDelimiter(token)) {
-                //throw new PdfException(PdfExceptionCodes.INVALID_EOF, "Expected a whitespace between starxref position and EOF");
                 token = tokenizer.Token();
             }
 
@@ -141,7 +140,12 @@ namespace SharpPDF.Lib {
 
         public void WriteTo(Stream ms)
         {
-            pdfObjects.WriteTo(ms, Catalog);
+            pdfObjects.WriteTo(ms, Catalog, Compression.Compress);
+        }
+
+        public void WriteTo(Stream ms, Compression compression)
+        {
+            pdfObjects.WriteTo(ms, Catalog, compression);
         }
     }
 }

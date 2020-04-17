@@ -8,13 +8,7 @@ namespace SharpPDF.Lib {
         private readonly byte[] stream;
 
         public DictionaryObject(string content) {
-            stream = System.Text.ASCIIEncoding.ASCII.GetBytes(content);
-            streamLength = stream.Length;
-            dictionary.Add("Length", new IntegerObject(streamLength.Value));
-            foreach (KeyValuePair<string, PdfObject> kvp in dictionary) {
-                childs.Add(new NameObject(kvp.Key));
-                childs.Add(kvp.Value);
-            }
+            stream = System.Text.Encoding.GetEncoding(1252).GetBytes(content);
         }
 
         public DictionaryObject(Dictionary<string, PdfObject> values) {
@@ -39,10 +33,9 @@ namespace SharpPDF.Lib {
             while (!tokenizer.IsNextTokenExcludedCommentsAndWhitespaces(">")) {
                 ReadKeyValue(tokenizer);            
             }
-            
-            if (!TokenValidator.IsDelimiter(tokenizer.TokenExcludedCommentsAndWhitespaces(), ">")) {
-                throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY, "Expected >");
-            }
+
+            tokenizer.TokenExcludedCommentsAndWhitespaces();            // first >
+
             if (!TokenValidator.IsDelimiter(tokenizer.TokenExcludedComments(), ">")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY, "Expected >");
             }
@@ -81,7 +74,7 @@ namespace SharpPDF.Lib {
 
         private int? streamLength;
 
-        private bool HasStream => streamLength.HasValue;        
+        private bool HasStream => stream != null || streamLength.HasValue;        
 
         private void ReadKeyValue(Tokenizer tokenizer) {
             var read = new Objectizer(tokenizer);
@@ -109,12 +102,50 @@ namespace SharpPDF.Lib {
         }
 
         public override string ToString() {
-            if (HasStream) {                
+            if (HasStream) {
                 return $"<<{string.Join(" ", childs)}>>stream\n{System.Text.Encoding.GetEncoding(1252).GetString(stream)}\nendstream";    
             }
             return $"<<{string.Join(" ", childs)}>>";
         }
+
+        public override byte[] Save(Compression compression) {
+            if (HasStream) {
+                 byte[] a2;
+                if ((compression & Compression.Compress) == Compression.Compress)
+                    a2 = Flate(stream);
+                else
+                    a2 = stream;
+                byte[] a3 = GetBytes($"\nendstream");
+
+                childs.Add(new NameObject("Length"));
+                childs.Add(new IntegerObject(a2.Length));
+                
+                childs.Add(new NameObject("Filter"));
+                childs.Add(new NameObject("FlateDecode"));
+
+                byte[] a1 = GetBytes($"<<{string.Join(" ", childs)}>>stream\n");
+               
+
+                return Join(a1, a2, a3);
+            }
+            return GetBytes($"<<{string.Join(" ", childs)}>>");
+        }
         
+        private byte[] Flate(byte[] b) {            
+            MemoryStream msOut = new MemoryStream();
+
+            msOut.WriteByte(120);
+            msOut.WriteByte(156);
+       
+            using (MemoryStream originalFileStream = new MemoryStream(b)) {
+                using (DeflateStream compressionStream = new DeflateStream(msOut, CompressionMode.Compress)) {                    
+                    originalFileStream.CopyTo(compressionStream);
+                }
+            }
+
+            return msOut.ToArray();
+		}
+
         private byte[] Deflate(byte[] b, int predictor, int finalColumnCount) {
             byte[] result;
             using (MemoryStream msOut = new MemoryStream()) {

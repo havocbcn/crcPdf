@@ -1,22 +1,18 @@
-using System;
 using System.IO;
 using SharpPDF.Lib;
 using Xunit;
-using System.Linq;
 using FluentAssertions;
 
-namespace SharpPDF.Tests
-{
-    public class DictionaryObjectShould
-    {     
+namespace SharpPDF.Tests {
+    public class DictionaryObjectShould {     
         [Theory]
         [InlineData("/Type /Example>>")]
         [InlineData("</Type /Example >>")]
+        [InlineData("<< /Type /Example>a")]
         [InlineData("<< /Type /Example>")]
         [InlineData("<< /Type /Example ")]
         [InlineData("<< 1 2 >>")]
-        public void ThrowError(string fragment)
-        {
+        public void ThrowError(string fragment) {
             // 7.3.7 Dictionary Objects
             byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(fragment);
             Tokenizer feed = new Tokenizer(new MemoryStream(bytes));            
@@ -29,8 +25,7 @@ namespace SharpPDF.Tests
         [InlineData("<</Type /Example >>")]
         [InlineData("<< /Type /Example>>")]
         [InlineData("<< /Type /Example >>")]
-        public void ReadAMinimalDictionary(string fragment)
-        {
+        public void ReadAMinimalDictionary(string fragment) {
             // 7.3.7 Dictionary Objects
             byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(fragment);
             Tokenizer feed = new Tokenizer(new MemoryStream(bytes));            

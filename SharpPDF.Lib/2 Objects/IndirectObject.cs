@@ -65,5 +65,13 @@ namespace SharpPDF.Lib {
         public override string ToString() {
             return $"{number} {generation} obj {childs[0].ToString()} endobj\n";
         }
+
+        public override byte[] Save(Compression compression) {            
+            byte[] a1 = GetBytes($"{number} {generation} obj ");
+            byte[] a2 = childs[0].Save(compression);
+            byte[] a3 = GetBytes($" endobj\n");
+
+            return Join(a1, a2, a3);
+        }
     }
 }

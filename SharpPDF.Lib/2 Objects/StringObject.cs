@@ -138,9 +138,17 @@ namespace SharpPDF.Lib {
         }
         
         private bool IsNewLine(string literalString, int i)
-         => i < literalString.Length && (literalString[i] == '\n' || literalString[i] == '\r');        
+            => i < literalString.Length && (literalString[i] == '\n' || literalString[i] == '\r');        
 
         private bool IsNumber(string literalString, int i)
-         => i < literalString.Length && (literalString[i] >= '0' && literalString[i] <= '9');
+            => i < literalString.Length && (literalString[i] >= '0' && literalString[i] <= '9');
+
+        public override string ToString() {
+            return $"({Value})";
+        }
+        
+        public override byte[] Save(Compression compression) {            
+            return GetBytes(this.ToString());
+        }
     }
 }

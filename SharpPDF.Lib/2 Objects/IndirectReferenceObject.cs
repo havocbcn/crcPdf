@@ -7,6 +7,9 @@ namespace SharpPDF.Lib {
 
         public IndirectReferenceObject(int number) {
             this.number = number;
+            if (number <= 0) {
+                throw new PdfException(PdfExceptionCodes.INVALID_NUMBER, "Indirect number must be positive");
+            }
             generation = 0;            
         }
 
@@ -28,6 +31,10 @@ namespace SharpPDF.Lib {
         }
 
         public override string ToString() => $"{number} {generation} R";
+
+        public override byte[] Save(Compression compression) {            
+            return GetBytes(this.ToString());
+        }
 
         public override int GetHashCode() => number.GetHashCode();
 

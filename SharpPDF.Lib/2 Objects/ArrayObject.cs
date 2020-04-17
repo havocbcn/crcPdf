@@ -24,5 +24,16 @@ namespace SharpPDF.Lib {
         public override string ToString() {
             return $"[{string.Join(" ", childs)}]";
         }
+
+        public override byte[] Save(Compression compression) {            
+            List<byte> b = new List<byte>();
+            b.Add((byte)'[');
+            foreach (var child in childs) {
+                b.AddRange(child.Save(compression));
+            }
+            b.Add((byte)']');
+
+            return b.ToArray();
+        }
     }
 }
