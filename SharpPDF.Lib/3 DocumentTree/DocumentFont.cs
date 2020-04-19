@@ -36,7 +36,7 @@ namespace SharpPDF.Lib {
 
 		public string Name { get; set; }
 
-		public string FullFileName { get; set; }
+		public string FullPath { get; set; }
 
 		public float GetAscendent(float size) => Ascendent * 0.001f * size;
 
@@ -111,7 +111,7 @@ namespace SharpPDF.Lib {
         /// https://stackoverflow.com/questions/35485179/stemv-value-of-the-truetype-font
         /// This value is not used
 		/// </summary>
-		public int StemV { get; }
+		public int StemV { get; set; }
 
 		/// <summary>
 		/// TTF Font
@@ -119,7 +119,9 @@ namespace SharpPDF.Lib {
 		protected byte[] TTFFont;
 
 
-        internal int? FirstChar;
+        internal int FirstChar;
+		private bool anyTextSet = false;
+
         internal int LastChar  = -1;
         internal readonly HashSet<int> hashChar = new HashSet<int>();
 
@@ -150,8 +152,9 @@ namespace SharpPDF.Lib {
         protected void AddNewChar(char c) {
             hashChar.Add((int)c);
 
-            if (FirstChar == null || c < FirstChar) {
+            if (!anyTextSet || c < FirstChar) {
                 FirstChar = c;
+				anyTextSet = true;
 			}
 			if (c > LastChar) {
                 LastChar = c;

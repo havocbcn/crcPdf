@@ -9,6 +9,9 @@ namespace SharpPDF.Lib {
         private readonly IndirectReferenceObject parentReference;
         private readonly Dictionary<DocumentFont, string> fonts = new Dictionary<DocumentFont, string>();
         public DocumentFont[] Font => fonts.Keys.ToArray();
+
+        public DocumentFont CurrentFont { get; private set;}
+
         private List<string> procsets = new List<string>();
         public string[] Procsets => procsets.ToArray();
 
@@ -74,6 +77,11 @@ namespace SharpPDF.Lib {
             
 
          public DocumentPage AddLabel(string text) {
+             if (CurrentFont == null) {
+                 throw new PdfException(PdfExceptionCodes.FONT_ERROR, $"A font must be set before writting");
+             }
+
+            CurrentFont.SetText(text);
             contents.AddLabel(text);        
             return this;
         }
@@ -91,7 +99,10 @@ namespace SharpPDF.Lib {
 
 
         public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic) 
-            => SetFont(name, size, isBold, isItalic, EEmbedded.Embedded);
+            => SetFont(name, size, isBold, isItalic, EEmbedded.NotEmbedded);
+
+        public DocumentPage SetFont(string name, int size) 
+            => SetFont(name, size, false, false, EEmbedded.NotEmbedded);
 
         public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, EEmbedded embedded) {
             var font = pdfObjects.fontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
@@ -100,6 +111,7 @@ namespace SharpPDF.Lib {
                 fonts.Add(font, "F" + fonts.Count);
             }
 
+            CurrentFont = font;
             contents.SetFont(fonts[font], size);
             return this;
         }

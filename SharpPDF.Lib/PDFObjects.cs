@@ -130,6 +130,7 @@ namespace SharpPDF.Lib {
         public T GetObject<T>(IndirectObject obj) where T : PdfObject {
             return obj.childs[0] as T;
         } 
+        
         public T GetObject<T>(IndirectReferenceObject indirectObj) where T : PdfObject {
             IndirectObject obj;
             if (!objects.TryGetValue(indirectObj, out obj)) {

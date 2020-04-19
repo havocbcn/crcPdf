@@ -23,7 +23,10 @@ namespace SharpPDF.Lib.Fonts {
 			this.unicode = unicode;
 		}
 
-		public FontGlyph(int width, ushort leftSideBearing) {
+		public FontGlyph() {
+		}
+
+		public void SetWidthAndLeftSideBearing(int width, ushort leftSideBearing) {
 			this.width = width;
 			this.leftSideBearing = leftSideBearing;
 		}

@@ -30,10 +30,10 @@ namespace SharpPDF.Lib {
         }
 
         private static readonly Dictionary<string, Func<List<PdfObject>, Operator>> textOperators = 
-            new Dictionary<string, Func<List<PdfObject>, Operator>>() {
+            new Dictionary<string, Func<List<PdfObject>, Operator>> {
             { "Tj", (t) => {                                     
                     ExpectedParameters(t, 1);
-                    var parameter = GetParameter<StringObject>(t, 0);                                    
+                    var parameter = GetParameter<StringObject>(t, 0);                                                        
                     return new TextOperator(parameter.Value);
                 }
             },
@@ -82,7 +82,7 @@ namespace SharpPDF.Lib {
 
         // Table 51 – Operator Categories
         private readonly Dictionary<string, Func<Objectizer, List<PdfObject>, Operator>> pageOperators = 
-            new Dictionary<string, Func<Objectizer, List<PdfObject>, Operator>>() {
+            new Dictionary<string, Func<Objectizer, List<PdfObject>, Operator>> {
             // Table 107 – Text object operators0
             { "J", (objectizer, parameters) => {                 
                     ExpectedParameters(parameters, 1);
@@ -157,8 +157,9 @@ namespace SharpPDF.Lib {
             List<Operator> objs = new List<Operator>();
             List<PdfObject> parameters = new List<PdfObject>();
 
-            if (reader.IsEOF())
+            if (reader.IsEOF()) {
                 return null;
+            }
                             
             while (!reader.IsEOF()) {
                 var o = reader.NextObject(true);
@@ -170,9 +171,7 @@ namespace SharpPDF.Lib {
                     parameters.Add(o);
                 }
             }
-
-            //ExpectedParameters(parameters, 0);
-
+            
             return objs;              
         }
     }

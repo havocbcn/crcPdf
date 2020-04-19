@@ -6,9 +6,6 @@ using SharpPDF.Lib.Fonts;
 
 namespace SharpPDF.Lib {
     public class DocumentBaseFont : DocumentFont {        
-        /// <summary>
-        /// When creating a pdf in memory
-        /// </summary>
         public DocumentBaseFont(PDFObjects pdf, string fontName) : base(pdf) {
             Name = fontName;
             LoadFont(fontName);

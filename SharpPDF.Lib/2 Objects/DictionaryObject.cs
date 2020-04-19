@@ -113,6 +113,8 @@ namespace SharpPDF.Lib {
                  byte[] a2;
                 if ((compression & Compression.Compress) == Compression.Compress) {
                     a2 = Flate(stream);
+                    childs.Add(new NameObject("Filter"));
+                    childs.Add(new NameObject("FlateDecode"));
                 } else {
                     a2 = stream;
                 }
@@ -122,8 +124,6 @@ namespace SharpPDF.Lib {
                 childs.Add(new NameObject("Length"));
                 childs.Add(new IntegerObject(a2.Length));
                 
-                childs.Add(new NameObject("Filter"));
-                childs.Add(new NameObject("FlateDecode"));
 
                 byte[] a1 = GetBytes($"<<{string.Join(" ", childs)}>>stream\n");
                

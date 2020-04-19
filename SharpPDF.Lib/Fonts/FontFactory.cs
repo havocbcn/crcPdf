@@ -66,25 +66,47 @@ namespace SharpPDF.Lib.Fonts {
 
    		internal DocumentFont GetFont(PDFObjects pdf, PdfObject pdfObject)
         {
-			var dic = pdf.GetObject<DictionaryObject>(pdfObject);
+            var dic = pdf.GetObject<DictionaryObject>(pdfObject);
 			
-			if (dic.Dictionary.ContainsKey("BaseFont")) {	
-				var fontBaseName = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
-				
-				lock (lck) {					
-					if (m_lstFont.ContainsKey(fontBaseName)) {
-						return m_lstFont[fontBaseName];
+            if (IsBaseFont(pdf, dic)) {
+                var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
+
+                lock (lck)
+                {
+                    if (m_lstFont.ContainsKey(name)) {
+                        return m_lstFont[name];
+                    }
+
+                    var font = new DocumentBaseFont(pdf, name);
+                    m_lstFont.Add(name, font);
+                    return font;
+                }
+            } else if (IsTrueTypeFont(pdf, dic)) {
+				var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
+                lock (lck) {
+					if (m_lstFont.ContainsKey(name)) {
+						return m_lstFont[name];
 					}
 
-					var font = new DocumentBaseFont(pdf, fontBaseName);
-				    m_lstFont.Add(fontBaseName, font);
+					var font = new DocumentTtfFont(pdf, dic);
+					m_lstFont.Add(name, font);
 					return font;
-                }				
+				}
 			}
 
-			// TODO
-			throw new PdfException(PdfExceptionCodes.INVALID_FONT, $"Not supported font type");
-		}
+            // TODO
+            throw new PdfException(PdfExceptionCodes.INVALID_FONT, $"Not supported font type");
+        }
+
+        private static bool IsBaseFont(PDFObjects pdf, DictionaryObject dic)
+         	=> dic.Dictionary.ContainsKey("BaseFont") &&
+                            dic.Dictionary.ContainsKey("Subtype") &&
+                            pdf.GetObject<NameObject>(dic.Dictionary["Subtype"]).Value == "Type1";        
+
+		private static bool IsTrueTypeFont(PDFObjects pdf, DictionaryObject dic)
+         	=> dic.Dictionary.ContainsKey("BaseFont") &&
+                            dic.Dictionary.ContainsKey("Subtype") &&
+                            pdf.GetObject<NameObject>(dic.Dictionary["Subtype"]).Value == "TrueType";
 
         internal DocumentFont GetFont(PDFObjects pdf, string name, bool IsBold, bool IsItalic, EEmbedded embedded)
 		{	
@@ -109,7 +131,7 @@ namespace SharpPDF.Lib.Fonts {
 			lock (lck) {
 				if (embedded == EEmbedded.NotEmbedded) {
 					if (File.Exists(name)) {
-						//ttffont = new XrefFontTtf(name);
+						ttffont = new DocumentTtfFont(pdf, name);
 					} else {
 						LoadSystemFonts();
 
@@ -117,7 +139,7 @@ namespace SharpPDF.Lib.Fonts {
 							throw new PdfException(PdfExceptionCodes.FONT_NOT_FOUND, "Font " + name + " not found");
 						}
 
-						//ttffont = new XrefFontTtf(dctFontRegistered[name]);
+						ttffont = new DocumentTtfFont(pdf, dctFontRegistered[name]);
 					}				
 				} else {
 					if (File.Exists(name)) {

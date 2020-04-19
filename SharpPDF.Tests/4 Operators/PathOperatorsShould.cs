@@ -34,7 +34,7 @@ namespace SharpPDF.Tests.Outline {
             Action act = () => pdf.Catalog.Pages
                     .AddPage()                        
                         .AddRectangle(10, 10, 12, 14.5f)
-                        .AddLabel("hola")
+                        .SetLineCap(LineCapStyle.ButtCap)
                         .AddStroke();
 
             act.Should().Throw<PdfException>()

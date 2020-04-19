@@ -29,6 +29,8 @@ namespace SharpPDF.Lib
         INVALID_COLOR,
         COMPRESSION_NOT_IMPLEMENTED,
         INVALID_FILTER,
-        INVALID_OPERATOR
+        INVALID_OPERATOR,
+        FONT_NOT_SUPPORTED,
+        FONT_ERROR
     }  
 }
