@@ -15,18 +15,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using SharpPDF.Lib.Fonts;
 
 namespace SharpPDF.Lib {
-	public abstract class DocumentTtfFontBase : DocumentFont  {		        
-        internal DocumentTtfDescriptorFont m_descriptor;
-
+	public abstract class DocumentTtfFontBase : DocumentFont {
 		internal FontTypes Flags { get; private set; }
 
-        internal Dictionary<string, Table> dctTables = new Dictionary<string, Table>();
+        private Dictionary<string, Table> dctTables = new Dictionary<string, Table>();
 
-        internal DocumentTtfFontBase(PDFObjects pdf, string FontFullPath) : base(pdf) {
+        protected DocumentTtfFontBase(PDFObjects pdf, string FontFullPath) : base(pdf) {
             FullPath = FontFullPath;
             Flags = FontTypes.Nonsymbolic;
             boundingBox[0] = -1166;
@@ -42,7 +39,7 @@ namespace SharpPDF.Lib {
             Process(FontFullPath);
         }
 
-		internal DocumentTtfFontBase(PDFObjects pdf, DictionaryObject dic) : base(pdf) {			
+		protected DocumentTtfFontBase(PDFObjects pdf, DictionaryObject dic) : base(pdf) {			
             var descriptorDictionary = pdf.GetObject<DictionaryObject>(dic.Dictionary["FontDescriptor"]).Dictionary;
 
             this.StemV = pdf.GetObject<IntegerObject>(descriptorDictionary["StemV"]).IntValue;
@@ -70,7 +67,7 @@ namespace SharpPDF.Lib {
             foreach (var width in widths.Childs<IntegerObject>()) {
 				if (width.IntValue > 0) {
 					lstGlyph.Add(
-						new Fonts.FontGlyph(){
+						new Fonts.FontGlyph {
 							width =  width.IntValue
 						}
 					);
@@ -303,8 +300,9 @@ namespace SharpPDF.Lib {
             int searchRange = GetUInt16();
             Skip(2);							// entrySelector
             int rangeShift = GetUInt16();
-            if (rangeShift != (segmentCount << 1) - searchRange)
+            if (rangeShift != (segmentCount << 1) - searchRange) {
                 throw new PdfException(PdfExceptionCodes.FONT_ERROR, "Invalid CMAP 4 format");
+			}
 
             int[] endCode = new int[segmentCount];
             for (int i = 0; i < segmentCount; i++) {
@@ -338,18 +336,17 @@ namespace SharpPDF.Lib {
 						dctCharCodeToGlyphID.Add(charIndex, glyphId);
                     	Glypth[glyphId].unicode = charIndex;
                     } else {
-                        //int j = charIndex - startCode[segmentIndex] + segmentIndex + idRangeOffset[segmentIndex] / 2 - segmentCount;
 						int j = (idRangeOffset[segmentIndex] >> 1) + (charIndex - startCode[segmentIndex]) - (segmentCount - segmentIndex);
 
 						if (glyphIdArray[j] != 0) {
                         	glyphId = (ushort)(glyphIdArray[j] + idDelta[segmentIndex]);
 							dctCharCodeToGlyphID.Add(charIndex, glyphId);
 
-							if (glyphId < Glypth.Length)
+							if (glyphId < Glypth.Length) {
                     			Glypth[glyphId].unicode = charIndex;
-							else
+							} else {
 								Console.WriteLine($"error {glyphId} of {Glypth.Length}");
-
+							}
 						}
 						// if 0 => missingGlyph
                     }
@@ -411,7 +408,7 @@ namespace SharpPDF.Lib {
             return TTFFont;
         }
 
-      	internal struct Table {
+      	private struct Table {
 			internal int offset;
 			internal int length;
             internal int checksum;

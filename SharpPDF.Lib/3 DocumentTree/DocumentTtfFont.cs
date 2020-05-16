@@ -27,9 +27,6 @@ namespace SharpPDF.Lib {
 
         }
 
-        private static string GetName(PDFObjects pdf, DictionaryObject dic) =>
-            pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
-
         public override void OnSaveEvent(IndirectObject indirectObject)
         {
             var widths = new List<PdfObject>();            

@@ -120,12 +120,10 @@ namespace SharpPDF.Lib {
 
 
         internal int FirstChar;
-		private bool anyTextSet = false;
+		private bool anyTextSet;
 
         internal int LastChar  = -1;
         internal readonly HashSet<int> hashChar = new HashSet<int>();
-
-        internal bool isUnicode;
 
         internal virtual int GetGlyphId(int ch) => dctCharCodeToGlyphID[ch];        
 

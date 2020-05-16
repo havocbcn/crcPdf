@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -7,8 +8,10 @@ namespace SharpPDF.Lib {
         private readonly Dictionary<string, PdfObject> dictionary = new Dictionary<string, PdfObject>();
         private readonly byte[] stream;
 
+        private string streamContent;
+
         public DictionaryObject(string content) {
-            stream = System.Text.Encoding.GetEncoding(1252).GetBytes(content);
+            streamContent = content;
         }
 
         public DictionaryObject(Dictionary<string, PdfObject> values) {
@@ -18,6 +21,17 @@ namespace SharpPDF.Lib {
                 childs.Add(new NameObject(kvp.Key));
                 childs.Add(kvp.Value);
             }
+        }
+
+        public DictionaryObject(Dictionary<string, PdfObject> values, byte[] stream) {
+            this.dictionary = values;
+            
+            foreach (KeyValuePair<string, PdfObject> kvp in values) {
+                childs.Add(new NameObject(kvp.Key));
+                childs.Add(kvp.Value);
+            }
+
+            this.stream = stream;
         }
         
         public DictionaryObject(Tokenizer tokenizer) {
@@ -102,32 +116,39 @@ namespace SharpPDF.Lib {
         }
 
         public override string ToString() {
-            if (HasStream) {
-                return $"<<{string.Join(" ", childs)}>>stream\n{System.Text.Encoding.GetEncoding(1252).GetString(stream)}\nendstream";    
+            if (streamContent != null) {
+                return $"<<{string.Join(" ", childs)}>>stream\n{streamContent}\nendstream";    
+            } else if (HasStream) {                
+                return $"<<{string.Join(" ", childs)}>>stream\n{BitConverter.ToString(stream).Replace("-","")}\nendstream";    
             }
             return $"<<{string.Join(" ", childs)}>>";
         }
 
         public override byte[] Save(Compression compression) {
-            if (HasStream) {
-                 byte[] a2;
+            if (streamContent != null) {
+                byte[] a2;
                 if ((compression & Compression.Compress) == Compression.Compress) {
-                    a2 = Flate(stream);
+                    a2 = Flate(System.Text.Encoding.GetEncoding(1252).GetBytes(streamContent));
                     childs.Add(new NameObject("Filter"));
                     childs.Add(new NameObject("FlateDecode"));
                 } else {
-                    a2 = stream;
+                    a2 = System.Text.Encoding.GetEncoding(1252).GetBytes(streamContent);
                 }
 
                 byte[] a3 = GetBytes($"\nendstream");
 
                 childs.Add(new NameObject("Length"));
-                childs.Add(new IntegerObject(a2.Length));
-                
+                childs.Add(new IntegerObject(a2.Length));                
 
                 byte[] a1 = GetBytes($"<<{string.Join(" ", childs)}>>stream\n");
                
-
+                return Join(a1, a2, a3);
+            }
+            else if (HasStream) {
+                byte[] a1 = GetBytes($"<<{string.Join(" ", childs)}>>stream\n");
+                byte[] a2 = stream;
+                byte[] a3 = GetBytes($"\nendstream");
+               
                 return Join(a1, a2, a3);
             }
             return GetBytes($"<<{string.Join(" ", childs)}>>");

@@ -50,6 +50,14 @@ namespace SharpPDF.Lib {
             return $"/{value}";
         }
 
+        public override bool Equals(object obj) {   
+            var other = obj as NameObject;
+            return obj == null ? false : value != other.value;
+        }
+        
+        public override int GetHashCode()
+            => value.GetHashCode();
+
         public override byte[] Save(Compression compression) {            
             return GetBytes(this.ToString());
         }

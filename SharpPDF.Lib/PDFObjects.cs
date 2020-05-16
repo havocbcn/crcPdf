@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using SharpPDF.Lib.Fonts;
+using SharpPDF.Lib.Images;
 
 namespace SharpPDF.Lib {
     public class PDFObjects {
         private readonly HashSet<IndirectObject> objects = new HashSet<IndirectObject>();
         public FontFactory fontFactory = new FontFactory();
+        public ImageFactory imageFactory = new ImageFactory();
         private readonly Dictionary<IndirectObject, IDocumentTree> cache = new Dictionary<IndirectObject, IDocumentTree>();
 
         private int lastNumber = 0;

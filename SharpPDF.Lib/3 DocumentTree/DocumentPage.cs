@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using SharpPDF.Lib.Fonts;
 using System.Linq;
+using System;
 
 namespace SharpPDF.Lib {
     public class DocumentPage : IDocumentTree {        
@@ -8,14 +9,14 @@ namespace SharpPDF.Lib {
         private DocumentPageTree parent;
         private readonly IndirectReferenceObject parentReference;
         private readonly Dictionary<DocumentFont, string> fonts = new Dictionary<DocumentFont, string>();
-        public DocumentFont[] Font => fonts.Keys.ToArray();
-
-        public DocumentFont CurrentFont { get; private set;}
-
+        private readonly Dictionary<DocumentImage, string> images = new Dictionary<DocumentImage, string>();        
+        private readonly Dictionary<string, DocumentImage> reverseImages = new Dictionary<string, DocumentImage>();        
         private List<string> procsets = new List<string>();
-        public string[] Procsets => procsets.ToArray();
-
         private Rectangle MediaBox;
+        public DocumentFont[] Font => fonts.Keys.ToArray();
+        public IReadOnlyDictionary<string, DocumentImage> Image => reverseImages;
+        public DocumentFont CurrentFont { get; private set;}
+        public string[] Procsets => procsets.ToArray();
 
         public DocumentPage(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);            
@@ -45,6 +46,13 @@ namespace SharpPDF.Lib {
                                 fonts.Add(documentFont, font.Key);
                             }
                             break;
+                        case "XObject":
+                            foreach (var image in pdf.GetObject<DictionaryObject>(resource.Value).Dictionary) {
+                                var documentImage = pdf.imageFactory.GetImage(pdfObjects, image.Value);
+                                images.Add(documentImage, image.Key);
+                                reverseImages.Add(image.Key, documentImage);
+                            }
+                            break;
                         case "ProcSet":
                             //14.2 Procedure Sets
                             var arrayobject = pdf.GetObject<ArrayObject>(resource.Value);
@@ -67,14 +75,11 @@ namespace SharpPDF.Lib {
             this.contents = new DocumentText(pdf);
         }
 
-        public DocumentText Contents => contents;
+        public DocumentText Contents 
+            => contents;
 
-        public DocumentPageTree Parent {
-            get { 
-                return parent ?? pdfObjects.GetDocument<DocumentPageTree>(parentReference);
-            }
-        }
-            
+        public DocumentPageTree Parent 
+            => parent ?? pdfObjects.GetDocument<DocumentPageTree>(parentReference);            
 
          public DocumentPage AddLabel(string text) {
              if (CurrentFont == null) {
@@ -139,6 +144,35 @@ namespace SharpPDF.Lib {
             return this;
         }
 
+        public DocumentPage AddImage(string fullFilePath) {
+            var image = pdfObjects.imageFactory.GetImage(pdfObjects, fullFilePath);
+
+            if (!images.ContainsKey(image)) {
+                var key = "I" + images.Count;
+                images.Add(image, key);
+                reverseImages.Add(key, image);
+            }
+
+            contents.AddImage(images[image]);
+            return this;
+        }
+
+        public DocumentPage SaveGraph() {
+            contents.SaveGraph();
+            return this;
+        }
+
+        public DocumentPage RestoreGraph() {
+            contents.RestoreGraph();
+            return this;
+        }
+
+        public DocumentPage CurrentTransformationMatrix(float a, float b, float c, float d, float e, float f) {
+            contents.CurrentTransformationMatrix(a, b, c, d, e, f);
+            return this;
+        }
+
+
 
         public override void OnSaveEvent(IndirectObject indirectObject)
         {
@@ -152,6 +186,16 @@ namespace SharpPDF.Lib {
                 }
 
                 resourceEntries.Add("Font", new DictionaryObject(dicFonts));
+            }
+
+             if (images.Count > 0) {                
+                var dicImages = new Dictionary<string, PdfObject>();
+
+                foreach (var img in images) {
+                    dicImages.Add(img.Value, img.Key.IndirectReferenceObject);
+                }
+
+                resourceEntries.Add("XObject", new DictionaryObject(dicImages));
             }
 
             if (procsets.Count > 0) {
@@ -179,7 +223,6 @@ namespace SharpPDF.Lib {
             if (MediaBox != null) {
                 entries.Add("MediaBox", new ArrayObject(MediaBox.ToArrayObject()));
             }
-
 
             indirectObject.SetChild(new DictionaryObject(entries));
         }

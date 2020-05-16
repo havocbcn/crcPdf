@@ -85,6 +85,13 @@ namespace SharpPDF.Lib {
             pageOperators.Add(new StrokeOperator());
         }
 
+        internal void AddImage(string imageCode) => pageOperators.Add(new ImageOperator(imageCode));
 
+        public void SaveGraph() => pageOperators.Add(new SaveGraphOperator());
+
+        public void RestoreGraph() => pageOperators.Add(new RestoreGraphOperator());
+
+        public void CurrentTransformationMatrix(float a, float b, float c, float d, float e, float f) 
+            => pageOperators.Add(new CurrentTransformationMatrixOperator(a, b, c, d, e, f));
     }
 }

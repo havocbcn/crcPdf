@@ -151,6 +151,35 @@ namespace SharpPDF.Lib {
                     return new StrokeOperator();
                 }
             },
+            { "Do", (objectizer, tParameters) => {    
+                    ExpectedParameters(tParameters, 1);
+                    var image = GetParameter<NameObject>(tParameters, 0).Value;
+                    return new ImageOperator(image);
+                }
+            },
+            // Table 57 Graphics State Operators
+            { "q", (objectizer, tParameters) => {    
+                    ExpectedParameters(tParameters, 0);
+                    return new SaveGraphOperator();
+                }
+            },
+            { "Q", (objectizer, tParameters) => {    
+                    ExpectedParameters(tParameters, 0);
+                    return new RestoreGraphOperator();
+                }
+            },
+            { "cm", (objectizer, parameters) => {    
+                    ExpectedParameters(parameters, 6);
+                    var a = GetParameter<RealObject>(parameters, 0).FloatValue;
+                    var b = GetParameter<RealObject>(parameters, 1).FloatValue;
+                    var c = GetParameter<RealObject>(parameters, 2).FloatValue;
+                    var d = GetParameter<RealObject>(parameters, 3).FloatValue;
+                    var e = GetParameter<RealObject>(parameters, 4).FloatValue;
+                    var f = GetParameter<RealObject>(parameters, 5).FloatValue;
+                    return new CurrentTransformationMatrixOperator(a, b, c, d, e, f);
+                }
+            },
+
         };
 
         internal List<Operator> ReadObjects() {

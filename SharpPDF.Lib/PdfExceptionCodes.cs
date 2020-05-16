@@ -31,6 +31,9 @@ namespace SharpPDF.Lib
         INVALID_FILTER,
         INVALID_OPERATOR,
         FONT_NOT_SUPPORTED,
-        FONT_ERROR
+        FONT_ERROR,
+        IMAGE_NOT_FOUND,
+        IMAGE_FORMAT_NOT_SUPPORTED,
+        IMAGE_BAD_IMAGE
     }  
 }
