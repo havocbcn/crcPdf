@@ -4,7 +4,7 @@ namespace SharpPDF.Lib {
     // 7.7.2 Document Catalog
     public class DocumentCatalog : IDocumentTree {
         private DocumentPageTree pageTree;
-        private DocumentOutline outlines;
+        private readonly DocumentOutline outlines;
         
         public DocumentCatalog(PDFObjects pdf) : base(pdf) {            
             this.pageTree = new DocumentPageTree(pdf);

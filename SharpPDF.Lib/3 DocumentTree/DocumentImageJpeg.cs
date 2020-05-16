@@ -18,10 +18,10 @@ using System.Collections.Generic;
 namespace SharpPDF.Lib {
     public class DocumentImageJpeg : DocumentImage {
         private readonly byte[] m_image;
-        private int m_width = -1;
-        private int m_height = -1;
-        private int m_bitsPerComponent = -1;    // 8 bits
-        private int m_component = -1;           // 1 => black&white, 3 => rgb
+        private readonly int m_width = -1;
+        private readonly int m_height = -1;
+        private readonly int m_bitsPerComponent = -1;    // 8 bits
+        private readonly int m_component = -1;           // 1 => black&white, 3 => rgb
 
         /// <summary>
         /// Ctor

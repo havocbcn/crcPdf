@@ -51,7 +51,7 @@ namespace SharpPDF.Lib {
         public string GetValue(string asciiHexadecimal) 
             => ConvertHexToString(FilterNonHexCharAndUpperCase(asciiHexadecimal));
 
-        private int GetHexVal(int val) 
+        private static int GetHexVal(int val) 
             => val - (val <= '9' ? '0' : 'A'-10);
     }
 }

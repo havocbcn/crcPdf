@@ -12,7 +12,7 @@ namespace SharpPDF.Lib {
         public ImageFactory imageFactory = new ImageFactory();
         private readonly Dictionary<IndirectObject, IDocumentTree> cache = new Dictionary<IndirectObject, IDocumentTree>();
 
-        private int lastNumber = 0;
+        private int lastNumber;
         internal IndirectObject CreateIndirectObject() {
             var indirect =  new IndirectObject(++lastNumber);
             objects.Add(indirect);

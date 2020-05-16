@@ -137,10 +137,10 @@ namespace SharpPDF.Lib {
             return i;
         }
         
-        private bool IsNewLine(string literalString, int i)
+        private static bool IsNewLine(string literalString, int i)
             => i < literalString.Length && (literalString[i] == '\n' || literalString[i] == '\r');        
 
-        private bool IsNumber(string literalString, int i)
+        private static bool IsNumber(string literalString, int i)
             => i < literalString.Length && (literalString[i] >= '0' && literalString[i] <= '9');
 
         public override string ToString() {

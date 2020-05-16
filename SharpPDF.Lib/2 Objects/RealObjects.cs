@@ -17,8 +17,9 @@ namespace SharpPDF.Lib {
                                 NumberStyles.AllowTrailingSign |
                                 NumberStyles.AllowThousands, 
                                 CultureInfo.InvariantCulture, 
-                                out floatValue))
+                                out floatValue)) {
                 throw new PdfException(PdfExceptionCodes.INVALID_NUMBER_TOKEN, $"Number {tokenContent} cannot be cast to a float number");
+            }
         }
         public float FloatValue => floatValue;    
 

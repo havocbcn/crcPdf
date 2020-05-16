@@ -4,8 +4,7 @@ namespace SharpPDF.Lib {
         public DocumentImage(PDFObjects pdf) : base(pdf) {
         }
 
-        public DocumentImage(PDFObjects pdf, PdfObject pdfObject) : base(pdf) { 
-            var contents = pdf.GetObject<DictionaryObject>(pdfObject);            
+        public DocumentImage(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {             
         }
 
         public abstract int Width { get; }

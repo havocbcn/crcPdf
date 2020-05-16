@@ -3,8 +3,8 @@ using System.Linq;
 
 namespace SharpPDF.Lib {
     public class DocumentPageTree : IDocumentTree {
-        private DocumentPageTree parent;
-        private List<DocumentPageTree> pageTreeSons = new List<DocumentPageTree>();
+        private readonly DocumentPageTree parent;
+        private readonly List<DocumentPageTree> pageTreeSons = new List<DocumentPageTree>();
         private List<DocumentPage> pageSons = new List<DocumentPage>();
 
         public DocumentPageTree(PDFObjects pdf) : base(pdf) {     
