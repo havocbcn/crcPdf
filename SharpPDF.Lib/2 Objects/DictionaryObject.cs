@@ -59,7 +59,7 @@ namespace SharpPDF.Lib {
                     throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY_STREAM, "A dictionary with Lenght hasnt stream object");
                 }                
 
-                if (!TokenValidator.IsWhiteSpace(tokenizer.Token(), "\n", "\r\n")) {
+                if (!tokenizer.ReadIntro()) {
                     throw new PdfException(PdfExceptionCodes.INVALID_DICTIONARY_STREAM, "A stream must be followed by \\n or \\r\\n");
                 }
 
@@ -140,12 +140,12 @@ namespace SharpPDF.Lib {
                 childs.Add(new NameObject("Length"));
                 childs.Add(new IntegerObject(a2.Length));                
 
-                byte[] a1 = GetBytes($"<<{string.Join(" ", childs)}>>stream\n");
+                byte[] a1 = GetBytes($"<<{string.Join(" ", childs)}>>\nstream\n");
                
                 return Join(a1, a2, a3);
             }
             else if (HasStream) {
-                byte[] a1 = GetBytes($"<<{string.Join(" ", childs)}>>stream\n");
+                byte[] a1 = GetBytes($"<<{string.Join(" ", childs)}>>\nstream\n");
                 byte[] a2 = stream;
                 byte[] a3 = GetBytes($"\nendstream");
                

@@ -110,6 +110,20 @@ namespace SharpPDF.Lib
 
         public Token Token() => GetTokenInternal(false);
 
+        public bool ReadIntro() {
+            int byteRead = fragment.ReadByte();
+            if (byteRead == 13) {
+                byteRead = fragment.ReadByte();
+                if (byteRead == 10) {
+                    return true;
+                }
+                return false;
+            } else if (byteRead == 10) {
+                return true;
+            }
+            return false;
+        }
+
         private Token GetTokenInternal(bool ignoreComments)
         {
             List<byte> bytesRead = new List<byte>();

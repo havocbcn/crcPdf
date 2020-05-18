@@ -2,6 +2,7 @@ using FluentAssertions;
 using System.IO;
 using SharpPDF.Lib;
 using Xunit;
+using SharpPDF.Lib.Fonts;
 
 namespace SharpPDF.Tests {
     public class DocumentFontShould : SharpPdfTest {   
@@ -69,6 +70,25 @@ namespace SharpPDF.Tests {
                     pdf.Catalog.Pages.PageSons[0].Font[0].Name = fontName;
     
                     using (var fs = new FileStream("openSans.pdf", FileMode.Create)) {
+                        pdf.WriteTo(fs);
+                    }
+                    }
+            );
+
+        [Theory]
+        [InlineData("OpenSans-Regular")]        
+        public void LoadSubsetTTFFonts(string fontName) =>
+            SharpPdf(
+                Given: pdf => { pdf.Catalog.Pages
+                    .AddPage()                        
+                        .SetFont(fontName, 12, false, false, EEmbedded.Embedded)
+                        .SetPosition(10, 15)
+                        .AddLabel("Α α:Alpha. Β β: Beta. Γ γ: Gamma. Δ δ: Delta"); },
+                Then: pdf => { 
+                    pdf.Catalog.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfFont>();
+                    pdf.Catalog.Pages.PageSons[0].Font[0].Name = fontName;
+    
+                    using (var fs = new FileStream("openSansSubset.pdf", FileMode.Create)) {
                         pdf.WriteTo(fs);
                     }
                     }

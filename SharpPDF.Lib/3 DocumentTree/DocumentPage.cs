@@ -86,8 +86,8 @@ namespace SharpPDF.Lib {
                  throw new PdfException(PdfExceptionCodes.FONT_ERROR, $"A font must be set before writting");
              }
 
-            CurrentFont.SetText(text);
-            contents.AddLabel(text);        
+            ;
+            contents.AddLabel(CurrentFont.SetText(text));
             return this;
         }
 

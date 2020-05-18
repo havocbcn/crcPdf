@@ -1,5 +1,7 @@
+using System.Linq;
+
 namespace SharpPDF.Lib {
-    // 9 Text
+    // 9.4.3 Text Showing Operators
     public class TextOperator : Operator {
         readonly string text;
         
@@ -8,7 +10,7 @@ namespace SharpPDF.Lib {
         }
 
         public override string ToString() {
-            return $"({text}) Tj";
+            return $"({text.Replace(@"\", @"\\").Replace("(", @"\(").Replace(")", @"\)")}) Tj";
         }
     }
 }

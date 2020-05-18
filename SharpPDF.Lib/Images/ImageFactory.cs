@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SharpReport.  If not, see <http://www.gnu.org/licenses/>.
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;

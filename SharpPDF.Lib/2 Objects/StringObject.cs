@@ -19,6 +19,10 @@ namespace SharpPDF.Lib {
             }
         }
 
+        public StringObject(string text) {
+            this.value = text;
+        }
+
         private string value;
         
         private readonly Dictionary<char, char> CharacterToEscapeCharacters = new Dictionary<char, char> {

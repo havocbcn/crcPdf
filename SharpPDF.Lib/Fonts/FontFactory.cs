@@ -92,6 +92,17 @@ namespace SharpPDF.Lib.Fonts {
 					m_lstFont.Add(name, font);
 					return font;
 				}
+			} else if (IsSubsetFont(pdf, dic)) {
+				var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
+                lock (lck) {
+					if (m_lstFont.ContainsKey(name)) {
+						return m_lstFont[name];
+					}
+
+					var font = new DocumentTtfSubsetFont(pdf, dic);
+					m_lstFont.Add(name, font);
+					return font;
+				}
 			}
 
             // TODO
@@ -107,6 +118,11 @@ namespace SharpPDF.Lib.Fonts {
          	=> dic.Dictionary.ContainsKey("BaseFont") &&
                             dic.Dictionary.ContainsKey("Subtype") &&
                             pdf.GetObject<NameObject>(dic.Dictionary["Subtype"]).Value == "TrueType";
+
+		private static bool IsSubsetFont(PDFObjects pdf, DictionaryObject dic)
+         	=> dic.Dictionary.ContainsKey("BaseFont") &&
+                            dic.Dictionary.ContainsKey("Subtype") &&
+                            pdf.GetObject<NameObject>(dic.Dictionary["Subtype"]).Value == "Type0";
 
         internal DocumentFont GetFont(PDFObjects pdf, string name, bool IsBold, bool IsItalic, EEmbedded embedded)
 		{	
@@ -143,7 +159,7 @@ namespace SharpPDF.Lib.Fonts {
 					}				
 				} else {
 					if (File.Exists(name)) {
-						//ttffont = new XrefFontTtfSubset(name, useBase64);
+						ttffont = new DocumentTtfSubsetFont(pdf, name);
 					} else {
 						LoadSystemFonts();
 
@@ -151,7 +167,7 @@ namespace SharpPDF.Lib.Fonts {
 							throw new PdfException(PdfExceptionCodes.FONT_NOT_FOUND, "Font " + name + " not found");
 						}
 						
-						//ttffont = new XrefFontTtfSubset(dctFontRegistered[name], useBase64);
+						ttffont = new DocumentTtfSubsetFont(pdf, dctFontRegistered[name]);
 					}
 				
 				}

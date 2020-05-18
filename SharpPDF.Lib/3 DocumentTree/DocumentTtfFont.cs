@@ -21,10 +21,8 @@ namespace SharpPDF.Lib {
             descriptor = new DocumentTtfDescriptorFont(pdf, this);            
         }
 
-        public DocumentTtfFont(PDFObjects pdf, DictionaryObject dic) : base(pdf, dic) {            
-        
+        public DocumentTtfFont(PDFObjects pdf, DictionaryObject dic) : base(pdf, dic) {                    
             descriptor = new DocumentTtfDescriptorFont(pdf, this);            
-
         }
 
         public override void OnSaveEvent(IndirectObject indirectObject)

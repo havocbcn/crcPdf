@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SharpPDF.  If not, see <http://www.gnu.org/licenses/>.
 using System.Collections.Generic;
+using System.Text;
 using SharpPDF.Lib.Fonts;
 
 namespace SharpPDF.Lib {
@@ -21,6 +22,8 @@ namespace SharpPDF.Lib {
 			StemV = 80;
 			boundingBox = new short[4];
 		}
+
+		internal bool isUnicode = false;
 
 		/// <summary>
 		/// The maximum height above the baseline reached by glyphs in this font.  
@@ -133,10 +136,12 @@ namespace SharpPDF.Lib {
         /// Escriben texto con esta fuente, me apunto cosas
         /// </summary>
         /// <param name="text">Text.</param>
-        public virtual void SetText(string text) {
+        public virtual string SetText(string text) {
             foreach (char c in text) {
                 AddNewChar(c);
             }
+
+			return text;
         }
 
         /// <summary>

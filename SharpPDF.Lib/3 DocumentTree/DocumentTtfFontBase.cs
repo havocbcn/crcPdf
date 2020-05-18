@@ -19,9 +19,11 @@ using SharpPDF.Lib.Fonts;
 
 namespace SharpPDF.Lib {
 	public abstract class DocumentTtfFontBase : DocumentFont {
-		internal FontTypes Flags { get; private set; }
+		internal FontTypes Flags { get; set; }
 
-        private Dictionary<string, Table> dctTables = new Dictionary<string, Table>();
+		internal bool IsEmbedded { get; set; }
+
+        internal Dictionary<string, Table> dctTables = new Dictionary<string, Table>();
 
         protected DocumentTtfFontBase(PDFObjects pdf, string FontFullPath) : base(pdf) {
             FullPath = FontFullPath;
@@ -55,7 +57,6 @@ namespace SharpPDF.Lib {
             this.Ascendent = (short)pdf.GetObject<IntegerObject>(descriptorDictionary["Ascent"]).IntValue;
             this.Descendent = (short)pdf.GetObject<IntegerObject>(descriptorDictionary["Descent"]).IntValue;
             this.CapHeight = (short)pdf.GetObject<IntegerObject>(descriptorDictionary["CapHeight"]).IntValue;
-
 
             this.FirstChar = pdf.GetObject<IntegerObject>(dic.Dictionary["FirstChar"]).IntValue;
             this.LastChar = pdf.GetObject<IntegerObject>(dic.Dictionary["LastChar"]).IntValue;
@@ -408,7 +409,7 @@ namespace SharpPDF.Lib {
             return TTFFont;
         }
 
-      	private struct Table {
+      	internal struct Table {
 			internal int offset;
 			internal int length;
             internal int checksum;

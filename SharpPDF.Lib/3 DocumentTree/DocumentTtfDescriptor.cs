@@ -49,6 +49,11 @@ namespace SharpPDF.Lib {
 
             if (font.Leading > 0) {
                 entries.Add("Leading", new IntegerObject(font.Leading));
+            }           
+
+            if (font.IsEmbedded) {
+                var fontContent = new DocumentFontContent(pdfObjects, font.GetFont());
+                entries.Add("FontFile2", fontContent.IndirectReferenceObject);
             }
             
             indirectObject.SetChild(new DictionaryObject(entries));
