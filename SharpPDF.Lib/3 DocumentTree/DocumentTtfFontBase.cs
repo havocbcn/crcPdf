@@ -38,7 +38,7 @@ namespace SharpPDF.Lib {
 
             Width = 1000;
 
-            Process(FontFullPath);
+            Process(File.ReadAllBytes(FontFullPath));
         }
 
 		protected DocumentTtfFontBase(PDFObjects pdf, DictionaryObject dic) : base(pdf) {			
@@ -62,27 +62,33 @@ namespace SharpPDF.Lib {
             this.LastChar = pdf.GetObject<IntegerObject>(dic.Dictionary["LastChar"]).IntValue;
 
             var widths = pdf.GetObject<ArrayObject>(dic.Dictionary["Widths"]);
-			var lstGlyph = new List<FontGlyph>();
-            
-            int i = 0;
-            foreach (var width in widths.Childs<IntegerObject>()) {
-				if (width.IntValue > 0) {
-					lstGlyph.Add(
-						new Fonts.FontGlyph {
-							width =  width.IntValue
-						}
-					);
-					hashChar.Add(FirstChar+i);
-					dctCharCodeToGlyphID.Add(FirstChar+i, lstGlyph.Count-1);
+
+			if (descriptorDictionary.ContainsKey("FontFile2")) {
+				Process(pdf.GetObject<DictionaryObject>(descriptorDictionary["FontFile2"]).Stream);
+			} else 
+			{
+				var lstGlyph = new List<FontGlyph>();
+				
+				int i = 0;
+				foreach (var width in widths.Childs<IntegerObject>()) {
+					if (width.IntValue > 0) {
+						lstGlyph.Add(
+							new Fonts.FontGlyph {
+								width =  width.IntValue
+							}
+						);
+						hashChar.Add(FirstChar+i);
+						dctCharCodeToGlyphID.Add(FirstChar+i, lstGlyph.Count-1);
+					}
+					i++;
 				}
-                i++;
-            }
-			Glypth = lstGlyph.ToArray();
+				Glypth = lstGlyph.ToArray();
+			}
+			
  		}
 
-
-        private void Process(string TTFFileName) {
-			TTFFont = File.ReadAllBytes(TTFFileName);
+        private void Process(byte[] stream) {
+			TTFFont = stream;
 
 			int version = GetUInt32();
 
@@ -118,7 +124,8 @@ namespace SharpPDF.Lib {
 			ProcessCMAP(dctTables["cmap"]);
 
 			// simplificación
-			Name = Path.GetFileNameWithoutExtension(TTFFileName);
+			// TODO
+			Name = ""; // Path.GetFileNameWithoutExtension(TTFFileName);
 
 		}
 
@@ -405,9 +412,7 @@ namespace SharpPDF.Lib {
 			}
 		}
 
-        public override byte[] GetFont() {
-            return TTFFont;
-        }
+        public override byte[] FontByteArray => TTFFont;
 
       	internal struct Table {
 			internal int offset;

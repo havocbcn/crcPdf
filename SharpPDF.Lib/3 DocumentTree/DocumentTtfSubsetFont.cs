@@ -21,14 +21,8 @@ using SharpPDF.Lib.Fonts;
 
 namespace SharpPDF.Lib  {
     public class DocumentTtfSubsetFont : DocumentTtfFontBase {
-		private const string m_sixHash = "IKWLZJ";
-
-        public string sixHash => m_sixHash;
-		private const string m_fontName = "FreeSans";
-        public string fontName => m_fontName;
-
         public DocumentTtfSubsetFont(PDFObjects pdf, DictionaryObject dic) : base(pdf, dic) {                    
-                 
+            
         }
             
         public DocumentTtfSubsetFont(PDFObjects pdf, string FullPath) : base(pdf, FullPath) {			
@@ -48,16 +42,12 @@ namespace SharpPDF.Lib  {
             dctNewGlyphIdToGlyphOldNew.Add(0, firstChar);
 
             this.Flags = FontTypes.Symbolic;
-            this.Name = m_sixHash + "+" + m_fontName;
+            this.Name = "IKWLZJ" + "+" + "FreeSans";
         }
 
-
-        public override byte[] GetFont() {
-            return SubsetTTFFont;
-        }
+        public override byte[] FontByteArray => SubsetTTFFont;
 
         private byte[] SubsetTTFFont;
-
 
         private readonly string[] tablesNames = { "cmap", "cvt ", "fpgm", "glyf", "head", "hhea", "hmtx", "loca", "maxp", "prep" };
 
@@ -601,28 +591,9 @@ namespace SharpPDF.Lib  {
             return pos;
         }
 
-        public override void OnSaveEvent(IndirectObject indirectObject)
-        {         
-
-            // TTFfont is the font in ttf format has to be rewritten
+        public override void OnSaveEvent(IndirectObject indirectObject) {         
             // a good guide: http://www.4real.gr/technical-documents-ttf-subset.html
             SubsetTTFFont = Subset(TTFFont);
-
-/*
-            var descendant = new DocumentDescendantFont(pdfObjects, this);  
-            var cmap = new DocumentCmapFont(pdfObjects, this);  
-
-            var entries = new Dictionary<string, PdfObject> {
-                { "Type", new NameObject("Font") },
-                { "Subtype", new NameObject("Type0") },
-                { "Encoding", new NameObject("Identity-H") },
-                { "DescendantFonts", new ArrayObject(new List<PdfObject> { descendant.IndirectReferenceObject }) },
-                { "ToUnicode", new ArrayObject(new List<PdfObject> { cmap.IndirectReferenceObject }) },
-                { "BaseFont", new NameObject(this.Name) }
-            };   
-   
-            indirectObject.SetChild(new DictionaryObject(entries));
-            */
 
             var widths = new List<PdfObject>();            
             widths.Add(new IntegerObject(this.Width));
@@ -647,7 +618,6 @@ namespace SharpPDF.Lib  {
                 { "FontDescriptor", descriptor.IndirectReferenceObject },
                 { "ToUnicode", cmap.IndirectReferenceObject },
             };   
-
 
             indirectObject.SetChild(new DictionaryObject(entries));
         }	

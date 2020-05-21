@@ -85,7 +85,7 @@ namespace SharpPDF.Tests {
                         .SetPosition(10, 15)
                         .AddLabel("Α α:Alpha. Β β: Beta. Γ γ: Gamma. Δ δ: Delta"); },
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfFont>();
+                    pdf.Catalog.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfSubsetFont>();
                     pdf.Catalog.Pages.PageSons[0].Font[0].Name = fontName;
     
                     using (var fs = new FileStream("openSansSubset.pdf", FileMode.Create)) {

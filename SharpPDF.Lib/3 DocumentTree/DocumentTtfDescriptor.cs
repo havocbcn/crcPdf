@@ -22,12 +22,6 @@ namespace SharpPDF.Lib {
             this.font = font;
         }
 
-        public DocumentTtfDescriptorFont(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
-            var dic = pdf.GetObject<DictionaryObject>(pdfObject);            
-
-            font.StemV = pdf.GetObject<IntegerObject>(dic.Dictionary["FirstChar"]).IntValue;
-        }
-
         public override void OnSaveEvent(IndirectObject indirectObject)
         {
             var entries = new Dictionary<string, PdfObject> {
@@ -52,7 +46,7 @@ namespace SharpPDF.Lib {
             }           
 
             if (font.IsEmbedded) {
-                var fontContent = new DocumentFontContent(pdfObjects, font.GetFont());
+                var fontContent = new DocumentFontContent(pdfObjects, font.FontByteArray);
                 entries.Add("FontFile2", fontContent.IndirectReferenceObject);
             }
             

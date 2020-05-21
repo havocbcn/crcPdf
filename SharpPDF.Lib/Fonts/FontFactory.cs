@@ -81,18 +81,7 @@ namespace SharpPDF.Lib.Fonts {
                     m_lstFont.Add(name, font);
                     return font;
                 }
-            } else if (IsTrueTypeFont(pdf, dic)) {
-				var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
-                lock (lck) {
-					if (m_lstFont.ContainsKey(name)) {
-						return m_lstFont[name];
-					}
-
-					var font = new DocumentTtfFont(pdf, dic);
-					m_lstFont.Add(name, font);
-					return font;
-				}
-			} else if (IsSubsetFont(pdf, dic)) {
+            } else if (IsSubsetFont(pdf, dic)) {
 				var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
                 lock (lck) {
 					if (m_lstFont.ContainsKey(name)) {
@@ -103,7 +92,18 @@ namespace SharpPDF.Lib.Fonts {
 					m_lstFont.Add(name, font);
 					return font;
 				}
-			}
+			} else if (IsTrueTypeFont(pdf, dic)) {
+				var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
+                lock (lck) {
+					if (m_lstFont.ContainsKey(name)) {
+						return m_lstFont[name];
+					}
+
+					var font = new DocumentTtfFont(pdf, dic);
+					m_lstFont.Add(name, font);
+					return font;
+				}
+			} 
 
             // TODO
             throw new PdfException(PdfExceptionCodes.INVALID_FONT, $"Not supported font type");
@@ -121,8 +121,7 @@ namespace SharpPDF.Lib.Fonts {
 
 		private static bool IsSubsetFont(PDFObjects pdf, DictionaryObject dic)
          	=> dic.Dictionary.ContainsKey("BaseFont") &&
-                            dic.Dictionary.ContainsKey("Subtype") &&
-                            pdf.GetObject<NameObject>(dic.Dictionary["Subtype"]).Value == "Type0";
+                            dic.Dictionary.ContainsKey("ToUnicode");
 
         internal DocumentFont GetFont(PDFObjects pdf, string name, bool IsBold, bool IsItalic, EEmbedded embedded)
 		{	

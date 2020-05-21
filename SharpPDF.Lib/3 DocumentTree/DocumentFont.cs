@@ -119,12 +119,9 @@ namespace SharpPDF.Lib {
 		/// <summary>
 		/// TTF Font
 		/// </summary>
-		protected byte[] TTFFont;
-
-
+		protected byte[] TTFFont { get; set; }
         internal int FirstChar;
 		private bool anyTextSet;
-
         internal int LastChar  = -1;
         internal readonly HashSet<int> hashChar = new HashSet<int>();
 
@@ -148,9 +145,7 @@ namespace SharpPDF.Lib {
         /// Get the font byte array
         /// </summary>
         /// <returns>The font.</returns>
-        public virtual byte[] GetFont() {
-            return new byte[0];
-        }
+        public virtual byte[] FontByteArray => TTFFont;
 
         protected void AddNewChar(char c) {
             hashChar.Add((int)c);
