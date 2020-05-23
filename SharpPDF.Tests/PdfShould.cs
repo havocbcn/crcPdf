@@ -265,70 +265,70 @@ startxref
             );
 
         [Fact]
-        public void ReadSharpReport() =>            
+        public void ReadSharpPdf() =>            
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 
-                    using (var fs = new FileStream("sharpReport_out.pdf", FileMode.Create)) {
+                    using (var fs = new FileStream("SharpPdf_out.pdf", FileMode.Create)) {
                         pdf.WriteTo(fs);
                     }
                 }
             );
 
         [Fact]
-        public void ReadSharpReportAndSaveUncompressed() =>            
+        public void ReadSharpPdfAndSaveUncompressed() =>            
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 
-                    using (var fs = new FileStream("sharpReport_uncompressed.pdf", FileMode.Create)) {
+                    using (var fs = new FileStream("SharpPdf_uncompressed.pdf", FileMode.Create)) {
                         pdf.WriteTo(fs, Compression.None);
                     }
                 }
             );
         
         [Fact]
-        public void ReadSharpReportAndSaveSimpleCompressed() =>            
+        public void ReadSharpPdfAndSaveSimpleCompressed() =>            
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 
-                    using (var fs = new FileStream("sharpReport_compressed.pdf", FileMode.Create)) {
+                    using (var fs = new FileStream("SharpPdf_compressed.pdf", FileMode.Create)) {
                         pdf.WriteTo(fs, Compression.Compress);
                     }
                 }
             );
 
         [Fact]
-        public void ReadSharpReportAndSaveSimpleOptimized() =>            
+        public void ReadSharpPdfAndSaveSimpleOptimized() =>            
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 
-                    using (var fs = new FileStream("sharpReport_uncompressed_optimized.pdf", FileMode.Create)) {
+                    using (var fs = new FileStream("SharpPdf_uncompressed_optimized.pdf", FileMode.Create)) {
                         pdf.WriteTo(fs, Compression.Optimize);
                     }
                 }
             );
 
         [Fact]
-        public void ReadSharpReportAndSaveCompressedAndOptimized() =>
+        public void ReadSharpPdfAndSaveCompressedAndOptimized() =>
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
+                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 
-                    using (var fs = new FileStream("sharpReport_compressed_optimized.pdf", FileMode.Create)) {
+                    using (var fs = new FileStream("SharpPdf_compressed_optimized.pdf", FileMode.Create)) {
                         pdf.WriteTo(fs, Compression.Compress | Compression.Optimize);
                     }
                 }
