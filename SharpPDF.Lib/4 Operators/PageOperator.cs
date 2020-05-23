@@ -28,7 +28,7 @@ namespace SharpPDF.Lib {
                     $"Unknown operator found in stream content {String.Join(',', parameters)}");
             } 
         }
-
+        
         private static readonly Dictionary<string, Func<List<PdfObject>, Operator>> textOperators = 
             new Dictionary<string, Func<List<PdfObject>, Operator>> {
             { "Tj", (t) => {                                     

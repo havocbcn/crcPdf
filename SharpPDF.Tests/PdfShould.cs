@@ -1,9 +1,7 @@
 using FluentAssertions;
-using System;
 using System.IO;
 using SharpPDF.Lib;
 using Xunit;
-using System.Text;
 
 namespace SharpPDF.Tests {
     public class PdfShould : SharpPdfTest {     
@@ -268,7 +266,7 @@ startxref
         public void ReadSharpPdf() =>            
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 
@@ -282,7 +280,7 @@ startxref
         public void ReadSharpPdfAndSaveUncompressed() =>            
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 
@@ -296,7 +294,7 @@ startxref
         public void ReadSharpPdfAndSaveSimpleCompressed() =>            
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 
@@ -310,7 +308,7 @@ startxref
         public void ReadSharpPdfAndSaveSimpleOptimized() =>            
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 
@@ -324,7 +322,7 @@ startxref
         public void ReadSharpPdfAndSaveCompressedAndOptimized() =>
             // 12.3.3 Document outline
             SharpPdfShould(
-                Given: File.ReadAllBytes("samples/SharpPdf.pdf"),
+                Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
                     pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
 

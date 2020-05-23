@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SharpPdf.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using System.Text;
 
 namespace SharpPDF.Lib
@@ -30,11 +29,9 @@ namespace SharpPDF.Lib
         }
 
         public DocumentCmapFont(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
-            var dic = pdf.GetObject<DictionaryObject>(pdfObject);            
         }
 
 		public override void OnSaveEvent(IndirectObject indirectObject) {           
-
 			//	/CIDInit		/ProcSet findresource begin 12
 			//		
 			// 	/CIDSystemInfo
@@ -56,7 +53,6 @@ endcodespacerange\n");
             sb.Append(font.hashChar.Count + " beginbfchar\n");
             foreach (int i in font.hashChar) {
                 sb.Append("<" + font.GetGlyphId(i).ToString("X2") + "> <" +  i.ToString("X4") + ">\n");    
-                // TODO si el siguiente kvp.key es consecutivo y el siguiente unicode también, se puede poner un rango  <0001><0001><0010> <0002><0002><0011> => <0001><0002><0010>                
             }
 
             sb.Append("endbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\nend end\n");

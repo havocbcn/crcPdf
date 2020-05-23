@@ -82,11 +82,10 @@ namespace SharpPDF.Lib {
             => parent ?? pdfObjects.GetDocument<DocumentPageTree>(parentReference);            
 
          public DocumentPage AddLabel(string text) {
-             if (CurrentFont == null) {
-                 throw new PdfException(PdfExceptionCodes.FONT_ERROR, $"A font must be set before writting");
-             }
-
-            ;
+            if (CurrentFont == null) {
+                throw new PdfException(PdfExceptionCodes.FONT_ERROR, $"A font must be set before writting");
+            }
+            
             contents.AddLabel(CurrentFont.SetText(text));
             return this;
         }
@@ -101,7 +100,6 @@ namespace SharpPDF.Lib {
             contents.SetNonStrokingColour(r, g, b);
             return this;
         }
-
 
         public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic) 
             => SetFont(name, size, isBold, isItalic, EEmbedded.NotEmbedded);

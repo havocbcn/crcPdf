@@ -104,8 +104,7 @@ namespace SharpPDF.Lib.Fonts {
 					return font;
 				}
 			} 
-
-            // TODO
+            
             throw new PdfException(PdfExceptionCodes.INVALID_FONT, $"Not supported font type");
         }
 

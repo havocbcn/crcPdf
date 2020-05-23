@@ -65,8 +65,7 @@ namespace SharpPDF.Lib {
 
 			if (descriptorDictionary.ContainsKey("FontFile2")) {
 				Process(pdf.GetObject<DictionaryObject>(descriptorDictionary["FontFile2"]).Stream);
-			} else 
-			{
+			} else {
 				var lstGlyph = new List<FontGlyph>();
 				
 				int i = 0;
@@ -83,8 +82,7 @@ namespace SharpPDF.Lib {
 					i++;
 				}
 				Glypth = lstGlyph.ToArray();
-			}
-			
+			}			
  		}
 
         private void Process(byte[] stream) {
@@ -117,7 +115,6 @@ namespace SharpPDF.Lib {
 
 			// kerning
 			ProcessGLYPH(dctTables["glyf"], dctTables["loca"]);
-
 			ProcessHead(dctTables["head"]);
 			ProcessHHEA(dctTables["hhea"]);
 			ProcessHMTX(dctTables["hmtx"]);
