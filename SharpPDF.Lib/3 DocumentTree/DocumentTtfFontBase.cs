@@ -233,7 +233,7 @@ namespace SharpPDF.Lib {
 
 				for (int i = 0; i < counts; i++) {
 					ushort platformId = GetUInt16();
-					ushort encodingId = GetUInt16();
+					GetUInt16();	// encodingId
 					ushort languageId = GetUInt16();
 					ushort nameId = GetUInt16();
 					ushort length = GetUInt16();

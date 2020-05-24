@@ -8,8 +8,10 @@ using SharpPDF.Lib.Images;
 namespace SharpPDF.Lib {
     public class PDFObjects {
         private readonly HashSet<IndirectObject> objects = new HashSet<IndirectObject>();
-        public FontFactory fontFactory = new FontFactory();
-        public ImageFactory imageFactory = new ImageFactory();
+        private FontFactory m_fontFactory = new FontFactory();
+        internal FontFactory fontFactory => m_fontFactory;
+        private ImageFactory m_imageFactory = new ImageFactory();
+        internal ImageFactory imageFactory => m_imageFactory;
         private readonly Dictionary<IndirectObject, IDocumentTree> cache = new Dictionary<IndirectObject, IDocumentTree>();
 
         private int lastNumber;

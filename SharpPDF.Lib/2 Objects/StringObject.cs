@@ -1,3 +1,17 @@
+// This file is part of SharpPdf.
+// 
+// SharpPdf is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// SharpPdf is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with SharpPdf.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -74,14 +88,13 @@ namespace SharpPDF.Lib {
             Token nextToken = tokenizer.TokenExcludedComments();
 
             StringBuilder token = new StringBuilder();
-            HexadecimalEscaper hexEscaper = new HexadecimalEscaper();
 
             while (nextToken.ToString() != ">") {                
-                token.Append(hexEscaper.FilterNonHexCharAndUpperCase(nextToken.ToString()));
+                token.Append(HexadecimalEscaper.FilterNonHexCharAndUpperCase(nextToken.ToString()));
                 
                 nextToken = tokenizer.TokenExcludedComments();
             }
-            value = hexEscaper.ConvertHexToString(token.ToString());
+            value = HexadecimalEscaper.ConvertHexToString(token.ToString());
         }
 
         private string EscapeALiteralString(string literalString) {

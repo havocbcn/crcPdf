@@ -6,7 +6,7 @@ namespace SharpPDF.Lib {
         
         PDFObjects pdfObjects = new PDFObjects();
 
-        public DocumentCatalog Catalog { get; private set; }
+        public DocumentCatalog Catalog { get; private set; }        
         
         public SharpPdf(MemoryStream ms) {
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -21,16 +21,13 @@ namespace SharpPDF.Lib {
 
         private void Analyze() {
             AnalyzeHeader();
-            long xrefPosition = XrefPosition();
-            ReadXRef(xrefPosition);
+            ReadXRef(XrefPosition());
         }
 
         private void ReadXRef(long xrefPosition) {
             tokenizer.MoveToPosition(xrefPosition);
 
-            Token token;
-
-            token = tokenizer.Token();
+            Token token = tokenizer.Token();
             if (!TokenValidator.Validate(token, CharacterSetType.Regular, "xref")) {
                 throw new PdfException(PdfExceptionCodes.INVALID_XREF, "Expected xref");
             }
@@ -45,8 +42,7 @@ namespace SharpPDF.Lib {
             int numberOfEntries = tokenizer.GetInteger();
             tokenizer.TokenExcludedComments();
 
-            for (int i = 0; i < numberOfEntries; i++)
-            {
+            for (int i = 0; i < numberOfEntries; i++) {
                 int pos = tokenizer.GetInteger();           // position
                 tokenizer.TokenExcludedComments();          // whitespace
                 tokenizer.GetInteger();                     // generation
@@ -80,8 +76,7 @@ namespace SharpPDF.Lib {
             Catalog = pdfObjects.GetDocument<DocumentCatalog>(rootIndirect);
         }
 
-        private long XrefPosition()
-        {
+        private long XrefPosition() {
             tokenizer.MoveToEnd();
             tokenizer.MoveToPrevious('s');
            
@@ -124,8 +119,7 @@ namespace SharpPDF.Lib {
             return xrefPosition;
         }
 
-        private void AnalyzeHeader()
-        {
+        private void AnalyzeHeader() {
             Token token = tokenizer.Token();
             if (!TokenValidator.IsDelimiter(token, "%")) {
                 throw new PdfException(PdfExceptionCodes.HEADER_NOT_FOUND, "Header not found");
@@ -138,14 +132,10 @@ namespace SharpPDF.Lib {
             }
         }
 
-        public void WriteTo(Stream ms)
-        {
-            pdfObjects.WriteTo(ms, Catalog, Compression.Compress);
-        }
+        public void WriteTo(Stream ms) 
+            => pdfObjects.WriteTo(ms, Catalog, Compression.Compress);        
 
-        public void WriteTo(Stream ms, Compression compression)
-        {
-            pdfObjects.WriteTo(ms, Catalog, compression);
-        }
+        public void WriteTo(Stream ms, Compression compression) 
+            => pdfObjects.WriteTo(ms, Catalog, compression);
     }
 }

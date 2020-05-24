@@ -1,28 +1,28 @@
-// This file is part of SharpPDF.
+// This file is part of SharpPdf.
 // 
-// SharpPDF is free software: you can redistribute it and/or modify
+// SharpPdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 // 
-// SharpPDF is distributed in the hope that it will be useful,
+// SharpPdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 // 
 // You should have received a copy of the GNU Lesser General Public License
-// along with SharpPDF.  If not, see <http://www.gnu.org/licenses/>.
+// along with SharpPdf.  If not, see <http://www.gnu.org/licenses/>.
 using System.Text;
 
 namespace SharpPDF.Lib {
     public class HexadecimalEscaper {
         private const int FromaToAInAscii = 32;   
 
-        public string ConvertHexToString(string rawHexString) {
+        public static string ConvertHexToString(string rawHexString) {
             StringBuilder hexString  = new StringBuilder();
             
-            for (int i = 0; i < rawHexString.Length; i+=2) {
-                if (i+1 < rawHexString.Length) {
+            for (int i = 0; i < rawHexString.Length; i += 2) {
+                if (i + 1 < rawHexString.Length) {
                     hexString.Append((char)((GetHexVal(rawHexString[i]) << 4) + (GetHexVal(rawHexString[i+1]))));
                 } else {
                     hexString.Append((char)(GetHexVal(rawHexString[i]) << 4));
@@ -32,7 +32,7 @@ namespace SharpPDF.Lib {
             return hexString.ToString();
         }
 
-        public string FilterNonHexCharAndUpperCase(string rawHex) {
+        public static string FilterNonHexCharAndUpperCase(string rawHex) {
             StringBuilder sb = new StringBuilder();
 
             foreach (char c in rawHex) {

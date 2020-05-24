@@ -122,7 +122,7 @@ namespace SharpPDF.Lib.Fonts {
          	=> dic.Dictionary.ContainsKey("BaseFont") &&
                             dic.Dictionary.ContainsKey("ToUnicode");
 
-        internal DocumentFont GetFont(PDFObjects pdf, string name, bool IsBold, bool IsItalic, EEmbedded embedded)
+        internal DocumentFont GetFont(PDFObjects pdf, string name, bool IsBold, bool IsItalic, Embedded embedded)
 		{	
 			string normalizedName = GetName(name, IsBold, IsItalic);        			
 
@@ -143,7 +143,7 @@ namespace SharpPDF.Lib.Fonts {
             // unknown, or disk or systemfonts
             DocumentFont ttffont = null;
 			lock (lck) {
-				if (embedded == EEmbedded.NotEmbedded) {
+				if (embedded == Embedded.No) {
 					if (File.Exists(name)) {
 						ttffont = new DocumentTtfFont(pdf, name);
 					} else {

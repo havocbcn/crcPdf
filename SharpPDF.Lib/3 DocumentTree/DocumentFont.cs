@@ -22,7 +22,7 @@ namespace SharpPDF.Lib {
 			boundingBox = new short[4];
 		}
 
-		internal bool isUnicode = false;
+		internal bool isUnicode;
 
 		/// <summary>
 		/// The maximum height above the baseline reached by glyphs in this font.  

@@ -23,7 +23,7 @@ namespace SharpPDF.Lib.Images {
     /// </summary>
 	public class ImageFactory {
 
-        private Dictionary<string, DocumentImage> dct = new Dictionary<string, DocumentImage>();
+        private readonly  Dictionary<string, DocumentImage> dct = new Dictionary<string, DocumentImage>();
         private static object lck = new object();
 
         private SHA1 sha1 = SHA1CryptoServiceProvider.Create();

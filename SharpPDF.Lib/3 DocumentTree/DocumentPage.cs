@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using SharpPDF.Lib.Fonts;
 using System.Linq;
-using System;
 
 namespace SharpPDF.Lib {
     public class DocumentPage : IDocumentTree {        
@@ -102,12 +101,16 @@ namespace SharpPDF.Lib {
         }
 
         public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic) 
-            => SetFont(name, size, isBold, isItalic, EEmbedded.NotEmbedded);
+            => SetFont(name, size, isBold, isItalic, Embedded.No);
 
         public DocumentPage SetFont(string name, int size) 
-            => SetFont(name, size, false, false, EEmbedded.NotEmbedded);
+            => SetFont(name, size, false, false, Embedded.No);
 
-        public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, EEmbedded embedded) {
+        public DocumentPage SetFont(string name, int size, Embedded embedded) 
+            => SetFont(name, size, false, false, embedded);
+
+
+        public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, Embedded embedded) {
             var font = pdfObjects.fontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
 
             if (!fonts.ContainsKey(font)) {
@@ -118,6 +121,7 @@ namespace SharpPDF.Lib {
             contents.SetFont(fonts[font], size);
             return this;
         }
+
 
         public DocumentPage SetLineCap(LineCapStyle lineCap)  {
             contents.SetLineCap(lineCap);

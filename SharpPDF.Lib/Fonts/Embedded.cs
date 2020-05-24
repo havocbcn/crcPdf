@@ -18,16 +18,16 @@ namespace SharpPDF.Lib.Fonts {
     /// <summary>
     /// embedded possibilities
     /// </summary>
-    public enum EEmbedded
+    public enum Embedded
     {
         /// <summary>
         /// Embedded font
         /// </summary>
-        Embedded = 0,
+        Yes = 0,
 
         /// <summary>
         /// Not embedded font
         /// </summary>
-        NotEmbedded = 1,
+        No = 1,
     }
 }
