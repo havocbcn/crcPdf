@@ -65,7 +65,12 @@ namespace SharpPDF.Lib {
 
 			if (descriptorDictionary.ContainsKey("FontFile2")) {
 				Process(pdf.GetObject<DictionaryObject>(descriptorDictionary["FontFile2"]).Stream);
-			} else {
+
+				if (dic.Dictionary.ContainsKey("ToUnicode")) {
+                    var cmap = pdf.GetObject<DictionaryObject>(dic.Dictionary["ToUnicode"]);
+                    ReadCmap(cmap);
+                }
+            } else {
 				var lstGlyph = new List<FontGlyph>();
 				
 				int i = 0;
@@ -84,6 +89,102 @@ namespace SharpPDF.Lib {
 				Glypth = lstGlyph.ToArray();
 			}			
  		}
+
+        private void ReadCmap(DictionaryObject cmap) {
+            var stream = new MemoryStream(cmap.Stream);
+            var reader = new Objectizer(new Tokenizer(stream));
+
+			 GlyphToChar firstChar = new GlyphToChar {
+                character = 0,
+                oldGlyphId = 0,
+                newGlyphId = 0
+            };
+            lstGlyphToChar.Add(firstChar);
+
+            dctCharToGlyphOldNew.Add(0, firstChar);
+            dctNewGlyphIdToGlyphOldNew.Add(0, firstChar);
+
+            while (!reader.IsEOF()) {
+                var o = reader.NextObject(true);
+
+                if (o is OperatorObject) {
+                    var op = o as OperatorObject;
+                    if (op.Value == "endcodespacerange") {
+                        var numberOrEndCmap = reader.NextObject(true);
+                        if (numberOrEndCmap is IntegerObject) {
+                            var numberOfItems = numberOrEndCmap as IntegerObject;
+                            var typeOfRange = reader.NextObject(true) as OperatorObject;
+                            if (typeOfRange.Value == "beginbfchar") {
+                                for (int i = 0; i < numberOfItems.IntValue; i++) {
+                                    var codeInHex = reader.NextObject(true) as StringObject;
+                                    int code = (int)codeInHex.Value[0];
+                                    var unicodeInHex = reader.NextObject(true) as StringObject;
+									if (unicodeInHex.Value.Length == 2) {
+										int unicode = ((int)unicodeInHex.Value[0] << 8) + (int)unicodeInHex.Value[1];
+
+										hashChar.Add(unicode);
+
+										GlyphToChar glyph = new GlyphToChar {
+											character = unicode,
+											oldGlyphId = code,
+											newGlyphId = code
+										};
+
+										lstGlyphToChar.Add(glyph);
+
+										dctCharToGlyphOldNew.Add(unicode, glyph);
+										dctNewGlyphIdToGlyphOldNew.Add(code, glyph);
+
+										if (!dctCharCodeToGlyphID.ContainsKey(unicode)) {
+											dctCharCodeToGlyphID.Add(unicode, code);
+										}
+
+									} else {
+                                        // TODO
+                                        throw new PdfException(PdfExceptionCodes.CMAP_TODO, "I do not undertand this cmap");
+                                    }
+                                }
+                            } else if (typeOfRange.Value == "beginbfrange") {
+                                for (int i = 0; i < numberOfItems.IntValue; i++) {
+                                    var codeStartInHex = reader.NextObject(true) as StringObject;
+                                    int codeStart = (int)codeStartInHex.Value[0];
+                                    var codeEndInHex = reader.NextObject(true) as StringObject;
+                                    int codeEnd = (int)codeEndInHex.Value[0];
+                                    var unicodeInHex = reader.NextObject(true) as StringObject;
+                                    if (unicodeInHex.Value.Length == 2) {
+                                        int unicode = ((int)unicodeInHex.Value[0] << 8) + (int)unicodeInHex.Value[1];
+
+                                        int counter = 0;
+                                        for (int code = codeStart; code < codeEnd; code++) {
+                                            hashChar.Add(code);
+
+											GlyphToChar glyph = new GlyphToChar {
+												character = unicode,
+												oldGlyphId = code,
+												newGlyphId = code
+											};
+
+											lstGlyphToChar.Add(glyph);
+
+											dctCharToGlyphOldNew.Add(unicode, glyph);
+											dctNewGlyphIdToGlyphOldNew.Add(code, glyph);
+
+											if (!dctCharCodeToGlyphID.ContainsKey(unicode + counter))												
+                                            	dctCharCodeToGlyphID.Add(unicode + counter, code);
+                                            counter++;
+                                        }
+                                    } else {
+                                        // TODO
+                                        throw new PdfException(PdfExceptionCodes.CMAP_TODO, "I do not undertand this cmap");
+                                    }
+                                }
+                            }
+                            reader.NextObject(true);    // endbfchar or endbfrange
+                        }
+                    }
+                }
+            }
+        }
 
         private void Process(byte[] stream) {
 			TTFFont = stream;
@@ -119,12 +220,46 @@ namespace SharpPDF.Lib {
 			ProcessHHEA(dctTables["hhea"]);
 			ProcessHMTX(dctTables["hmtx"]);
 			ProcessCMAP(dctTables["cmap"]);
+			ProcessNAME(dctTables["name"]);
+		}
 
-			// simplificación
+        private void ProcessNAME(Table table) {
+            filePosition = table.offset;
+			ushort format = GetUInt16();
+
+			if (format == 0) {
+				ushort counts = GetUInt16();
+				ushort offset = GetUInt16();
+
+				for (int i = 0; i < counts; i++) {
+					ushort platformId = GetUInt16();
+					ushort encodingId = GetUInt16();
+					ushort languageId = GetUInt16();
+					ushort nameId = GetUInt16();
+					ushort length = GetUInt16();
+					ushort stringOffset = GetUInt16();
+
+					int actualFilePosition = filePosition;
+					filePosition = table.offset + offset + stringOffset;
+					string fontString = GetString(length);
+					filePosition = actualFilePosition;
+
+					if (nameId == 4 && // 4 	Full font name that reflects all family and relevant subfamily descriptors. The full font name is generally a combination of name IDs 1 and 2, or of name IDs 16 and 17, or a similar human-readable variant. 
+						(languageId == 0 || languageId == 1033 /* english US */ || languageId == 2057 /* english UK */)) {
+						if (string.IsNullOrEmpty(Name)) {
+							Name = fontString;
+						}
+					}					
+				}
+
+			}
+
+						// simplificación
 			// TODO
 			Name = ""; // Path.GetFileNameWithoutExtension(TTFFileName);
 
-		}
+
+        }
 
         private void ProcessGLYPH(Table tableGlyph, Table tableLoca) {
 			filePosition = tableLoca.offset;
@@ -137,7 +272,7 @@ namespace SharpPDF.Lib {
     			glyphOffset = new int[numEntries];
 
 				for (int i = 0; i < numEntries; i++) {
-					glyphOffset[i] = GetUInt16() * 2;
+					glyphOffset[i] = GetUInt16() << 1; // The actual local offset divided by 2 is stored. 
 				}
 			} else {
 				int numEntries = tableLoca.length / 4;	
@@ -152,13 +287,13 @@ namespace SharpPDF.Lib {
 			Glypth = new FontGlyph[glyphOffset.Length-1]; // In order to compute the length of the last glyph element, there is an extra entry after the last valid index.
 
 			// In order to compute the length of the last glyph element, there is an extra entry after the last valid index.
-			for (int i = 0; i < glyphOffset.Length-1; i++) {
-				filePosition = tableGlyph.offset + glyphOffset[i] + 2;
+			for (int i = 0; i < glyphOffset.Length-1; i++) {				
+				// REMEMBER: filePosition = tableGlyph.offset + glyphOffset[i] + 2;
 
 				Glypth[i] = new FontGlyph();
 				Glypth[i].SetFilePosition(tableGlyph.offset + glyphOffset[i], glyphOffset[i+1] - glyphOffset[i]);
 
-				Skip(8);  	// lowerX, lowerY, upperX, uppery				
+				// REMEMBER: Skip(8);  	// lowerX, lowerY, upperX, uppery				
 			}
 		}
 
@@ -259,7 +394,9 @@ namespace SharpPDF.Lib {
                     CMAP_OFFSET = table.offset + offset;
                 } else if (platformID == 3 && encodingID == 10) {
                     CMAP_OFFSET = table.offset + offset;					
-				 } else if (platformID == 3 && encodingID == 1) {
+				} else if (platformID == 3 && encodingID == 1) {
+                    CMAP_OFFSET = table.offset + offset;					
+				} else if (CMAP_OFFSET == 0) {
                     CMAP_OFFSET = table.offset + offset;					
 				}
 			}
@@ -398,14 +535,14 @@ namespace SharpPDF.Lib {
 
 			int lastGlypthWidth = 0;
 			ushort lastLeftSideBearing = 0;
-			for (int i = 0; i < numberOfHMetrics; i++) {		
-				lastGlypthWidth = GetUInt16() * 1000 / unitsPerEm;
+			for (int i = 0; i < numberOfHMetrics; i++) {						
+				lastGlypthWidth = GetUInt16();
 				lastLeftSideBearing = GetUInt16();
-				Glypth[i].SetWidthAndLeftSideBearing(lastGlypthWidth, lastLeftSideBearing);
+				Glypth[i].SetWidthAndLeftSideBearing(lastGlypthWidth * 1000 / unitsPerEm, lastGlypthWidth, lastLeftSideBearing);
 			}
 
 			for (int i = numberOfHMetrics; i < Glypth.Length; i++) {
-				Glypth[i].SetWidthAndLeftSideBearing(lastGlypthWidth, lastLeftSideBearing);
+				Glypth[i].SetWidthAndLeftSideBearing(lastGlypthWidth * 1000 / unitsPerEm, lastGlypthWidth, lastLeftSideBearing);
 			}
 		}
 

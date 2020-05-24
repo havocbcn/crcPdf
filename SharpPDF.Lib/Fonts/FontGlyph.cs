@@ -26,8 +26,9 @@ namespace SharpPDF.Lib.Fonts {
 		public FontGlyph() {
 		}
 
-		public void SetWidthAndLeftSideBearing(int width, ushort leftSideBearing) {
+		public void SetWidthAndLeftSideBearing(int width, int widthInEm, ushort leftSideBearing) {
 			this.width = width;
+			this.widthInEm = widthInEm;
 			this.leftSideBearing = leftSideBearing;
 		}
 
@@ -41,6 +42,8 @@ namespace SharpPDF.Lib.Fonts {
 		public int lengthFile => m_lengthFile;
 
 		public int width { get; set; }
+
+		public int widthInEm { get; set; }
 
 		public int unicode  { get; set; }	
 

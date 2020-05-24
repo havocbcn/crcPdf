@@ -48,7 +48,7 @@ namespace SharpPDF.Lib
 
             sb.Append(@"/CIDInit/ProcSet findresource begin 12 dict begin begincmap/CIDSystemInfo <</Registry (QWERT)/Ordering (ASDFG)/Supplement 0>> def /CMapName /QWERT def/CMapType 2 def 1 begincodespacerange
 <00> <FF>
-endcodespacerange\n");
+endcodespacerange" + "\n");
 
             sb.Append(font.hashChar.Count + " beginbfchar\n");
             foreach (int i in font.hashChar) {

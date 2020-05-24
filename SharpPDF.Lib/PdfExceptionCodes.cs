@@ -34,6 +34,7 @@ namespace SharpPDF.Lib
         FONT_ERROR,
         IMAGE_NOT_FOUND,
         IMAGE_FORMAT_NOT_SUPPORTED,
-        IMAGE_BAD_IMAGE
+        IMAGE_BAD_IMAGE,
+        CMAP_TODO
     }  
 }

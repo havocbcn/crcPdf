@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SharpPDF.  If not, see <http://www.gnu.org/licenses/>.
 using System.Collections.Generic;
-using System.Text;
 using SharpPDF.Lib.Fonts;
 
 namespace SharpPDF.Lib {
@@ -124,6 +123,19 @@ namespace SharpPDF.Lib {
 		private bool anyTextSet;
         internal int LastChar  = -1;
         internal readonly HashSet<int> hashChar = new HashSet<int>();
+
+		public class GlyphToChar {
+            public int? character {get; set;}
+            public int oldGlyphId {get; set;}
+
+            public int newGlyphId {get; set;}
+            public byte[] bytes  {get; set;}
+        }
+
+		readonly internal List<GlyphToChar> lstGlyphToChar = new List<GlyphToChar>();
+        readonly internal Dictionary<int, GlyphToChar> dctCharToGlyphOldNew = new Dictionary<int, GlyphToChar>();
+        readonly internal Dictionary<int, GlyphToChar> dctNewGlyphIdToGlyphOldNew = new Dictionary<int, GlyphToChar>();
+
 
         internal virtual int GetGlyphId(int ch) => dctCharCodeToGlyphID[ch];        
 

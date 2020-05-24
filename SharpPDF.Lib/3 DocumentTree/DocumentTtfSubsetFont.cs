@@ -15,20 +15,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using SharpPDF.Lib.Fonts;
 
 namespace SharpPDF.Lib  {
     public class DocumentTtfSubsetFont : DocumentTtfFontBase {
-        public DocumentTtfSubsetFont(PDFObjects pdf, DictionaryObject dic) : base(pdf, dic) {                    
-            
+        public DocumentTtfSubsetFont(PDFObjects pdf, DictionaryObject dic) : base(pdf, dic) {
+            IsEmbedded = true;            
+            isUnicode = true;
         }
             
         public DocumentTtfSubsetFont(PDFObjects pdf, string FullPath) : base(pdf, FullPath) {			
-
-            IsEmbedded = true;
-            
+            IsEmbedded = true;            
             isUnicode = true;
 
             GlyphToChar firstChar = new GlyphToChar {
@@ -36,8 +36,8 @@ namespace SharpPDF.Lib  {
                 oldGlyphId = 0,
                 newGlyphId = 0
             };
-            lstGlyphToChar.Add(firstChar);
 
+            lstGlyphToChar.Add(firstChar);
             dctCharToGlyphOldNew.Add(0, firstChar);
             dctNewGlyphIdToGlyphOldNew.Add(0, firstChar);
 
@@ -49,15 +49,7 @@ namespace SharpPDF.Lib  {
 
         private byte[] SubsetTTFFont;
 
-        private readonly string[] tablesNames = { "cmap", "cvt ", "fpgm", "glyf", "head", "hhea", "hmtx", "loca", "maxp", "prep" };
-
-        public class GlyphToChar {
-            public int? character {get; set;}
-            public int oldGlyphId {get; set;}
-
-            public int newGlyphId {get; set;}
-            public byte[] bytes  {get; set;}
-        }
+        private readonly string[] tablesNames = { "cmap", "cvt ", "fpgm", "glyf", "head", "hhea", "hmtx", "loca", "maxp", "prep", "name" /* for license preservation */ };
 
         internal override int GetGlyphId(int ch) {
             return dctCharToGlyphOldNew[ch].newGlyphId;
@@ -70,8 +62,9 @@ namespace SharpPDF.Lib  {
         public override string SetText(string text) {
             foreach (char ch in text) {
                 // si ya existe este caracter, no hago nada
-                if (hashChar.Contains(ch))
+                if (hashChar.Contains(ch)) {
                     continue;
+                }
 
                 // nuevo caracter
                 int counter = dctNewGlyphIdToGlyphOldNew.Count;
@@ -99,11 +92,6 @@ namespace SharpPDF.Lib  {
             return sb.ToString();
         }
 
-
-        readonly List<GlyphToChar> lstGlyphToChar = new List<GlyphToChar>();
-        readonly Dictionary<int, GlyphToChar> dctCharToGlyphOldNew = new Dictionary<int, GlyphToChar>();
-        readonly Dictionary<int, GlyphToChar> dctNewGlyphIdToGlyphOldNew = new Dictionary<int, GlyphToChar>();
-
         // Bit 0: If this is set, the arguments are 16-bit (uint16 or int16); otherwise, they are bytes (uint8 or int8).
         private const int ARG_1_AND_2_ARE_WORDS = 0x0001; 
 
@@ -122,7 +110,7 @@ namespace SharpPDF.Lib  {
         private byte[] Subset(byte[] font)
         {
             // regular: 1 char is 1 glyph 
-            // composite: 1 char is 1 glyph that points to many glyphs
+            // composite: 1 char is 1 glyph that points to many glyphs            
             int glyphToCharIndex = 0;
             while (glyphToCharIndex < lstGlyphToChar.Count)
             {
@@ -131,7 +119,9 @@ namespace SharpPDF.Lib  {
 
                 // obtengo el glyph en sí
                 glyphChar.bytes = new byte[Glypth[glyphChar.oldGlyphId].lengthFile];
-                Array.Copy(font, Glypth[glyphChar.oldGlyphId].offsetFile, glyphChar.bytes, 0, Glypth[glyphChar.oldGlyphId].lengthFile);
+                Array.Copy(font, Glypth[glyphChar.oldGlyphId].offsetFile,   // source
+                           glyphChar.bytes, 0,                              // destination
+                           Glypth[glyphChar.oldGlyphId].lengthFile);        // length
 
                 int fontOffset = Glypth[glyphChar.oldGlyphId].offsetFile;
                 int endPtsOfContours = GetUInt16(font, ref fontOffset);
@@ -199,17 +189,21 @@ namespace SharpPDF.Lib  {
             byte[] cmap = SetCmap();
             List<int> glyphOffset;
             byte[] glyph = SetGlyph(out glyphOffset);
+
+            if (glyph.Length < 128000)
+                indexToLocFormat = 0;   // 0 for short offsets
+            else
+                indexToLocFormat = 1;   // 1 for long
+
             byte[] head = SetHead(font);
-            byte[] loca = SetLoca(glyphOffset, head, glyph.Length);
+            byte[] loca = SetLoca(glyphOffset, head);
 
             int fontSubsetSize = 0;
             fontSubsetSize += 12;   // initial header
             fontSubsetSize += 16 * dctTablesUsed.Count;   // initial header pointers
             // de las tablas que vamos a grabar
-            foreach (KeyValuePair<string, Table> kvp in dctTablesUsed)
-            {
-                switch (kvp.Key)
-                {
+            foreach (KeyValuePair<string, Table> kvp in dctTablesUsed) {
+                switch (kvp.Key) {
                     case "hhea":
                         fontSubsetSize += Get4bytePadding(hhea.Length);
                         break;
@@ -250,11 +244,9 @@ namespace SharpPDF.Lib  {
             fontSubsetPos = SetUInt16(fontSubset, fontSubsetPos, entrySelector);
             fontSubsetPos = SetUInt16(fontSubset, fontSubsetPos, rangeShift);
 
-            foreach (KeyValuePair<string, Table> kvp in dctTablesUsed)
-            {
+            foreach (KeyValuePair<string, Table> kvp in dctTablesUsed) {
                 fontSubsetPos = SetString(fontSubset, fontSubsetPos, kvp.Key);
-                switch (kvp.Key)
-                {
+                switch (kvp.Key) {
                     case "hhea":
                         fontSubsetPos = WriteHeader(fontSubset, fontSubsetPos, hhea, ref tableOffset);
                         break;
@@ -288,10 +280,8 @@ namespace SharpPDF.Lib  {
 
             // -- Tables --
             int checkSumAdjustmentOffset = 0;
-            foreach (KeyValuePair<string, Table> kvp in dctTablesUsed)
-            {
-                switch (kvp.Key)
-                {
+            foreach (KeyValuePair<string, Table> kvp in dctTablesUsed) {
+                switch (kvp.Key) {
                     case "hhea":
                         Array.Copy(hhea, 0, fontSubset, fontSubsetPos, hhea.Length);
                         fontSubsetPos += Get4bytePadding(hhea.Length);
@@ -333,18 +323,18 @@ namespace SharpPDF.Lib  {
             return fontSubset;
         }
 
-        private byte[] SetLoca(List<int> glyphOffset, byte[] head, int glyphLength)
+        private byte[] SetLoca(List<int> glyphOffset, byte[] head)
         {
             byte[] loca = null;
             
-            if (glyphLength> 128000) {
+            if (indexToLocFormat == 0) {
                 loca = new byte[glyphOffset.Count * 2];
 
                 SetUInt16(head, 50, 0);
 
                 int pos = 0;
                 foreach (int offset in glyphOffset) {
-                    pos = SetUInt16(loca, pos, offset);
+                    pos = SetUInt16(loca, pos, offset >> 1); // The actual local offset divided by 2 is stored. 
                 }
             } else {
             
@@ -360,16 +350,16 @@ namespace SharpPDF.Lib  {
             return loca;
         }
 
-        private byte[] SetHead(byte[] font)
-        {
+        private byte[] SetHead(byte[] font) {
             byte[] head = new byte[dctTables["head"].length];
             Array.Copy(font, dctTables["head"].offset, head, 0, dctTables["head"].length);
             SetUInt32(head, 8, 0);  // checkSumAdjustment
+            
+            SetUInt16(head, head.Length-2, indexToLocFormat);
             return head;
         }
 
-        private byte[] SetGlyph(out List<int> glyphOffset)
-        {
+        private byte[] SetGlyph(out List<int> glyphOffset) {
             int glyphSize = lstGlyphToChar.Sum(glyph => Get4bytePadding(glyph.bytes.Length));
             byte[] glyph = new byte[glyphSize];
             glyphOffset = new List<int>();
@@ -387,21 +377,21 @@ namespace SharpPDF.Lib  {
 
         private byte[] SetCmap() {
             byte[] cmap = new byte[24 + 14 + lstGlyphToChar.Count * 12 + 262];
-            int pos = 0;
-            pos = SetUInt16(cmap, pos, 0);  // version     0
-            pos = SetUInt16(cmap, pos, 2);  // numTables   2
+            int pos = 0;                    //                                                  Bytes
+            pos = SetUInt16(cmap, pos, 0);  // version                                          0
+            pos = SetUInt16(cmap, pos, 2);  // numTables                                        2
 
-            pos = SetUInt16(cmap, pos, 1);  // platformID  4
-            pos = SetUInt16(cmap, pos, 0);  // encodingID  6
-            pos = SetUInt32(cmap, pos, 20); // offset      8
+            pos = SetUInt16(cmap, pos, 1);  // platformID                                       4
+            pos = SetUInt16(cmap, pos, 0);  // encodingID                                       6
+            pos = SetUInt32(cmap, pos, 20); // offset                                           8
 
-            pos = SetUInt16(cmap, pos, 1);  // platformID  12
-            pos = SetUInt16(cmap, pos, 10); // encodingID  14
-            pos = SetUInt32(cmap, pos, 282); // offset      16
+            pos = SetUInt16(cmap, pos, 3);  // platformID  Windows                              12  
+            pos = SetUInt16(cmap, pos, 10); // encodingID  Unicode full repertoire              14  
+            pos = SetUInt32(cmap, pos, 282); // offset                                          16
 
-            pos = SetUInt16(cmap, pos, 0);  // 20 Subtable format; set to 0
-            pos = SetUInt16(cmap, pos, 262);// 22 This is the length in bytes of the subtable.
-            pos = SetUInt16(cmap, pos, 0);  // 24 Please see "Note on the language field in 'cmap' subtables"
+            pos = SetUInt16(cmap, pos, 0);  // Subtable format; set to 0                        20
+            pos = SetUInt16(cmap, pos, 262);// This is the length in bytes of the subtable.     22
+            pos = SetUInt16(cmap, pos, 0);  // Please see "Note on the language field in 'cmap' subtables"  24 
 
             for (int i = 0; i < 256; i++) {
                 if (dctNewGlyphIdToGlyphOldNew.ContainsKey(i)) {
@@ -432,13 +422,12 @@ namespace SharpPDF.Lib  {
             return cmap;
         }
 
-        private byte[] SetHmtx()
-        {
+        private byte[] SetHmtx() {
             byte[] hmtx = new byte[Get4bytePadding(4 * lstGlyphToChar.Count)];
             int pos = 0;
 
             foreach (GlyphToChar glyphChar in lstGlyphToChar) {
-                pos = SetUInt16(hmtx, pos, Glypth[glyphChar.oldGlyphId].width * unitsPerEm / 1000);
+                pos = SetUInt16(hmtx, pos, Glypth[glyphChar.oldGlyphId].widthInEm);
                 pos = SetUInt16(hmtx, pos, Glypth[glyphChar.oldGlyphId].leftSideBearing);
             }
 
@@ -459,8 +448,7 @@ namespace SharpPDF.Lib  {
             return maxp;
         }
 
-        private byte[] SetHhea(byte[] font, Dictionary<string, Table> dctTablesUsed)
-        {
+        private byte[] SetHhea(byte[] font, Dictionary<string, Table> dctTablesUsed) {
             if (dctTablesUsed.ContainsKey("hhea"))
             {
                 byte[] hhea = new byte[dctTablesUsed["hhea"].length];
@@ -594,6 +582,8 @@ namespace SharpPDF.Lib  {
             // a good guide: http://www.4real.gr/technical-documents-ttf-subset.html
             SubsetTTFFont = Subset(TTFFont);
 
+            File.WriteAllBytes("file.ttf", SubsetTTFFont);
+            
             var widths = new List<PdfObject>();            
             widths.Add(new IntegerObject(this.Width));
             foreach (int i in hashChar) { 
