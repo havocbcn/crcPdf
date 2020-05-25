@@ -25,7 +25,7 @@ namespace SharpPDF.Lib {
 
         private void LoadFont(string fontName) {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "SharpPDF.Lib.Fonts.Resources." + fontName + "_resource.txt";
+            var resourceName = "SharpPDF.Lib.Resources." + fontName + "_resource.txt";
 
             string[] result;
             Stream stream = assembly.GetManifestResourceStream(resourceName);

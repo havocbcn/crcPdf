@@ -5,19 +5,19 @@
   </PropertyGroup>
 
  <ItemGroup>
-    <EmbeddedResource Include="Fonts\Resources\Courier_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Courier-Bold_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Courier-BoldOblique_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Courier-Oblique_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Helvetica_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Helvetica-Bold_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Helvetica-BoldOblique_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Helvetica-Oblique_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Times-Roman_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Times-Bold_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Times-BoldItalic_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Times-Italic_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\ZapfDingbats_resource.txt" />
-    <EmbeddedResource Include="Fonts\Resources\Symbol_resource.txt" />
+    <EmbeddedResource Include="Resources\Courier_resource.txt" />
+    <EmbeddedResource Include="Resources\Courier-Bold_resource.txt" />
+    <EmbeddedResource Include="Resources\Courier-BoldOblique_resource.txt" />
+    <EmbeddedResource Include="Resources\Courier-Oblique_resource.txt" />
+    <EmbeddedResource Include="Resources\Helvetica_resource.txt" />
+    <EmbeddedResource Include="Resources\Helvetica-Bold_resource.txt" />
+    <EmbeddedResource Include="Resources\Helvetica-BoldOblique_resource.txt" />
+    <EmbeddedResource Include="Resources\Helvetica-Oblique_resource.txt" />
+    <EmbeddedResource Include="Resources\Times-Roman_resource.txt" />
+    <EmbeddedResource Include="Resources\Times-Bold_resource.txt" />
+    <EmbeddedResource Include="Resources\Times-BoldItalic_resource.txt" />
+    <EmbeddedResource Include="Resources\Times-Italic_resource.txt" />
+    <EmbeddedResource Include="Resources\ZapfDingbats_resource.txt" />
+    <EmbeddedResource Include="Resources\Symbol_resource.txt" />
   </ItemGroup>
 </Project>

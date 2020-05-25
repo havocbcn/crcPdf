@@ -40,9 +40,6 @@ namespace SharpPDF.Tests {
             pdfWriter.WriteTo(ms);
 
             ms.Seek(0, SeekOrigin.Begin);
-            Console.WriteLine(System.Text.UTF8Encoding.UTF8.GetString(ms.ToArray()));
-
-            ms.Seek(0, SeekOrigin.Begin);
             SharpPdf pdfRead = new SharpPdf(ms);
 
             if (When != null) {

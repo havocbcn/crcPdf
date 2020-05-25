@@ -269,7 +269,7 @@ namespace SharpPDF.Lib {
 					if (nameId == 4 && // 4 	Full font name that reflects all family and relevant subfamily descriptors. The full font name is generally a combination of name IDs 1 and 2, or of name IDs 16 and 17, or a similar human-readable variant. 
 						(languageId == 0 || languageId == 1033 /* english US */ || languageId == 2057 /* english UK */)) {
 						if (string.IsNullOrEmpty(Name)) {
-							Name = fontString;
+							Name = fontString.Replace(" ","");
 						}
 					}					
 				}
