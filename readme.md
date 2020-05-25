@@ -66,7 +66,7 @@ Includes an image.
 SharpPdf pdf = new SharpPdf();
 pdf.Catalog.Pages
   .AddPage()        
-                                                              // widh, 0, 0, height, X, Y
+                             // widh, 0, 0, height, X, Y
     .CurrentTransformationMatrix(300, 0, 0, 500, 50, 100)
     .AddImage("samples/image.jpg")
 ```

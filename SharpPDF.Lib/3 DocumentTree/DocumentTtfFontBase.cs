@@ -23,7 +23,7 @@ namespace SharpPDF.Lib {
 
 		internal bool IsEmbedded { get; set; }
 
-        internal Dictionary<string, Table> dctTables = new Dictionary<string, Table>();
+        internal Dictionary<string, TtfTable> dctTables = new Dictionary<string, TtfTable>();
 
         protected DocumentTtfFontBase(PDFObjects pdf, string FontFullPath) : base(pdf) {
             FullPath = FontFullPath;
@@ -115,73 +115,96 @@ namespace SharpPDF.Lib {
                             var numberOfItems = numberOrEndCmap as IntegerObject;
                             var typeOfRange = reader.NextObject(true) as OperatorObject;
                             if (typeOfRange.Value == "beginbfchar") {
-                                for (int i = 0; i < numberOfItems.IntValue; i++) {
-                                    var codeInHex = reader.NextObject(true) as StringObject;
-                                    int code = (int)codeInHex.Value[0];
-                                    var unicodeInHex = reader.NextObject(true) as StringObject;
-									if (unicodeInHex.Value.Length == 2) {
-										int unicode = ((int)unicodeInHex.Value[0] << 8) + (int)unicodeInHex.Value[1];
-
-										hashChar.Add(unicode);
-
-										GlyphToChar glyph = new GlyphToChar {
-											character = unicode,
-											oldGlyphId = code,
-											newGlyphId = code
-										};
-
-										lstGlyphToChar.Add(glyph);
-
-										dctCharToGlyphOldNew.Add(unicode, glyph);
-										dctNewGlyphIdToGlyphOldNew.Add(code, glyph);
-
-										if (!dctCharCodeToGlyphID.ContainsKey(unicode)) {
-											dctCharCodeToGlyphID.Add(unicode, code);
-										}
-
-									} else {
-                                        // TODO
-                                        throw new PdfException(PdfExceptionCodes.CMAP_TODO, "I do not undertand this cmap");
-                                    }
-                                }
+                                ReadCmapChar(reader, numberOfItems);
                             } else if (typeOfRange.Value == "beginbfrange") {
-                                for (int i = 0; i < numberOfItems.IntValue; i++) {
-                                    var codeStartInHex = reader.NextObject(true) as StringObject;
-                                    int codeStart = (int)codeStartInHex.Value[0];
-                                    var codeEndInHex = reader.NextObject(true) as StringObject;
-                                    int codeEnd = (int)codeEndInHex.Value[0];
-                                    var unicodeInHex = reader.NextObject(true) as StringObject;
-                                    if (unicodeInHex.Value.Length == 2) {
-                                        int unicode = ((int)unicodeInHex.Value[0] << 8) + (int)unicodeInHex.Value[1];
-
-                                        int counter = 0;
-                                        for (int code = codeStart; code < codeEnd; code++) {
-                                            hashChar.Add(code);
-
-											GlyphToChar glyph = new GlyphToChar {
-												character = unicode,
-												oldGlyphId = code,
-												newGlyphId = code
-											};
-
-											lstGlyphToChar.Add(glyph);
-
-											dctCharToGlyphOldNew.Add(unicode, glyph);
-											dctNewGlyphIdToGlyphOldNew.Add(code, glyph);
-
-											if (!dctCharCodeToGlyphID.ContainsKey(unicode + counter))												
-                                            	dctCharCodeToGlyphID.Add(unicode + counter, code);
-                                            counter++;
-                                        }
-                                    } else {
-                                        // TODO
-                                        throw new PdfException(PdfExceptionCodes.CMAP_TODO, "I do not undertand this cmap");
-                                    }
-                                }
+                                ReadCmapRange(reader, numberOfItems);
                             }
                             reader.NextObject(true);    // endbfchar or endbfrange
                         }
                     }
+                }
+            }
+        }
+
+        private void ReadCmapRange(Objectizer reader, IntegerObject numberOfItems)
+        {
+            for (int i = 0; i < numberOfItems.IntValue; i++)
+            {
+                var codeStartInHex = reader.NextObject(true) as StringObject;
+                int codeStart = (int)codeStartInHex.Value[0];
+                var codeEndInHex = reader.NextObject(true) as StringObject;
+                int codeEnd = (int)codeEndInHex.Value[0];
+                var unicodeInHex = reader.NextObject(true) as StringObject;
+                if (unicodeInHex.Value.Length == 2)
+                {
+                    int unicode = ((int)unicodeInHex.Value[0] << 8) + (int)unicodeInHex.Value[1];
+
+                    int counter = 0;
+                    for (int code = codeStart; code < codeEnd; code++)
+                    {
+                        hashChar.Add(code);
+
+                        GlyphToChar glyph = new GlyphToChar
+                        {
+                            character = unicode,
+                            oldGlyphId = code,
+                            newGlyphId = code
+                        };
+
+                        lstGlyphToChar.Add(glyph);
+
+                        dctCharToGlyphOldNew.Add(unicode, glyph);
+                        dctNewGlyphIdToGlyphOldNew.Add(code, glyph);
+
+                        if (!dctCharCodeToGlyphID.ContainsKey(unicode + counter)) {
+                            dctCharCodeToGlyphID.Add(unicode + counter, code);
+						}
+                        counter++;
+                    }
+                }
+                else
+                {
+                    // TODO
+                    throw new PdfException(PdfExceptionCodes.CMAP_TODO, "I do not undertand this cmap");
+                }
+            }
+        }
+
+        private void ReadCmapChar(Objectizer reader, IntegerObject numberOfItems)
+        {
+            for (int i = 0; i < numberOfItems.IntValue; i++)
+            {
+                var codeInHex = reader.NextObject(true) as StringObject;
+                int code = (int)codeInHex.Value[0];
+                var unicodeInHex = reader.NextObject(true) as StringObject;
+                if (unicodeInHex.Value.Length == 2)
+                {
+                    int unicode = ((int)unicodeInHex.Value[0] << 8) + (int)unicodeInHex.Value[1];
+
+                    hashChar.Add(unicode);
+
+                    GlyphToChar glyph = new GlyphToChar
+                    {
+                        character = unicode,
+                        oldGlyphId = code,
+                        newGlyphId = code
+                    };
+
+                    lstGlyphToChar.Add(glyph);
+
+                    dctCharToGlyphOldNew.Add(unicode, glyph);
+                    dctNewGlyphIdToGlyphOldNew.Add(code, glyph);
+
+                    if (!dctCharCodeToGlyphID.ContainsKey(unicode))
+                    {
+                        dctCharCodeToGlyphID.Add(unicode, code);
+                    }
+
+                }
+                else
+                {
+                    // TODO
+                    throw new PdfException(PdfExceptionCodes.CMAP_TODO, "I do not undertand this cmap");
                 }
             }
         }
@@ -207,14 +230,13 @@ namespace SharpPDF.Lib {
 			for (int i = 0; i < numTables; i++) {
 				string tag = GetString(4);
 				
-				dctTables.Add(tag, new Table{
+				dctTables.Add(tag, new TtfTable{
                     checksum = GetUInt32(),
 					offset = GetUInt32(),
 					length = GetUInt32()
 				});
 			}
 
-			// kerning
 			ProcessGLYPH(dctTables["glyf"], dctTables["loca"]);
 			ProcessHead(dctTables["head"]);
 			ProcessHHEA(dctTables["hhea"]);
@@ -223,7 +245,7 @@ namespace SharpPDF.Lib {
 			ProcessNAME(dctTables["name"]);
 		}
 
-        private void ProcessNAME(Table table) {
+        private void ProcessNAME(TtfTable table) {
             filePosition = table.offset;
 			ushort format = GetUInt16();
 
@@ -253,15 +275,9 @@ namespace SharpPDF.Lib {
 				}
 
 			}
-
-						// simplificación
-			// TODO
-			Name = ""; // Path.GetFileNameWithoutExtension(TTFFileName);
-
-
         }
 
-        private void ProcessGLYPH(Table tableGlyph, Table tableLoca) {
+        private void ProcessGLYPH(TtfTable tableGlyph, TtfTable tableLoca) {
 			filePosition = tableLoca.offset;
 
 			int[] glyphOffset;
@@ -288,16 +304,12 @@ namespace SharpPDF.Lib {
 
 			// In order to compute the length of the last glyph element, there is an extra entry after the last valid index.
 			for (int i = 0; i < glyphOffset.Length-1; i++) {				
-				// REMEMBER: filePosition = tableGlyph.offset + glyphOffset[i] + 2;
-
 				Glypth[i] = new FontGlyph();
 				Glypth[i].SetFilePosition(tableGlyph.offset + glyphOffset[i], glyphOffset[i+1] - glyphOffset[i]);
-
-				// REMEMBER: Skip(8);  	// lowerX, lowerY, upperX, uppery				
 			}
 		}
 
-       	private void ProcessHead(Table table) {
+       	private void ProcessHead(TtfTable table) {
 			filePosition = table.offset;
         
 			ushort majorVersion = GetUInt16();
@@ -352,7 +364,7 @@ namespace SharpPDF.Lib {
 			indexToLocFormat = GetInt16();
 		}
 
-		private void ProcessHHEA(Table table) {
+		private void ProcessHHEA(TtfTable table) {
 			filePosition = table.offset;
 
 			ushort majorVersion = GetUInt16();
@@ -379,7 +391,7 @@ namespace SharpPDF.Lib {
 			numberOfHMetrics = GetUInt16();
 		}
 
-		private void ProcessCMAP(Table table) {
+		private void ProcessCMAP(TtfTable table) {
 			filePosition = table.offset;
 			Skip(2);	// cmapVersion
 			ushort cmapNumTables = GetUInt16();
@@ -487,7 +499,7 @@ namespace SharpPDF.Lib {
 							if (glyphId < Glypth.Length) {
                     			Glypth[glyphId].unicode = charIndex;
 							} else {
-								Console.WriteLine($"error {glyphId} of {Glypth.Length}");
+								throw new PdfException(PdfExceptionCodes.FONT_ERROR, $"error {glyphId} of {Glypth.Length}");
 							}
 						}
 						// if 0 => missingGlyph
@@ -529,7 +541,7 @@ namespace SharpPDF.Lib {
 			}
 		}
 
-		private void ProcessHMTX(Table table)
+		private void ProcessHMTX(TtfTable table)
 		{
 			filePosition = table.offset;
 
@@ -547,14 +559,7 @@ namespace SharpPDF.Lib {
 		}
 
         public override byte[] FontByteArray => TTFFont;
-
-      	internal struct Table {
-			internal int offset;
-			internal int length;
-            internal int checksum;
-		}		
-
-
+      
 		/// <summary>
 		/// Number of hMetric entries in 'hmtx' table
 		/// </summary>

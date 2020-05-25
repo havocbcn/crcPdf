@@ -171,7 +171,7 @@ namespace SharpPDF.Lib  {
                 }
             }
 
-            Dictionary<string, Table> dctTablesUsed = new Dictionary<string, Table>();
+            Dictionary<string, TtfTable> dctTablesUsed = new Dictionary<string, TtfTable>();
 
             // de todas las tablas cargadas, sólo grabaremos las que PDF necesita
             foreach (string table in tablesNames)
@@ -202,7 +202,7 @@ namespace SharpPDF.Lib  {
             fontSubsetSize += 12;   // initial header
             fontSubsetSize += 16 * dctTablesUsed.Count;   // initial header pointers
             // de las tablas que vamos a grabar
-            foreach (KeyValuePair<string, Table> kvp in dctTablesUsed) {
+            foreach (KeyValuePair<string, TtfTable> kvp in dctTablesUsed) {
                 switch (kvp.Key) {
                     case "hhea":
                         fontSubsetSize += Get4bytePadding(hhea.Length);
@@ -244,7 +244,7 @@ namespace SharpPDF.Lib  {
             fontSubsetPos = SetUInt16(fontSubset, fontSubsetPos, entrySelector);
             fontSubsetPos = SetUInt16(fontSubset, fontSubsetPos, rangeShift);
 
-            foreach (KeyValuePair<string, Table> kvp in dctTablesUsed) {
+            foreach (KeyValuePair<string, TtfTable> kvp in dctTablesUsed) {
                 fontSubsetPos = SetString(fontSubset, fontSubsetPos, kvp.Key);
                 switch (kvp.Key) {
                     case "hhea":
@@ -280,7 +280,7 @@ namespace SharpPDF.Lib  {
 
             // -- Tables --
             int checkSumAdjustmentOffset = 0;
-            foreach (KeyValuePair<string, Table> kvp in dctTablesUsed) {
+            foreach (KeyValuePair<string, TtfTable> kvp in dctTablesUsed) {
                 switch (kvp.Key) {
                     case "hhea":
                         Array.Copy(hhea, 0, fontSubset, fontSubsetPos, hhea.Length);
@@ -434,7 +434,7 @@ namespace SharpPDF.Lib  {
             return hmtx;
         }
 
-        private byte[] SetMaxp(byte[] font, Dictionary<string, Table> dctTablesUsed) {
+        private byte[] SetMaxp(byte[] font, Dictionary<string, TtfTable> dctTablesUsed) {
             if (!dctTablesUsed.ContainsKey("maxp")) {
                 return  new byte[0];
             }
@@ -448,7 +448,7 @@ namespace SharpPDF.Lib  {
             return maxp;
         }
 
-        private byte[] SetHhea(byte[] font, Dictionary<string, Table> dctTablesUsed) {
+        private byte[] SetHhea(byte[] font, Dictionary<string, TtfTable> dctTablesUsed) {
             if (dctTablesUsed.ContainsKey("hhea"))
             {
                 byte[] hhea = new byte[dctTablesUsed["hhea"].length];
