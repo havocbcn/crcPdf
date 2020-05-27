@@ -1,4 +1,6 @@
-Library to read and write lowlevel pdf's, like ITextSharp, but free.
+LGPL C# library to read and write pdf's, like ITextSharp, but free.
+
+Fully compantible with net461, netcore 2.0, netcore 3.1
 
 Very alpha version, doesn't fully implement Pdf standard. Please report any problem found.
 
@@ -15,7 +17,7 @@ Very alpha version, doesn't fully implement Pdf standard. Please report any prob
 ### Text
 Support for positioning, rotating and set text.
 ```csharp
-SharpPdf pdf = new SharpPdf();
+crcPdf pdf = new crcPdf();
 pdf.Catalog.Pages
   .AddPage()                        
      .SetFont("Times roman", 12, false, false)
@@ -27,7 +29,7 @@ pdf.Catalog.Pages
 Support for pdf base fonts: Time new Roman, Courier, Helvetica, ZapfDingbats and Symbols. Any of those fonts are already included in any Pdf reader.
 
 ```csharp
-SharpPdf pdf = new SharpPdf();
+crcPdf pdf = new crcPdf();
 pdf.Catalog.Pages
   .AddPage()                        
      .SetFont("Times roman", 12, false, false)
@@ -39,7 +41,7 @@ pdf.Catalog.Pages
 Library can read and use ttf fonts located with the application or in typical OS forldes. For speed considerations, the filename of the font must be used.
 
 ```csharp
-SharpPdf pdf = new SharpPdf();
+crcPdf pdf = new crcPdf();
 pdf.Catalog.Pages
   .AddPage()                        
      .SetFont("OpenSans-Regular", 12)
@@ -51,7 +53,7 @@ pdf.Catalog.Pages
 Maybe you want to include the font inside the Pdf or you want to use unicode characters, so the font must be included inside the Pdf:
 
 ```csharp
-SharpPdf pdf = new SharpPdf();
+crcPdf pdf = new crcPdf();
 pdf.Catalog.Pages
   .AddPage()                        
      .SetFont("OpenSans-Regular", 12, Embedded.Yes)
@@ -63,7 +65,7 @@ pdf.Catalog.Pages
 Includes an image.
 
 ```csharp
-SharpPdf pdf = new SharpPdf();
+crcPdf pdf = new crcPdf();
 pdf.Catalog.Pages
   .AddPage()        
                              // widh, 0, 0, height, X, Y
@@ -71,4 +73,4 @@ pdf.Catalog.Pages
     .AddImage("samples/image.jpg")
 ```
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e0969b64ccbf42aa8011a605a5fc2770)](https://app.codacy.com/manual/havocbcn/SharpPDF?utm_source=github.com&utm_medium=referral&utm_content=havocbcn/SharpPDF&utm_campaign=Badge_Grade_Dashboard)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e0969b64ccbf42aa8011a605a5fc2770)](https://app.codacy.com/manual/havocbcn/crcPdf?utm_source=github.com&utm_medium=referral&utm_content=havocbcn/crcPdf&utm_campaign=Badge_Grade_Dashboard)

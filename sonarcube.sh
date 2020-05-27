@@ -11,7 +11,7 @@ dotnet test /p:CollectCoverage="true" /p:CoverletOutputFormat="opencover" /p:Cov
 
 reportgenerator -reports:./coverage.opencover.xml  -targetdir:./cover/
 
-#dotnet-sonarscanner begin /k:"SharpPDF" /d:sonar.host.url="http://192.168.1.100:32768" /d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml" 
+#dotnet-sonarscanner begin /k:"crcPdf" /d:sonar.host.url="http://192.168.1.100:32768" /d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml" 
 #dotnet build
 #dotnet-sonarscanner end 
 
