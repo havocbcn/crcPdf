@@ -2,7 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>crcPdf</PackageId>
+    <RepositoryUrl>https://github.com/havocbcn/crcPdf</RepositoryUrl>   
+    <PackageLicenseUrl>https://www.gnu.org/licenses/lgpl-3.0.html</PackageLicenseUrl>    
     <Version>0.0.1</Version>
     <Authors>Carlos Rodríguez Caminero</Authors>
     <Company>Carlos Rodríguez Caminero</Company>
