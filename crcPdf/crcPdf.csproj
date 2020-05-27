@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <PackageId>crcPdf</PackageId>
-    <Version>1.0.0</Version>
+    <Version>0.0.1</Version>
     <Authors>Carlos Rodríguez Caminero</Authors>
     <Company>Carlos Rodríguez Caminero</Company>
     <description>LGPL C# library to read and write pdf's</description>
