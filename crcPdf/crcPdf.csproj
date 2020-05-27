@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <PackageId>crcPdf</PackageId>
     <Version>0.0.1</Version>
     <Authors>Carlos Rodríguez Caminero</Authors>
@@ -26,4 +26,8 @@
     <EmbeddedResource Include="Resources\ZapfDingbats_resource.txt" />
     <EmbeddedResource Include="Resources\Symbol_resource.txt" />
   </ItemGroup>
+
+ <ItemGroup>
+   <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.1" />
+ </ItemGroup>
 </Project>

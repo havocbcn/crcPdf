@@ -57,13 +57,8 @@ namespace crcPdf {
         /// 1 0 obj [ 1 2 3 ] endobj
         /// type will be null
         /// </summary>
-        public string GetType(IndirectReferenceObject indirectObj) {
-            IndirectObject obj;
-            if (!objects.TryGetValue(indirectObj, out obj)) {
-                return null;
-            }
-            return GetType(obj);
-        }
+        public string GetType(IndirectReferenceObject indirectObj) 
+            => objects.TryGetValue(indirectObj, out IndirectObject obj) ? GetType(obj) : null;        
 
         /// <summary>
         /// From an object reference, I want to know the type of this object
@@ -131,9 +126,8 @@ namespace crcPdf {
             return obj as T;
         } 
 
-        public T GetObject<T>(IndirectObject obj) where T : PdfObject {
-            return obj.childs[0] as T;
-        } 
+        public T GetObject<T>(IndirectObject obj) where T : PdfObject 
+            => obj.childs[0] as T;
         
         public T GetObject<T>(IndirectReferenceObject indirectObj) where T : PdfObject {
             IndirectObject obj;

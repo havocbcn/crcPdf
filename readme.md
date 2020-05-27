@@ -1,7 +1,5 @@
 LGPL C# library to read and write pdf's, like ITextSharp, but free.
 
-Fully compantible with net461, netcore 2.0, netcore 3.1
-
 Very alpha version, doesn't fully implement Pdf standard. Please report any problem found.
 
 ### Features
