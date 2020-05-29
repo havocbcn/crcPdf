@@ -46,7 +46,7 @@ namespace crcPdf {
             actualPage = Catalog.Pages.AddPage();
         }
 
-        public void DrawImage(byte[] image, int x, int y, int w, int h) {
+        public void DrawImage(byte[] image, float x, float y, float w, float h) {
             actualPage.SaveGraph();
             actualPage.CurrentTransformationMatrix(w, 0, 0, h, x, y);
             actualPage.AddImage(image);
@@ -78,6 +78,21 @@ namespace crcPdf {
 
             actualPage.AddLabel(text);
         }        
+
+        public void SetColor(float r, float g, float b) 
+            => actualPage.AddNonStrokingColour(r, g, b);
+
+        public void DrawRectangle(float x, float y, float width, float height)  {
+            actualPage.AddRectangle(x, y, width, height);
+            actualPage.AddStroke();
+        }
+
+         public void DrawRectangleFull(float x, float y, float width, float height)  {
+            actualPage.AddRectangle(x, y, width, height);
+            actualPage.AddFill();
+            actualPage.AddStroke();
+        }
+            
         
     }
 }

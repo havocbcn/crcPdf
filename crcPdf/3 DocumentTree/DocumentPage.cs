@@ -84,6 +84,12 @@ namespace crcPdf {
             contents = pdf.GetDocument<DocumentText>(dic.Dictionary["Contents"]);
         }
 
+        internal DocumentPage AddNonStrokingColour(float r, float g, float b)
+        {
+            contents.AddNonStrokingColour(r, g, b);
+            return this;
+        }
+
         internal DocumentPage SetTextMatrix(float a, float b, float c, float d, float e, float f)
         {
             contents.SetTextMatrix(a, b, c, d, e, f);

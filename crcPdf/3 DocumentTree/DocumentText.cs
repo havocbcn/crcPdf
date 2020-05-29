@@ -100,5 +100,8 @@ namespace crcPdf {
 
         internal void SetTextMatrix(float a, float b, float c, float d, float e, float f)
             => pageOperators.Add(new TextMatrixOperation(a,b,c,d,e,f));
+
+        internal void AddNonStrokingColour(float r, float g, float b)
+            => pageOperators.Add(new NonStrokingColourOperator(r, g, b));
     }
 }
