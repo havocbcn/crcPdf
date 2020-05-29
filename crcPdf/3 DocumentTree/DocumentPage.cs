@@ -15,6 +15,7 @@
 using System.Collections.Generic;
 using crcPdf.Fonts;
 using System.Linq;
+using System;
 
 namespace crcPdf {
     public class DocumentPage : IDocumentTree {        
@@ -83,6 +84,12 @@ namespace crcPdf {
             contents = pdf.GetDocument<DocumentText>(dic.Dictionary["Contents"]);
         }
 
+        internal DocumentPage SetTextMatrix(float a, float b, float c, float d, float e, float f)
+        {
+            contents.SetTextMatrix(a, b, c, d, e, f);
+            return this;
+        }
+
         public DocumentPage(PDFObjects pdf, DocumentPageTree parent) : base(pdf) {   
             this.parent = parent;
             this.contents = new DocumentText(pdf);
@@ -123,10 +130,10 @@ namespace crcPdf {
         public DocumentPage SetFont(string name, int size, Embedded embedded) 
             => SetFont(name, size, false, false, embedded);
 
+        public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, Embedded embedded)
+            => SetFont(pdfObjects.fontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded), size);
 
-        public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, Embedded embedded) {
-            var font = pdfObjects.fontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded);
-
+        public DocumentPage SetFont(DocumentFont font, int size) {
             if (!fonts.ContainsKey(font)) {
                 fonts.Add(font, "F" + fonts.Count);
             }
@@ -170,6 +177,19 @@ namespace crcPdf {
             }
 
             contents.AddImage(images[image]);
+            return this;
+        }
+
+          public DocumentPage AddImage(byte[] image) {
+            var documentIimage = pdfObjects.imageFactory.GetImage(pdfObjects, image);
+
+            if (!images.ContainsKey(documentIimage)) {
+                var key = "I" + images.Count;
+                images.Add(documentIimage, key);
+                reverseImages.Add(key, documentIimage);
+            }
+
+            contents.AddImage(images[documentIimage]);
             return this;
         }
 

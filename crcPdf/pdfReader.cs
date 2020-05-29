@@ -12,33 +12,24 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
-using System.IO;
 
 namespace crcPdf {
-    public class crcPdf {
-        readonly Tokenizer tokenizer;
-        
-        PDFObjects pdfObjects = new PDFObjects();
-
-        public DocumentCatalog Catalog { get; private set; }        
-        
-        public crcPdf(MemoryStream ms) {
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-            tokenizer = new Tokenizer(ms);
-            Analyze();
+    /// <summary>
+    /// Class to read a Pdf
+    /// </summary>
+    internal class PdfReader {      
+        /// <summary>
+        /// Read a Pdf using a tokenizer
+        /// </summary>
+        /// <param name="tokenizer">Read token by token a pdf</param>
+        /// <returns>The document catalog that represents the pdf</returns>
+        internal DocumentCatalog Analyze(Tokenizer tokenizer) {
+            AnalyzeHeader(tokenizer);
+            return ReadXRef(tokenizer);
         }
 
-        public crcPdf() {      
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);      
-            Catalog = new DocumentCatalog(pdfObjects);
-        }
-
-        private void Analyze() {
-            AnalyzeHeader();
-            ReadXRef(XrefPosition());
-        }
-
-        private void ReadXRef(long xrefPosition) {
+        private DocumentCatalog ReadXRef(Tokenizer tokenizer) {
+            long xrefPosition = XrefPosition(tokenizer);
             tokenizer.MoveToPosition(xrefPosition);
 
             Token token = tokenizer.Token();
@@ -55,6 +46,8 @@ namespace crcPdf {
             tokenizer.TokenExcludedComments();
             int numberOfEntries = tokenizer.GetInteger();
             tokenizer.TokenExcludedComments();
+
+            PDFObjects pdfObjects = new PDFObjects();
 
             for (int i = 0; i < numberOfEntries; i++) {
                 int pos = tokenizer.GetInteger();           // position
@@ -87,10 +80,10 @@ namespace crcPdf {
             var trailer = new DictionaryObject(tokenizer);
             var rootIndirect = (IndirectReferenceObject)trailer.Dictionary["Root"];
 
-            Catalog = pdfObjects.GetDocument<DocumentCatalog>(rootIndirect);
+            return pdfObjects.GetDocument<DocumentCatalog>(rootIndirect);
         }
 
-        private long XrefPosition() {
+        private long XrefPosition(Tokenizer tokenizer) {
             tokenizer.MoveToEnd();
             tokenizer.MoveToPrevious('s');
            
@@ -133,7 +126,7 @@ namespace crcPdf {
             return xrefPosition;
         }
 
-        private void AnalyzeHeader() {
+        private void AnalyzeHeader(Tokenizer tokenizer) {
             Token token = tokenizer.Token();
             if (!TokenValidator.IsDelimiter(token, "%")) {
                 throw new PdfException(PdfExceptionCodes.HEADER_NOT_FOUND, "Header not found");
@@ -145,11 +138,5 @@ namespace crcPdf {
                 throw new PdfException(PdfExceptionCodes.HEADER_NOT_FOUND, "Header not found");            
             }
         }
-
-        public void WriteTo(Stream ms) 
-            => pdfObjects.WriteTo(ms, Catalog, Compression.Compress);        
-
-        public void WriteTo(Stream ms, Compression compression) 
-            => pdfObjects.WriteTo(ms, Catalog, compression);
     }
 }

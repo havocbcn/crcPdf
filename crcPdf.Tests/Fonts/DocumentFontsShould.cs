@@ -14,7 +14,6 @@
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
 using FluentAssertions;
 using System.IO;
-using crcPdf;
 using Xunit;
 using crcPdf.Fonts;
 
@@ -43,20 +42,20 @@ namespace crcPdf.Tests {
         [InlineData("ZapfDingbats", true, true)]        
         public void LoadBaseFonts(string fontName, bool bold, bool italic) =>
             crcPdf(
-                Given: pdf => { pdf.Catalog.Pages
+                Given: pdf => { pdf.Pages
                     .AddPage()                        
                         .SetFont(fontName, 12, bold, italic)
                         .SetPosition(10, 15)
                         .AddLabel("Hola"); },
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentBaseFont>();
+                    pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentBaseFont>();
                     if (bold || italic)
                         fontName += "-";
                     if (bold)
                         fontName += "Bold";
                     if (italic)
                         fontName += "Italic";
-                    pdf.Catalog.Pages.PageSons[0].Font[0].Name = fontName;
+                    pdf.Pages.PageSons[0].Font[0].Name = fontName;
                     }
             );
 
@@ -65,8 +64,8 @@ namespace crcPdf.Tests {
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/microsample.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentBaseFont>();
-                    pdf.Catalog.Pages.PageSons[0].Font[0].Name = "Times-Roman";
+                    pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentBaseFont>();
+                    pdf.Pages.PageSons[0].Font[0].Name = "Times-Roman";
                 }
             );
 
@@ -74,17 +73,17 @@ namespace crcPdf.Tests {
         [InlineData("OpenSans-Regular")]        
         public void LoadTTFFonts(string fontName) =>
             crcPdf(
-                Given: pdf => { pdf.Catalog.Pages
+                Given: pdf => { pdf.Pages
                     .AddPage()                        
                         .SetFont(fontName, 12)
                         .SetPosition(10, 15)
                         .AddLabel("Hola"); },
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfFont>();
-                    pdf.Catalog.Pages.PageSons[0].Font[0].Name = fontName;
+                    pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfFont>();
+                    pdf.Pages.PageSons[0].Font[0].Name = fontName;
     
                     using (var fs = new FileStream("openSans.pdf", FileMode.Create)) {
-                        pdf.WriteTo(fs);
+                        pdf.Save(fs);
                     }
                     }
             );
@@ -93,17 +92,17 @@ namespace crcPdf.Tests {
         [InlineData("OpenSans-Regular")]        
         public void LoadSubsetTTFFonts(string fontName) =>
             crcPdf(
-                Given: pdf => { pdf.Catalog.Pages
+                Given: pdf => { pdf.Pages
                     .AddPage()                        
                         .SetFont(fontName, 12, Embedded.Yes)
                         .SetPosition(10, 15)
                         .AddLabel("Α α:Alpha. Β β: Beta. Γ γ: Gamma. Δ δ: Delta"); },
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfSubsetFont>();
-                    pdf.Catalog.Pages.PageSons[0].Font[0].Name = fontName;
+                    pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfSubsetFont>();
+                    pdf.Pages.PageSons[0].Font[0].Name = fontName;
     
                     using (var fs = new FileStream("openSansSubset.pdf", FileMode.Create)) {
-                        pdf.WriteTo(fs);
+                        pdf.Save(fs);
                     }
                     }
             );

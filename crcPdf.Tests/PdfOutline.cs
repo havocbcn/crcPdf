@@ -10,7 +10,7 @@ namespace crcPdf.Tests.Outline {
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/sample.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Outlines.Count.Should().Be(0);
+                    pdf.Outlines.Count.Should().Be(0);
                 }
             );
     }

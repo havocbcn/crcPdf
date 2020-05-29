@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
 using System.Collections.Generic;
+using System.IO;
 
 namespace crcPdf {
     // 7.7.2 Document Catalog
@@ -21,10 +22,12 @@ namespace crcPdf {
         private readonly DocumentOutline outlines;
         
         public DocumentCatalog(PDFObjects pdf) : base(pdf) {            
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);      
             this.pageTree = new DocumentPageTree(pdf);
         }
 
         public DocumentCatalog(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);      
             var dictionary = pdf.GetObject<DictionaryObject>(pdfObject);
             pageTree = pdf.GetDocument<DocumentPageTree>(dictionary.Dictionary["Pages"]);
 
@@ -49,5 +52,20 @@ namespace crcPdf {
 
         public DocumentPageTree Pages => pageTree;
         public DocumentOutline Outlines => outlines;
+
+
+
+
+        public DocumentCatalog() : base(new PDFObjects()) {                  
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);      
+            this.pageTree = new DocumentPageTree(pdfObjects);
+        }
+
+        public void Save(Stream ms) 
+            => pdfObjects.WriteTo(ms, this, Compression.Compress);        
+
+        public void Save(Stream ms, Compression compression) 
+            => pdfObjects.WriteTo(ms, this, compression);
+
     }
 }

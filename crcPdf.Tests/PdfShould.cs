@@ -40,7 +40,7 @@ startxref
 392
 %%EOF"),
                 When: pdf => {  },
-                Then: pdf => { pdf.Catalog.Should().NotBeNull(); }
+                Then: pdf => { pdf.Should().NotBeNull(); }
             );
         }
 
@@ -64,7 +64,7 @@ startxref
             Assert.Throws<PdfException>(() =>
             {
                 byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(pdfFile);
-                var pdf = new crcPdf(new MemoryStream(bytes));
+                var pdf = Pdf.Load(new MemoryStream(bytes));
             });
         }
 
@@ -82,7 +82,7 @@ startxref
             Assert.Throws<PdfException>(() =>
             {
                 byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(pdfFile);
-                var pdf = new crcPdf(new MemoryStream(bytes));
+                var pdf = Pdf.Load(new MemoryStream(bytes));
             });
         }
 
@@ -98,7 +98,7 @@ startxre
             Assert.Throws<PdfException>(() =>
             {
                 byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(pdfFile);
-                var pdf = new crcPdf(new MemoryStream(bytes));
+                var pdf = Pdf.Load(new MemoryStream(bytes));
             });
         }
 
@@ -113,7 +113,7 @@ startxref 9
             Assert.Throws<PdfException>(() =>
             {
                 byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(pdfFile);
-                var pdf = new crcPdf(new MemoryStream(bytes));
+                var pdf = Pdf.Load(new MemoryStream(bytes));
             });
         }
 
@@ -128,7 +128,7 @@ NO
             Assert.Throws<PdfException>(() =>
             {
                 byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(pdfFile);
-                var pdf = new crcPdf(new MemoryStream(bytes));
+                var pdf = Pdf.Load(new MemoryStream(bytes));
             });
         }
 
@@ -141,7 +141,7 @@ NO
             Assert.Throws<PdfException>(() =>
             {
                 byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(pdfFile);
-                var pdf = new crcPdf(new MemoryStream(bytes));
+                var pdf = Pdf.Load(new MemoryStream(bytes));
             });
         }
 
@@ -157,7 +157,7 @@ startxref
             Assert.Throws<PdfException>(() =>
             {
                 byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(pdfFile);
-                var pdf = new crcPdf(new MemoryStream(bytes));
+                var pdf = Pdf.Load(new MemoryStream(bytes));
             });
         }
 
@@ -168,7 +168,7 @@ startxref
                 Given: File.ReadAllBytes("samples/microsample.pdf"),
                 When: pdf => { },
                 Then: pdf => {                     
-                    pdf.Catalog.Should().NotBeNull();
+                    pdf.Should().NotBeNull();
                     }
             );
 
@@ -178,8 +178,8 @@ startxref
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/microsample.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons.Should().HaveCount(1);
-                    pdf.Catalog.Pages.PageSons[0].Parent.Should().Be(pdf.Catalog.Pages);
+                    pdf.Pages.PageSons.Should().HaveCount(1);
+                    pdf.Pages.PageSons[0].Parent.Should().Be(pdf.Pages);
                     }
             );
 
@@ -210,9 +210,9 @@ startxref
 441
 %%EOF"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons.Should().HaveCount(1);
-                    pdf.Catalog.Pages.PageTreeSons.Should().HaveCount(1);
-                    pdf.Catalog.Pages.PageTreeSons[0].PageSons.Should().HaveCount(1);                   
+                    pdf.Pages.PageSons.Should().HaveCount(1);
+                    pdf.Pages.PageTreeSons.Should().HaveCount(1);
+                    pdf.Pages.PageTreeSons[0].PageSons.Should().HaveCount(1);                   
                 }
             );
 
@@ -222,27 +222,27 @@ startxref
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/microsample.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons[0].Contents.Should().NotBeNull();
+                    pdf.Pages.PageSons[0].Contents.Should().NotBeNull();
                 }
             );
 
         [Fact]
         public void WriteASimplePdf() =>
             crcPdf(
-                Given: pdf => { pdf.Catalog.Pages
+                Given: pdf => { pdf.Pages
                     .AddPage()                        
                         .SetFont("Times roman", 12, false, false)
                         .SetPosition(10, 15)
                         .AddLabel("Hola"); },
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons.Should().HaveCount(1);
-                    pdf.Catalog.Pages.PageSons[0].Contents.PageOperators.Should().HaveCount(1);
-                    pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0].Should().BeOfType<TextObject>();
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators.Should().HaveCount(3);
-                    ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators[0]).Code.Should().Be("F0");
-                    ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators[0]).Size.Should().Be(12);
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators[1].ToString().Should().Be("10 15 Td");
-                    ((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).Operators[2].ToString().Should().Be("(Hola) Tj");
+                    pdf.Pages.PageSons.Should().HaveCount(1);
+                    pdf.Pages.PageSons[0].Contents.PageOperators.Should().HaveCount(1);
+                    pdf.Pages.PageSons[0].Contents.PageOperators[0].Should().BeOfType<TextObject>();
+                    ((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[0]).Operators.Should().HaveCount(3);
+                    ((FontOperator)((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[0]).Operators[0]).Code.Should().Be("F0");
+                    ((FontOperator)((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[0]).Operators[0]).Size.Should().Be(12);
+                    ((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[0]).Operators[1].ToString().Should().Be("10 15 Td");
+                    ((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[0]).Operators[2].ToString().Should().Be("(Hola) Tj");
                 }
             );
 
@@ -252,13 +252,13 @@ startxref
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/sample.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
-                    ((LineCapOperator)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[0]).LineCap.Should().Be(LineCapStyle.ProjectingSquareCap);
-                    ((NonStrokingColourOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).R.Should().Be(0);
-                    ((NonStrokingColourOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).G.Should().Be(0);
-                    ((NonStrokingColourOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).B.Should().Be(0);
-                    ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[1]).Code.Should().Be("F1");
-                    ((FontOperator)((TextObject)pdf.Catalog.Pages.PageSons[0].Contents.PageOperators[1]).Operators[1]).Size.Should().Be(27);
+                    pdf.Pages.PageSons.Should().HaveCount(2);
+                    ((LineCapOperator)pdf.Pages.PageSons[0].Contents.PageOperators[0]).LineCap.Should().Be(LineCapStyle.ProjectingSquareCap);
+                    ((NonStrokingColourOperator)((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).R.Should().Be(0);
+                    ((NonStrokingColourOperator)((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).G.Should().Be(0);
+                    ((NonStrokingColourOperator)((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[1]).Operators[0]).B.Should().Be(0);
+                    ((FontOperator)((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[1]).Operators[1]).Code.Should().Be("F1");
+                    ((FontOperator)((TextObject)pdf.Pages.PageSons[0].Contents.PageOperators[1]).Operators[1]).Size.Should().Be(27);
                 }
             );
 
@@ -268,10 +268,10 @@ startxref
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+                    pdf.Pages.PageSons.Should().HaveCount(2);
 
                     using (var fs = new FileStream("crcPdf_out.pdf", FileMode.Create)) {
-                        pdf.WriteTo(fs);
+                        pdf.Save(fs);
                     }
                 }
             );
@@ -282,10 +282,10 @@ startxref
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+                    pdf.Pages.PageSons.Should().HaveCount(2);
 
                     using (var fs = new FileStream("crcPdf_uncompressed.pdf", FileMode.Create)) {
-                        pdf.WriteTo(fs, Compression.None);
+                        pdf.Save(fs, Compression.None);
                     }
                 }
             );
@@ -296,10 +296,10 @@ startxref
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+                    pdf.Pages.PageSons.Should().HaveCount(2);
 
                     using (var fs = new FileStream("crcPdf_compressed.pdf", FileMode.Create)) {
-                        pdf.WriteTo(fs, Compression.Compress);
+                        pdf.Save(fs, Compression.Compress);
                     }
                 }
             );
@@ -310,10 +310,10 @@ startxref
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+                    pdf.Pages.PageSons.Should().HaveCount(2);
 
                     using (var fs = new FileStream("crcPdf_uncompressed_optimized.pdf", FileMode.Create)) {
-                        pdf.WriteTo(fs, Compression.Optimize);
+                        pdf.Save(fs, Compression.Optimize);
                     }
                 }
             );
@@ -324,10 +324,10 @@ startxref
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/sharpReport.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons.Should().HaveCount(2);
+                    pdf.Pages.PageSons.Should().HaveCount(2);
 
                     using (var fs = new FileStream("crcPdf_compressed_optimized.pdf", FileMode.Create)) {
-                        pdf.WriteTo(fs, Compression.Compress | Compression.Optimize);
+                        pdf.Save(fs, Compression.Compress | Compression.Optimize);
                     }
                 }
             );

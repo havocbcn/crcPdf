@@ -14,13 +14,12 @@
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.IO;
-using crcPdf;
 
 namespace crcPdf.Tests {
     public class crcPdfTest { 
-        internal void crcPdfShould(byte[] Given, Action<crcPdf> When = null, Action<crcPdf> Then = null)
+        internal void crcPdfShould(byte[] Given, Action<DocumentCatalog> When = null, Action<DocumentCatalog> Then = null)
         {            
-            crcPdf pdf = new crcPdf(new MemoryStream(Given));
+            DocumentCatalog pdf = Pdf.Load(new MemoryStream(Given));
 
             if (When != null) {
                 When(pdf);
@@ -31,16 +30,16 @@ namespace crcPdf.Tests {
             }
         }
 
-        internal void crcPdf(Action<crcPdf> Given, Action<crcPdf> When = null, Action<crcPdf> Then = null)
+        internal void crcPdf(Action<DocumentCatalog> Given, Action<DocumentCatalog> When = null, Action<DocumentCatalog> Then = null)
         {            
-            crcPdf pdfWriter = new crcPdf();
+            DocumentCatalog pdfWriter = Pdf.CreateExpert();
             Given(pdfWriter);
 
             MemoryStream ms = new MemoryStream();
-            pdfWriter.WriteTo(ms);
+            pdfWriter.Save(ms);
 
             ms.Seek(0, SeekOrigin.Begin);
-            crcPdf pdfRead = new crcPdf(ms);
+            DocumentCatalog pdfRead = Pdf.Load(ms);
 
             if (When != null) {
                 When(pdfRead);

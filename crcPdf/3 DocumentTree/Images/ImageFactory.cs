@@ -43,6 +43,9 @@ namespace crcPdf.Images {
             return GetImageInternal(pdf, image);
         }
 
+        public DocumentImage GetImage(PDFObjects pdf, byte[] image) 
+            => GetImageInternal(pdf, image);
+
         private DocumentImage GetImageInternal(PDFObjects pdf, byte[] image) {
             byte[] hashBytes = sha1.ComputeHash(image);
             string hash = string.Concat(hashBytes.Select(b => b.ToString("x2")));

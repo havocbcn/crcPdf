@@ -11,9 +11,9 @@ namespace crcPdf.Tests.Outline {
             crcPdfShould(
                 Given: File.ReadAllBytes("samples/sample.pdf"),
                 Then: pdf => { 
-                    pdf.Catalog.Pages.PageSons[0].Procsets.Should().HaveCount(2);
-                    pdf.Catalog.Pages.PageSons[0].Procsets[0].Should().Be("PDF");
-                    pdf.Catalog.Pages.PageSons[0].Procsets[1].Should().Be("Text");
+                    pdf.Pages.PageSons[0].Procsets.Should().HaveCount(2);
+                    pdf.Pages.PageSons[0].Procsets[0].Should().Be("PDF");
+                    pdf.Pages.PageSons[0].Procsets[1].Should().Be("Text");
                 }
             );
 
