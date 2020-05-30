@@ -13,21 +13,23 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
 using System.Collections.Generic;
-using System.IO;
 
 namespace crcPdf {
-	public class DocumentFontContent : IDocumentTree  {		
+	public class DocumentFontContent : DocumentTree  {		
 		private readonly byte[] font;
-        public DocumentFontContent(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
+        public DocumentFontContent(PDFObjects pdf, PdfObject pdfObject){
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);
             font = dic.Stream;
         }
 
-        public DocumentFontContent(PDFObjects pdf, byte[] font) : base(pdf) {
+        public DocumentFontContent() {
+        }
+
+        public DocumentFontContent(byte[] font) {
             this.font = font;
         }
 
-        public override void OnSaveEvent(IndirectObject indirectObject)
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdf)
         {          
             var entries = new Dictionary<string, PdfObject> {
                 { "Length", new IntegerObject(font.Length) },

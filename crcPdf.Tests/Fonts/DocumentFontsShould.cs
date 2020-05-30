@@ -55,7 +55,7 @@ namespace crcPdf.Tests {
                         fontName += "Bold";
                     if (italic)
                         fontName += "Italic";
-                    pdf.Pages.PageSons[0].Font[0].Name = fontName;
+                    pdf.Pages.PageSons[0].Font[0].Name.Should().Be(fontName);
                     }
             );
 
@@ -65,7 +65,7 @@ namespace crcPdf.Tests {
                 Given: File.ReadAllBytes("samples/microsample.pdf"),
                 Then: pdf => { 
                     pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentBaseFont>();
-                    pdf.Pages.PageSons[0].Font[0].Name = "Times-Roman";
+                    pdf.Pages.PageSons[0].Font[0].Name.Should().Be("Times-Roman");
                 }
             );
 
@@ -80,7 +80,7 @@ namespace crcPdf.Tests {
                         .AddLabel("Hola"); },
                 Then: pdf => { 
                     pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfFont>();
-                    pdf.Pages.PageSons[0].Font[0].Name = fontName;
+                    pdf.Pages.PageSons[0].Font[0].Name.Should().Be("OpenSans");
     
                     using (var fs = new FileStream("openSans.pdf", FileMode.Create)) {
                         pdf.Save(fs);
@@ -99,9 +99,33 @@ namespace crcPdf.Tests {
                         .AddLabel("Α α:Alpha. Β β: Beta. Γ γ: Gamma. Δ δ: Delta"); },
                 Then: pdf => { 
                     pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfSubsetFont>();
-                    pdf.Pages.PageSons[0].Font[0].Name = fontName;
+                    pdf.Pages.PageSons[0].Font[0].Name.Should().Be("OpenSans");
     
                     using (var fs = new FileStream("openSansSubset.pdf", FileMode.Create)) {
+                        pdf.Save(fs);
+                    }
+                    }
+            );
+
+        [Theory]
+        [InlineData("OpenSans-Regular")]        
+        public void MixTTFFontsAndSubset(string fontName) =>
+            crcPdf(
+                Given: pdf => { pdf.Pages
+                    .AddPage()                        
+                        .SetFont(fontName, 12, Embedded.No)
+                        .SetPosition(10, 15)
+                        .AddLabel("Α α:Alpha. Β β: Beta. Γ γ: Gamma. Δ δ: Delta")
+                        .SetFont(fontName, 12, Embedded.Yes)
+                        .SetPosition(100, 150)
+                        .AddLabel("Α α:Alpha. Β β: Beta. Γ γ: Gamma. Δ δ: Delta"); },
+                Then: pdf => { 
+                    pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfFont>();
+                    pdf.Pages.PageSons[0].Font[0].Name.Should().Be("OpenSans");
+                    pdf.Pages.PageSons[0].Font[1].Should().BeOfType<DocumentTtfSubsetFont>();
+                    pdf.Pages.PageSons[0].Font[1].Name.Should().EndWith("OpenSans");
+    
+                    using (var fs = new FileStream("openSansSubsetMix.pdf", FileMode.Create)) {
                         pdf.Save(fs);
                     }
                     }

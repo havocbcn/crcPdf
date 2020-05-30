@@ -13,14 +13,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
 namespace crcPdf {
-    public abstract class DocumentImage : IDocumentTree {
-
-        protected DocumentImage(PDFObjects pdf) : base(pdf) {
-        }
-
-        protected DocumentImage(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {             
-        }
-
+    public abstract class DocumentImage : DocumentTree {
         public abstract int Width { get; }
         public abstract int Height { get; }
     }

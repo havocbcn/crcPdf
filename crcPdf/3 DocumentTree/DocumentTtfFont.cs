@@ -16,16 +16,16 @@ using System.Collections.Generic;
 
 namespace crcPdf {
 	public class DocumentTtfFont : DocumentTtfFontBase  {		
-		private readonly DocumentTtfDescriptorFont descriptor;
-        public DocumentTtfFont(PDFObjects pdf, string FullPath) : base(pdf, FullPath) {
-            descriptor = new DocumentTtfDescriptorFont(pdf, this);            
+		private DocumentTtfDescriptorFont descriptor;
+        public DocumentTtfFont(string FullPath) : base(FullPath) {
+            descriptor = new DocumentTtfDescriptorFont(this);            
         }
 
-        public DocumentTtfFont(PDFObjects pdf, DictionaryObject dic) : base(pdf, dic) {                    
-            descriptor = new DocumentTtfDescriptorFont(pdf, this);            
+        public DocumentTtfFont(){
+            descriptor = new DocumentTtfDescriptorFont(this);
         }
 
-        public override void OnSaveEvent(IndirectObject indirectObject)
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
         {
             var widths = new List<PdfObject>();            
             for (int i = FirstChar; i < LastChar+1; i++) {                
@@ -46,7 +46,7 @@ namespace crcPdf {
                 { "FirstChar", new IntegerObject(FirstChar) },
                 { "LastChar", new IntegerObject(LastChar) },
                 { "Widths", new ArrayObject(widths) },
-                { "FontDescriptor", descriptor.IndirectReferenceObject },
+                { "FontDescriptor", descriptor.IndirectReferenceObject(pdfObjects) },
             };   
    
             indirectObject.SetChild(new DictionaryObject(entries));

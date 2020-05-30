@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
 namespace crcPdf {
-    public class DocumentOutline : IDocumentTree {
-
-        public DocumentOutline(PDFObjects pdf) : base(pdf) {
+    public class DocumentOutline : DocumentTree {
+        public DocumentOutline()
+        {
+            
         }
-
-        public DocumentOutline(PDFObjects pdf, PdfObject pdfObject) : base(pdf) { 
+        public override void Load(PDFObjects pdf, PdfObject pdfObject) { 
             var contents = pdf.GetObject<DictionaryObject>(pdfObject);
             foreach (var value in contents.Dictionary) {
                 switch (value.Key) {
@@ -51,15 +51,15 @@ namespace crcPdf {
             }
         } 
 
-        public DocumentOutline first { get; }
-        public DocumentOutline last { get; }
-        public DocumentOutline parent { get; }
-        public DocumentOutline prev { get; }
-        public DocumentOutline next { get; }
-        public int Count { get; }
-        public string title { get; }
+        public DocumentOutline first { get; private set; }
+        public DocumentOutline last { get; private set; }
+        public DocumentOutline parent { get; private set; }
+        public DocumentOutline prev { get; private set; }
+        public DocumentOutline next { get; private set; }
+        public int Count { get; private set; }
+        public string title { get; private set; }
 
-        public override void OnSaveEvent(IndirectObject indirectObject)
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
         {
             // TODO
         }

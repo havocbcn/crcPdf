@@ -21,12 +21,15 @@ using crcPdf.Fonts;
 
 namespace crcPdf {
     public class DocumentBaseFont : DocumentFont {        
-        public DocumentBaseFont(PDFObjects pdf, string fontName) : base(pdf) {
+        public DocumentBaseFont(string fontName) {
             Name = fontName;
             LoadFont(fontName);
-        }
+        }           
 
-        public override void OnSaveEvent(IndirectObject indirectObject)
+        public DocumentBaseFont() {            
+        }        
+
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdf)
         {
             var entries = new Dictionary<string, PdfObject> {
                 { "Type", new NameObject("Font") },

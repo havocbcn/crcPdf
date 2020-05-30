@@ -27,7 +27,7 @@ namespace crcPdf {
         /// Ctor
         /// </summary>
         /// <param name="image">Image byte array</param>
-        public DocumentImageJpeg(PDFObjects pdf,  byte[] image): base(pdf) {
+        public DocumentImageJpeg(byte[] image){
             m_image = image;
       
             // https://en.wikipedia.org/wiki/JPEG#Syntax_and_structure
@@ -147,7 +147,7 @@ namespace crcPdf {
         /// <returns>1 = black&amp;white, 3=RGB</returns>
         public int Components => m_component;
 
-        public override void OnSaveEvent(IndirectObject indirectObject)
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
         {
             var entries = new Dictionary<string, PdfObject> {
                 { "Type", new NameObject("XObject") },

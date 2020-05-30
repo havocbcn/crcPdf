@@ -15,14 +15,14 @@
 using System.Collections.Generic;
 
 namespace crcPdf {
-	public class DocumentTtfDescriptorFont : IDocumentTree  {
+	public class DocumentTtfDescriptorFont : DocumentTree  {
         private readonly DocumentTtfFontBase font;
 
-        public DocumentTtfDescriptorFont(PDFObjects pdf, DocumentTtfFontBase font) : base(pdf) {
+        public DocumentTtfDescriptorFont(DocumentTtfFontBase font) {
             this.font = font;
         }
 
-        public override void OnSaveEvent(IndirectObject indirectObject)
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
         {
             var entries = new Dictionary<string, PdfObject> {
                 { "Type", new NameObject("FontDescriptor") },
@@ -46,8 +46,8 @@ namespace crcPdf {
             }           
 
             if (font.IsEmbedded) {
-                var fontContent = new DocumentFontContent(pdfObjects, font.FontByteArray);
-                entries.Add("FontFile2", fontContent.IndirectReferenceObject);
+                var fontContent = new DocumentFontContent(font.FontByteArray);
+                entries.Add("FontFile2", fontContent.IndirectReferenceObject(pdfObjects));
             }
             
             indirectObject.SetChild(new DictionaryObject(entries));

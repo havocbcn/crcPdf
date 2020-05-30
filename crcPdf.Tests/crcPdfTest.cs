@@ -39,6 +39,10 @@ namespace crcPdf.Tests {
             pdfWriter.Save(ms);
 
             ms.Seek(0, SeekOrigin.Begin);
+            Console.Write(System.Text.UTF8Encoding.UTF8.GetString(ms.ToArray()));
+
+
+            ms.Seek(0, SeekOrigin.Begin);
             DocumentCatalog pdfRead = Pdf.Load(ms);
 
             if (When != null) {

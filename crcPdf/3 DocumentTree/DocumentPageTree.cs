@@ -16,15 +16,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace crcPdf {
-    public class DocumentPageTree : IDocumentTree {
-        private readonly DocumentPageTree parent;
+    public class DocumentPageTree : DocumentTree {
+        private DocumentPageTree parent;
         private readonly List<DocumentPageTree> pageTreeSons = new List<DocumentPageTree>();
         private readonly List<DocumentPage> pageSons = new List<DocumentPage>();
 
-        public DocumentPageTree(PDFObjects pdf) : base(pdf) {     
-        }
-
-        public DocumentPageTree(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
+        public override void Load(PDFObjects pdf, PdfObject pdfObject) {
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);
             if (dic.Dictionary.ContainsKey("Parent")) {                
                 parent = pdf.GetDocument<DocumentPageTree>(dic.Dictionary["Parent"]);
@@ -40,11 +37,11 @@ namespace crcPdf {
             }
         }
 
-        public override void OnSaveEvent(IndirectObject indirectObject)
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
         {
             List<PdfObject> kids = new List<PdfObject>();
-            kids.AddRange(pageTreeSons.Select(p => p.IndirectReferenceObject));
-            kids.AddRange(pageSons.Select(p => p.IndirectReferenceObject));            
+            kids.AddRange(pageTreeSons.Select(p => p.IndirectReferenceObject(pdfObjects)));
+            kids.AddRange(pageSons.Select(p => p.IndirectReferenceObject(pdfObjects)));            
 
             indirectObject.SetChild(new DictionaryObject(
                 new Dictionary<string, PdfObject>
@@ -60,12 +57,9 @@ namespace crcPdf {
         public DocumentPage[] PageSons => pageSons.ToArray();
         public DocumentPageTree Parent => parent;
         public DocumentPage AddPage(){
-            var page = new DocumentPage(pdfObjects, this);
-            pageSons.Add(page);            
-
+            var page = new DocumentPage(this);
+            pageSons.Add(page);
             return page;
         }
-
-        
     }
 }

@@ -16,22 +16,28 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using crcPdf.Fonts;
-using crcPdf.Images;
 
 namespace crcPdf {
     public class PDFObjects {
         private readonly HashSet<IndirectObject> objects = new HashSet<IndirectObject>();
-        private FontFactory m_fontFactory = new FontFactory();
-        internal FontFactory fontFactory => m_fontFactory;
-        private ImageFactory m_imageFactory = new ImageFactory();
-        internal ImageFactory imageFactory => m_imageFactory;
-        private readonly Dictionary<IndirectObject, IDocumentTree> cache = new Dictionary<IndirectObject, IDocumentTree>();
+
+        private Dictionary<Guid, IndirectObject> guidToIndirect = new Dictionary<Guid, IndirectObject>();
+        private readonly Dictionary<IndirectObject, DocumentTree> cache = new Dictionary<IndirectObject, DocumentTree>();
 
         private int lastNumber;
-        internal IndirectObject CreateIndirectObject() {
+
+        internal IndirectObject CacheGuid(Guid guid) 
+            => guidToIndirect.ContainsKey(guid) ? guidToIndirect[guid] : null;
+
+        internal IndirectObject CreateIndirectObject(Guid guid) {
+            if (guidToIndirect.ContainsKey(guid))
+                return guidToIndirect[guid];
+
             var indirect =  new IndirectObject(++lastNumber);
+            
             objects.Add(indirect);
+            guidToIndirect.Add(guid, indirect);
+
             return indirect;
         } 
 
@@ -51,17 +57,21 @@ namespace crcPdf {
         /// From an indirect object -1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj-, 
         /// construct a Document -DocumentCatalog in the example-
         /// </summary>
-        public T GetDocument<T>(IndirectObject obj) where T : IDocumentTree {
+        public T GetDocument<T>(IndirectObject obj) where T : DocumentTree {
             if (cache.ContainsKey(obj)) {
                 return cache[obj] as T;
             }
 
-            var a = (T)Activator.CreateInstance(typeof(T), this, obj.childs[0]);
-
+            var a = (T)Activator.CreateInstance(typeof(T));
+            
             cache.Add(obj, a);
-            return a;
-        } 
 
+            a.Load(this, obj.childs[0]);
+
+            return a;
+        }
+
+      
         /// <summary>
         /// From an indirect reference, I want to know the type of this object
         /// For example: 1 0 R
@@ -98,10 +108,10 @@ namespace crcPdf {
         /// construct a Document -DocumentCatalog in the example- using the objects list
         /// previously loaded
         /// </summary>
-        public T GetDocument<T>(IndirectReferenceObject indirectObj) where T : IDocumentTree {
+        public T GetDocument<T>(IndirectReferenceObject indirectObj) where T : DocumentTree {
             IndirectObject obj;
             if (!objects.TryGetValue(indirectObj, out obj)) {
-                return null;            
+                return default(T);            
             }
             return GetDocument<T>(obj);
         } 
@@ -111,7 +121,7 @@ namespace crcPdf {
         /// construct a Document -DocumentCatalog for example- using the objects list
         /// previously loaded
         /// </summary>
-        public T GetDocument<T>(PdfObject obj) where T : IDocumentTree {
+        internal T GetDocument<T>(PdfObject obj) where T : DocumentTree {
             if (obj is IndirectObject) {
                 return GetDocument<T>(obj as IndirectObject);
             }
@@ -119,17 +129,21 @@ namespace crcPdf {
                 return GetDocument<T>(obj as IndirectReferenceObject);
             }
 
-            var a = (T)Activator.CreateInstance(typeof(T), this, obj);
+            var a = (T)Activator.CreateInstance(typeof(T));            
+            a.Load(this, obj);
             return a;
         } 
 
         /// <summary>
         /// From an unknown object: indirect object, indirect reference, dictionaryobject or so on
         /// transform to T -DictionaryObject for example- using the objects list
-        /// previously loaded if necessary
-        /// if is impossible to convert, an error is throw
+        /// previously loaded if necessary.
+        /// If is impossible to convert, an error is throw
         /// </summary>
-        public T GetObject<T>(PdfObject obj) where T : PdfObject {
+        /// <param name="obj">The resource to obtain the data</param>
+        /// <typeparam name="T">Document desired</typeparam>
+        /// <returns>The final object transformed to correct type</returns>
+        internal T GetObject<T>(PdfObject obj) where T : PdfObject {
             if (obj is IndirectObject) {
                 return GetObject<T>(obj as IndirectObject);
             }
@@ -140,10 +154,10 @@ namespace crcPdf {
             return obj as T;
         } 
 
-        public T GetObject<T>(IndirectObject obj) where T : PdfObject 
+        internal T GetObject<T>(IndirectObject obj) where T : PdfObject 
             => obj.childs[0] as T;
         
-        public T GetObject<T>(IndirectReferenceObject indirectObj) where T : PdfObject {
+        internal T GetObject<T>(IndirectReferenceObject indirectObj) where T : PdfObject {
             IndirectObject obj;
             if (!objects.TryGetValue(indirectObj, out obj)) {
                 throw new PdfException(PdfExceptionCodes.INVALID_CONTENT, $"Impossible to cast");
@@ -157,7 +171,7 @@ namespace crcPdf {
 			stream.Write(textByte, 0, textByte.Length);
 		}
 
-        public void WriteTo(Stream ms, DocumentCatalog catalog, Compression compression) {   
+        internal void WriteTo(Stream ms, DocumentCatalog catalog, Compression compression) {   
             Write(ms, "%PDF-1.3\n");
 
             // if a pdf was loaded, all objects where loaded too
@@ -167,7 +181,10 @@ namespace crcPdf {
             // trigger the object generation
             CleanObjects();
 
-            var catalogIndirectReference = catalog.IndirectReferenceObject;            
+            // start creating all Documents, obtaining the indirect reference of the catalog
+            // will call for indirect references of pageTree, those to page's, and so on. In each
+            // step it will save the new Document in this
+            var catalogIndirectReference = catalog.IndirectReferenceObject(this);            
             
             // now we can save all generated objects            
             var childPos = new List<long>();

@@ -21,50 +21,50 @@ namespace crcPdf.Fonts {
     /// <summary>
     /// Get a font
     /// </summary>
-	public class FontFactory {
-		private readonly Dictionary<string, DocumentFont> m_lstFont = new Dictionary<string, DocumentFont>();
-		private readonly Dictionary<string, string> dctFontRegistered = new Dictionary<string, string>();
-		private readonly object lck = new object();
-		private readonly Dictionary<string,string> baseFontsNames = new Dictionary<string, string> {
-			{ "timesnewromanbi", "Times-BoldItalic"},
-			{ "timesnewromanb_", "Times-Bold"},
-			{ "timesnewroman_i", "Times-Italic"},
-			{ "timesnewroman__", "Times-Roman"},
-			{ "timesbi", "Times-BoldItalic"},
-			{ "timesb_", "Times-Bold"},
-			{ "times_i", "Times-Italic"},
-			{ "times__", "Times-Roman"},
-			{ "timesromanbi", "Times-BoldItalic"},
-			{ "timesromanb_", "Times-Bold"},
-			{ "timesroman_i", "Times-Italic"},
-			{ "timesroman__", "Times-Roman"},
-			{ "times-romanbi", "Times-BoldItalic"},
-			{ "times-romanb_", "Times-Bold"},
-			{ "times-roman_i", "Times-Italic"},
-			{ "times-roman__", "Times-Roman"},
-			{ "times-roman", "Times-Roman"},
-			{ "zapfdingbatsbi", "ZapfDingbats"},
-			{ "zapfdingbatsb_", "ZapfDingbats"},
-			{ "zapfdingbats_i", "ZapfDingbats"},
-			{ "zapfdingbats__", "ZapfDingbats"},
-			{ "courierbi", "Courier-BoldOblique"},
-			{ "courierb_", "Courier-Bold"},
-			{ "courier_i", "Courier-Oblique"},
-			{ "courier__", "Courier"},
-			{ "helveticabi", "Helvetica-BoldOblique"},
-			{ "helveticab_", "Helvetica-Bold"},
-			{ "helvetica_i", "Helvetica-Oblique"},
-			{ "helvetica__", "Helvetica"},
-			{ "symbolbi", "Symbol"},
-			{ "symbol_i", "Symbol"},
-			{ "symbolb_", "Symbol"},
-			{ "symbol__", "Symbol"},
+	public static class FontFactory {
+		private static readonly Dictionary<string, DocumentFont> m_lstFont = new Dictionary<string, DocumentFont>();
+		private static readonly Dictionary<string, string> dctFontRegistered = new Dictionary<string, string>();
+		private static readonly object lck = new object();
+		private static readonly Dictionary<string,string> baseFontsNames = new Dictionary<string, string> {
+			{ "timesnewromanbiN", "Times-BoldItalic"},
+			{ "timesnewromanb_N", "Times-Bold"},
+			{ "timesnewroman_iN", "Times-Italic"},
+			{ "timesnewroman__N", "Times-Roman"},
+			{ "timesbiN", "Times-BoldItalic"},
+			{ "timesb_N", "Times-Bold"},
+			{ "times_iN", "Times-Italic"},
+			{ "times__N", "Times-Roman"},
+			{ "timesromanbiN", "Times-BoldItalic"},
+			{ "timesromanb_N", "Times-Bold"},
+			{ "timesroman_iN", "Times-Italic"},
+			{ "timesroman__N", "Times-Roman"},
+			{ "times-romanbiN", "Times-BoldItalic"},
+			{ "times-romanb_N", "Times-Bold"},
+			{ "times-roman_iN", "Times-Italic"},
+			{ "times-roman__N", "Times-Roman"},
+			{ "times-romanN", "Times-Roman"},
+			{ "zapfdingbatsbiN", "ZapfDingbats"},
+			{ "zapfdingbatsb_N", "ZapfDingbats"},
+			{ "zapfdingbats_iN", "ZapfDingbats"},
+			{ "zapfdingbats__N", "ZapfDingbats"},
+			{ "courierbiN", "Courier-BoldOblique"},
+			{ "courierb_N", "Courier-Bold"},
+			{ "courier_iN", "Courier-Oblique"},
+			{ "courier__N", "Courier"},
+			{ "helveticabiN", "Helvetica-BoldOblique"},
+			{ "helveticab_N", "Helvetica-Bold"},
+			{ "helvetica_iN", "Helvetica-Oblique"},
+			{ "helvetica__N", "Helvetica"},
+			{ "symbolbiN", "Symbol"},
+			{ "symbol_iN", "Symbol"},
+			{ "symbolb_N", "Symbol"},
+			{ "symbol__N", "Symbol"},
 		};
 
-		private static string GetName(string name, bool IsBold, bool IsItalic) 
-			=> $"{name.ToLower(CultureInfo.InvariantCulture).Replace(" ","")}{(IsBold ? "b" : "_")}{(IsItalic ? "i" : "_")}";
+		private static string GetName(string name, bool IsBold, bool IsItalic, Embedded embedded) 
+			=> $"{name.ToLower(CultureInfo.InvariantCulture).Replace(" N","")}{(IsBold ? "b" : "_")}{(IsItalic ? "i" : "_")}{(embedded == Embedded.Yes ? "Y" : "N")}";
 
-   		internal DocumentFont GetFont(PDFObjects pdf, PdfObject pdfObject)
+   		internal static DocumentFont GetFont(PDFObjects pdf, PdfObject pdfObject)
         {
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);
 			
@@ -77,7 +77,7 @@ namespace crcPdf.Fonts {
                         return m_lstFont[name];
                     }
 
-                    var font = new DocumentBaseFont(pdf, name);
+                    var font = new DocumentBaseFont(name);
                     m_lstFont.Add(name, font);
                     return font;
                 }
@@ -88,7 +88,7 @@ namespace crcPdf.Fonts {
 						return m_lstFont[name];
 					}
 
-					var font = new DocumentTtfSubsetFont(pdf, dic);
+					var font = pdf.GetDocument<DocumentTtfSubsetFont>(pdfObject);
 					m_lstFont.Add(name, font);
 					return font;
 				}
@@ -99,7 +99,7 @@ namespace crcPdf.Fonts {
 						return m_lstFont[name];
 					}
 
-					var font = new DocumentTtfFont(pdf, dic);
+					var font = pdf.GetDocument<DocumentTtfFont>(pdfObject);
 					m_lstFont.Add(name, font);
 					return font;
 				}
@@ -122,9 +122,9 @@ namespace crcPdf.Fonts {
          	=> dic.Dictionary.ContainsKey("BaseFont") &&
                             dic.Dictionary.ContainsKey("ToUnicode");
 
-        internal DocumentFont GetFont(PDFObjects pdf, string name, bool IsBold, bool IsItalic, Embedded embedded)
+        internal static DocumentFont GetFont(string name, bool IsBold, bool IsItalic, Embedded embedded)
 		{	
-			string normalizedName = GetName(name, IsBold, IsItalic);        			
+			string normalizedName = GetName(name, IsBold, IsItalic, embedded);
 
 			// base fonts
 			if (baseFontsNames.ContainsKey(normalizedName)) {
@@ -134,7 +134,7 @@ namespace crcPdf.Fonts {
 						return m_lstFont[fontBaseName];
 					}
 
-					var font = new DocumentBaseFont(pdf, fontBaseName);
+					var font = new DocumentBaseFont(fontBaseName);
 				    m_lstFont.Add(fontBaseName, font);
 					return font;
                 }
@@ -143,9 +143,13 @@ namespace crcPdf.Fonts {
             // unknown, or disk or systemfonts
             DocumentFont ttffont = null;
 			lock (lck) {
+				if (m_lstFont.ContainsKey(normalizedName)) {
+						return m_lstFont[normalizedName];
+					}
+
 				if (embedded == Embedded.No) {
 					if (File.Exists(name)) {
-						ttffont = new DocumentTtfFont(pdf, name);
+						ttffont = new DocumentTtfFont(name);
 					} else {
 						LoadSystemFonts();
 
@@ -153,11 +157,11 @@ namespace crcPdf.Fonts {
 							throw new PdfException(PdfExceptionCodes.FONT_NOT_FOUND, "Font " + name + " not found");
 						}
 
-						ttffont = new DocumentTtfFont(pdf, dctFontRegistered[name]);
+						ttffont = new DocumentTtfFont(dctFontRegistered[name]);
 					}				
 				} else {
 					if (File.Exists(name)) {
-						ttffont = new DocumentTtfSubsetFont(pdf, name);
+						ttffont = new DocumentTtfSubsetFont(name);
 					} else {
 						LoadSystemFonts();
 
@@ -165,7 +169,7 @@ namespace crcPdf.Fonts {
 							throw new PdfException(PdfExceptionCodes.FONT_NOT_FOUND, "Font " + name + " not found");
 						}
 						
-						ttffont = new DocumentTtfSubsetFont(pdf, dctFontRegistered[name]);
+						ttffont = new DocumentTtfSubsetFont(dctFontRegistered[name]);
 					}
 				
 				}
@@ -175,7 +179,7 @@ namespace crcPdf.Fonts {
 			return ttffont;
 		}
 
-		private void LoadSystemFonts() {
+		private static void LoadSystemFonts() {
 			if (dctFontRegistered.Count == 0) 
 			{
 				lock (lck) {
@@ -196,7 +200,7 @@ namespace crcPdf.Fonts {
 			}
 		}
 
-		private void LoadFonts(string folder)
+		private static void LoadFonts(string folder)
 		{
 			if (!Directory.Exists(folder)) {
 				return;

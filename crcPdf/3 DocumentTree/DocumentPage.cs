@@ -12,14 +12,15 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
+
 using System.Collections.Generic;
 using crcPdf.Fonts;
 using System.Linq;
-using System;
+using crcPdf.Images;
 
 namespace crcPdf {
-    public class DocumentPage : IDocumentTree {        
-        private readonly DocumentText contents;
+    public class DocumentPage : DocumentTree {        
+        private DocumentText contents;
         private DocumentPageTree parent;
         private readonly IndirectReferenceObject parentReference;
         private readonly Dictionary<DocumentFont, string> fonts = new Dictionary<DocumentFont, string>();
@@ -32,11 +33,21 @@ namespace crcPdf {
         public DocumentFont CurrentFont { get; private set;}
         public string[] Procsets => procsets.ToArray();
 
-        public DocumentPage(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
+        public DocumentPage()
+        {
+            
+        }        
+        
+        public DocumentPage(DocumentPageTree parent) {   
+            this.parent = parent;
+            this.contents = new DocumentText();
+        }
+
+        public override void Load(PDFObjects pdf, PdfObject pdfObject) {
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);            
 
             if (dic.Dictionary.ContainsKey("Parent")) {                
-                parentReference = (IndirectReferenceObject)dic.Dictionary["Parent"];
+                parent = pdf.GetDocument<DocumentPageTree>(dic.Dictionary["Parent"]);
             }
 
             if (dic.Dictionary.ContainsKey("MediaBox")) {                
@@ -56,13 +67,13 @@ namespace crcPdf {
                     switch (resource.Key) {
                         case "Font":
                             foreach (var font in pdf.GetObject<DictionaryObject>(resource.Value).Dictionary) {
-                                var documentFont = pdf.fontFactory.GetFont(pdfObjects, font.Value);
+                                var documentFont = FontFactory.GetFont(pdf, font.Value);
                                 fonts.Add(documentFont, font.Key);
                             }
                             break;
                         case "XObject":
                             foreach (var image in pdf.GetObject<DictionaryObject>(resource.Value).Dictionary) {
-                                var documentImage = pdf.imageFactory.GetImage(pdfObjects, image.Value);
+                                var documentImage = ImageFactory.GetImage(pdf, image.Value);
                                 images.Add(documentImage, image.Key);
                                 reverseImages.Add(image.Key, documentImage);
                             }
@@ -95,18 +106,11 @@ namespace crcPdf {
             contents.SetTextMatrix(a, b, c, d, e, f);
             return this;
         }
-
-        public DocumentPage(PDFObjects pdf, DocumentPageTree parent) : base(pdf) {   
-            this.parent = parent;
-            this.contents = new DocumentText(pdf);
-        }
+      
 
         public DocumentText Contents 
             => contents;
-
-        public DocumentPageTree Parent 
-            => parent ?? pdfObjects.GetDocument<DocumentPageTree>(parentReference);            
-
+      
          public DocumentPage AddLabel(string text) {
             if (CurrentFont == null) {
                 throw new PdfException(PdfExceptionCodes.FONT_ERROR, $"A font must be set before writting");
@@ -137,7 +141,7 @@ namespace crcPdf {
             => SetFont(name, size, false, false, embedded);
 
         public DocumentPage SetFont(string name, int size, bool isBold, bool isItalic, Embedded embedded)
-            => SetFont(pdfObjects.fontFactory.GetFont(pdfObjects, name, isBold, isItalic, embedded), size);
+            => SetFont(FontFactory.GetFont(name, isBold, isItalic, embedded), size);
 
         public DocumentPage SetFont(DocumentFont font, int size) {
             if (!fonts.ContainsKey(font)) {
@@ -174,7 +178,7 @@ namespace crcPdf {
         }
 
         public DocumentPage AddImage(string fullFilePath) {
-            var image = pdfObjects.imageFactory.GetImage(pdfObjects, fullFilePath);
+            var image = ImageFactory.GetImage(fullFilePath);
 
             if (!images.ContainsKey(image)) {
                 var key = "I" + images.Count;
@@ -187,7 +191,7 @@ namespace crcPdf {
         }
 
           public DocumentPage AddImage(byte[] image) {
-            var documentIimage = pdfObjects.imageFactory.GetImage(pdfObjects, image);
+            var documentIimage = ImageFactory.GetImage(image);
 
             if (!images.ContainsKey(documentIimage)) {
                 var key = "I" + images.Count;
@@ -214,9 +218,7 @@ namespace crcPdf {
             return this;
         }
 
-
-
-        public override void OnSaveEvent(IndirectObject indirectObject)
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
         {
             var resourceEntries = new Dictionary<string, PdfObject>();
 
@@ -224,7 +226,7 @@ namespace crcPdf {
                 var dicFonts = new Dictionary<string, PdfObject>();
 
                 foreach (var font in fonts) {
-                    dicFonts.Add(font.Value, font.Key.IndirectReferenceObject);
+                    dicFonts.Add(font.Value, font.Key.IndirectReferenceObject(pdfObjects));
                 }
 
                 resourceEntries.Add("Font", new DictionaryObject(dicFonts));
@@ -234,7 +236,7 @@ namespace crcPdf {
                 var dicImages = new Dictionary<string, PdfObject>();
 
                 foreach (var img in images) {
-                    dicImages.Add(img.Value, img.Key.IndirectReferenceObject);
+                    dicImages.Add(img.Value, img.Key.IndirectReferenceObject(pdfObjects));
                 }
 
                 resourceEntries.Add("XObject", new DictionaryObject(dicImages));
@@ -248,14 +250,14 @@ namespace crcPdf {
                 resourceEntries.Add("ProcSet", new ArrayObject(lstObjects));
             }
 
-            if (parentReference != null) {
+            if (parentReference != null ) {
                 parent = pdfObjects.GetDocument<DocumentPageTree>(parentReference);            
             }
 
             var entries = new Dictionary<string, PdfObject> {
                 { "Type", new NameObject("Page") },
-                { "Parent", parent.IndirectReferenceObject },
-                { "Contents", contents.IndirectReferenceObject }
+                { "Parent", parent.IndirectReferenceObject(pdfObjects)},
+                { "Contents", contents.IndirectReferenceObject (pdfObjects)}
             };            
 
             if (resourceEntries.Count > 0) {                

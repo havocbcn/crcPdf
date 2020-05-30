@@ -25,7 +25,11 @@ namespace crcPdf {
 
         internal Dictionary<string, TtfTable> dctTables = new Dictionary<string, TtfTable>();
 
-        protected DocumentTtfFontBase(PDFObjects pdf, string FontFullPath) : base(pdf) {
+		public DocumentTtfFontBase() {
+			
+		}
+		
+        protected DocumentTtfFontBase(string FontFullPath) {
             FullPath = FontFullPath;
             Flags = FontTypes.Nonsymbolic;
             boundingBox[0] = -1166;
@@ -39,9 +43,10 @@ namespace crcPdf {
             Width = 1000;
 
             Process(File.ReadAllBytes(FontFullPath));
-        }
+        }		
 
-		protected DocumentTtfFontBase(PDFObjects pdf, DictionaryObject dic) : base(pdf) {			
+		public override void Load(PDFObjects pdf, PdfObject pdfObject) {			
+			var dic = pdf.GetObject<DictionaryObject>(pdfObject);
             var descriptorDictionary = pdf.GetObject<DictionaryObject>(dic.Dictionary["FontDescriptor"]).Dictionary;
 
             this.StemV = pdf.GetObject<IntegerObject>(descriptorDictionary["StemV"]).IntValue;

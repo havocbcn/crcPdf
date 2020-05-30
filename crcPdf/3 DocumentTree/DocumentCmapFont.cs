@@ -20,18 +20,18 @@ namespace crcPdf
 	/// <summary>
 	/// Representa el mapeo de glyph a unicode (CMAP)
 	/// </summary>
-	public class DocumentCmapFont : IDocumentTree
+	public class DocumentCmapFont : DocumentTree
 	{		
         private readonly DocumentTtfFontBase font;
 
-        public DocumentCmapFont(PDFObjects pdf, DocumentTtfFontBase font) : base(pdf) {
+		public DocumentCmapFont()  {
+		}
+
+        public DocumentCmapFont(DocumentTtfFontBase font)  {
             this.font = font;
         }
 
-        public DocumentCmapFont(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
-        }
-
-		public override void OnSaveEvent(IndirectObject indirectObject) {           
+		public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdf) {           
 			//	/CIDInit		/ProcSet findresource begin 12
 			//		
 			// 	/CIDSystemInfo

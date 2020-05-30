@@ -179,7 +179,6 @@ startxref
                 Given: File.ReadAllBytes("samples/microsample.pdf"),
                 Then: pdf => { 
                     pdf.Pages.PageSons.Should().HaveCount(1);
-                    pdf.Pages.PageSons[0].Parent.Should().Be(pdf.Pages);
                     }
             );
 

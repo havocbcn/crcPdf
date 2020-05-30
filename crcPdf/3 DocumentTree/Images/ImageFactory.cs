@@ -21,32 +21,32 @@ namespace crcPdf.Images {
     /// <summary>
     /// Get an image
     /// </summary>
-	public class ImageFactory {
+	public static class ImageFactory {
 
-        private readonly  Dictionary<string, DocumentImage> dct = new Dictionary<string, DocumentImage>();
+        private static readonly  Dictionary<string, DocumentImage> dct = new Dictionary<string, DocumentImage>();
         private static object lck = new object();
 
-        private SHA1 sha1 = SHA1CryptoServiceProvider.Create();
+        private static SHA1 sha1 = SHA1CryptoServiceProvider.Create();
 
-        public DocumentImage GetImage(PDFObjects pdf, PdfObject pdfObject) {
+        public static DocumentImage GetImage(PDFObjects pdf, PdfObject pdfObject) {
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);
-            return GetImageInternal(pdf, dic.Stream);
+            return GetImageInternal(dic.Stream);
         }
 
-        public DocumentImage GetImage(PDFObjects pdf, string fullFilePath) {
+        public static DocumentImage GetImage(string fullFilePath) {
             if (!File.Exists(fullFilePath)) { 
                 throw new PdfException(PdfExceptionCodes.IMAGE_NOT_FOUND, $"File {fullFilePath} doesnt exists");
             }
 
             byte[] image = File.ReadAllBytes(fullFilePath);
 
-            return GetImageInternal(pdf, image);
+            return GetImageInternal(image);
         }
 
-        public DocumentImage GetImage(PDFObjects pdf, byte[] image) 
-            => GetImageInternal(pdf, image);
+        public static  DocumentImage GetImage(byte[] image) 
+            => GetImageInternal(image);
 
-        private DocumentImage GetImageInternal(PDFObjects pdf, byte[] image) {
+        private static DocumentImage GetImageInternal(byte[] image) {
             byte[] hashBytes = sha1.ComputeHash(image);
             string hash = string.Concat(hashBytes.Select(b => b.ToString("x2")));
 
@@ -59,7 +59,7 @@ namespace crcPdf.Images {
             // https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format
             // SOI FF D8 Start of Image
             if (image[0] == 0xFF && image[1] == 0xD8) {     
-                img = new DocumentImageJpeg(pdf, image);
+                img = new DocumentImageJpeg(image);
             } else {
                 throw new PdfException(PdfExceptionCodes.IMAGE_FORMAT_NOT_SUPPORTED, "Image format not supported");
             }

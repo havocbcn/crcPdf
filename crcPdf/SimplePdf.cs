@@ -58,7 +58,7 @@ namespace crcPdf {
         }
 
         public void GetFont(string name, bool IsBold, bool IsItalic, Embedded embedded)
-            => Catalog.pdfObjects.fontFactory.GetFont(Catalog.pdfObjects,name, IsBold, IsItalic, embedded);
+            => FontFactory.GetFont(name, IsBold, IsItalic, embedded);
 
         /// <summary>
         /// Set a rotation for text in degrees

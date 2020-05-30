@@ -16,8 +16,8 @@ using System.Collections.Generic;
 using crcPdf.Fonts;
 
 namespace crcPdf {
-	public abstract class DocumentFont : IDocumentTree  {		
-		protected DocumentFont(PDFObjects pdf) : base(pdf) {
+	public class DocumentFont : DocumentTree  {		
+		protected DocumentFont() {
 			StemV = 80;
 			boundingBox = new short[4];
 		}
@@ -28,17 +28,17 @@ namespace crcPdf {
 		/// The maximum height above the baseline reached by glyphs in this font.  
 		/// The height of glyphs for accented characters shall be excluded. 
 		/// </summary>
-		public short Ascendent { get; set; }
+		public short Ascendent { get; internal set; }
 
 		/// <summary>
 		/// The maximum depth below the baseline reached by glyphs in this font. 
 		/// The value shall be a negative number. 
 		/// </summary>
-		public short Descendent { get; set; }
+		public short Descendent { get; internal set; }
 
-		public string Name { get; set; }
+		public string Name { get; internal set; }
 
-		public string FullPath { get; set; }
+		public string FullPath { get; internal set; }
 
 		public float GetAscendent(float size) => Ascendent * 0.001f * size;
 

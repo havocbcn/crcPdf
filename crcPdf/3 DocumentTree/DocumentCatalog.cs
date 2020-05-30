@@ -17,16 +17,16 @@ using System.IO;
 
 namespace crcPdf {
     // 7.7.2 Document Catalog
-    public class DocumentCatalog : IDocumentTree {
-        private readonly DocumentPageTree pageTree;
-        private readonly DocumentOutline outlines;
+    public class DocumentCatalog : DocumentTree {
+        private DocumentPageTree pageTree;
+        private DocumentOutline outlines;
         
-        public DocumentCatalog(PDFObjects pdf) : base(pdf) {            
+        public DocumentCatalog() {            
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);      
-            this.pageTree = new DocumentPageTree(pdf);
+            this.pageTree = new DocumentPageTree();
         }
 
-        public DocumentCatalog(PDFObjects pdf, PdfObject pdfObject) : base(pdf) {
+        public override void Load(PDFObjects pdf, PdfObject pdfObject) {
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);      
             var dictionary = pdf.GetObject<DictionaryObject>(pdfObject);
             pageTree = pdf.GetDocument<DocumentPageTree>(dictionary.Dictionary["Pages"]);
@@ -36,15 +36,15 @@ namespace crcPdf {
             }
         }
 
-        public override void OnSaveEvent(IndirectObject indirectObject)
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
         {
              var dic = new Dictionary<string, PdfObject> {
                 { "Type", new NameObject("Catalog") },
-                { "Pages", pageTree.IndirectReferenceObject }
+                { "Pages", pageTree.IndirectReferenceObject(pdfObjects) }
             };
 
             if (Outlines != null) {
-                dic.Add("Outlines", outlines.IndirectReferenceObject);
+                dic.Add("Outlines", outlines.IndirectReferenceObject(pdfObjects));
             }
 
             indirectObject.SetChild(new DictionaryObject(dic));
@@ -56,16 +56,11 @@ namespace crcPdf {
 
 
 
-        public DocumentCatalog() : base(new PDFObjects()) {                  
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);      
-            this.pageTree = new DocumentPageTree(pdfObjects);
-        }
-
         public void Save(Stream ms) 
-            => pdfObjects.WriteTo(ms, this, Compression.Compress);        
+            => new PDFObjects().WriteTo(ms, this, Compression.Compress);        
 
         public void Save(Stream ms, Compression compression) 
-            => pdfObjects.WriteTo(ms, this, compression);
+            => new PDFObjects().WriteTo(ms, this, compression);
 
     }
 }

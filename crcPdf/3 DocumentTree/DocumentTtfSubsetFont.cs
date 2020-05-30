@@ -22,12 +22,12 @@ using crcPdf.Fonts;
 
 namespace crcPdf  {
     public class DocumentTtfSubsetFont : DocumentTtfFontBase {
-        public DocumentTtfSubsetFont(PDFObjects pdf, DictionaryObject dic) : base(pdf, dic) {
+        public DocumentTtfSubsetFont() {
             IsEmbedded = true;            
             isUnicode = true;
         }
             
-        public DocumentTtfSubsetFont(PDFObjects pdf, string FullPath) : base(pdf, FullPath) {			
+        public DocumentTtfSubsetFont(string FullPath) : base(FullPath) {			
             IsEmbedded = true;            
             isUnicode = true;
 
@@ -42,7 +42,7 @@ namespace crcPdf  {
             dctNewGlyphIdToGlyphOldNew.Add(0, firstChar);
 
             this.Flags = FontTypes.Symbolic;
-            this.Name = "IKWLZJ" + "+" + "FreeSans";
+            this.Name = guid + "+" + Name;            
         }
 
         public override byte[] FontByteArray => SubsetTTFFont;
@@ -578,7 +578,7 @@ namespace crcPdf  {
             return pos;
         }
 
-        public override void OnSaveEvent(IndirectObject indirectObject) {         
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects) {         
             // a good guide: http://www.4real.gr/technical-documents-ttf-subset.html
             SubsetTTFFont = Subset(TTFFont);
 
@@ -594,8 +594,8 @@ namespace crcPdf  {
                 }
             }
 
-            var descriptor = new DocumentTtfDescriptorFont(pdfObjects, this);
-            var cmap = new DocumentCmapFont(pdfObjects, this);  
+            var descriptor = new DocumentTtfDescriptorFont(this);
+            var cmap = new DocumentCmapFont(this);  
 
             var entries = new Dictionary<string, PdfObject> {
                 { "Type", new NameObject("Font") },
@@ -604,8 +604,8 @@ namespace crcPdf  {
                 { "FirstChar", new IntegerObject(0) },
                 { "LastChar", new IntegerObject(hashChar.Count) },
                 { "Widths", new ArrayObject(widths) },
-                { "FontDescriptor", descriptor.IndirectReferenceObject },
-                { "ToUnicode", cmap.IndirectReferenceObject },
+                { "FontDescriptor", descriptor.IndirectReferenceObject(pdfObjects) },
+                { "ToUnicode", cmap.IndirectReferenceObject(pdfObjects) },
             };   
 
             indirectObject.SetChild(new DictionaryObject(entries));

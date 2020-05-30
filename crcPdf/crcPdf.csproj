@@ -6,7 +6,7 @@
     <PackageId>crcPdf</PackageId>
     <RepositoryUrl>https://github.com/havocbcn/crcPdf</RepositoryUrl>
     <PackageLicense>https://www.gnu.org/licenses/lgpl-3.0.html</PackageLicense>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <Authors>Carlos Rodríguez Caminero</Authors>
     <Company>Carlos Rodríguez Caminero</Company>
     <description>LGPL C# library to read and write pdf's</description>

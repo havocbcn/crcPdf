@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace crcPdf {
-    public class DocumentText : IDocumentTree {        
+    public class DocumentText : DocumentTree {        
         List<Operator> pageOperators = new List<Operator>();
 
-        public DocumentText(PDFObjects pdf) : base(pdf) {
-        }
-
-        public DocumentText(PDFObjects pdf, PdfObject pdfObject)  : base(pdf) {            
+     
+        public override void Load(PDFObjects pdf, PdfObject pdfObject)  {            
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);
                 
             if (dic.Stream != null) {
@@ -56,7 +54,7 @@ namespace crcPdf {
             }
         }      
 
-        public override void OnSaveEvent(IndirectObject indirectObject) {
+        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects) {
             string text = string.Join(" ", pageOperators);
             indirectObject.SetChild(new DictionaryObject(text));
         }
