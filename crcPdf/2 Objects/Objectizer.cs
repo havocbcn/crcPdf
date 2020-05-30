@@ -25,7 +25,7 @@ namespace crcPdf {
         }
 
         private readonly Dictionary<string, Func<Tokenizer, PdfObject>> tokenToObject = 
-            new Dictionary<string, Func<Tokenizer, PdfObject>>()
+            new Dictionary<string, Func<Tokenizer, PdfObject>>
         {
             { "true", (t) => { return new BooleanObject(t); }},
             { "false", (t) => { return new BooleanObject(t); }},
@@ -48,7 +48,10 @@ namespace crcPdf {
             }
         };
 
-        public PdfObject NextObject(bool allowOperators = false)
+        public PdfObject NextObject()
+            => NextObject(false);
+
+        public PdfObject NextObject(bool allowOperators)
         {
             tokenizer.SavePosition();            
             Token token = tokenizer.TokenExcludedCommentsAndWhitespaces();

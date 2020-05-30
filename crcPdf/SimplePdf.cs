@@ -69,7 +69,7 @@ namespace crcPdf {
         }
 
         public void DrawText(string text, int x, int y) {
-            if (textAngle != 0) {
+            if (textAngle > -0.0001 && textAngle < 0.0001) {
                 float sinus = (float)Math.Sin(textAngle * degreesToRadiant);
 				float cosinus = (float)Math.Cos(textAngle * degreesToRadiant);
 

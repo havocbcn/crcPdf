@@ -16,7 +16,7 @@ using System.Collections.Generic;
 
 namespace crcPdf {
 	public class DocumentTtfFont : DocumentTtfFontBase  {		
-		private DocumentTtfDescriptorFont descriptor;
+		private readonly DocumentTtfDescriptorFont descriptor;
         public DocumentTtfFont(string FullPath) : base(FullPath) {
             descriptor = new DocumentTtfDescriptorFont(this);            
         }

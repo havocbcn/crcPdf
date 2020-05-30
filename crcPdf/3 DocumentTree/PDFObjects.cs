@@ -20,18 +20,17 @@ using System.Text;
 namespace crcPdf {
     public class PDFObjects {
         private readonly HashSet<IndirectObject> objects = new HashSet<IndirectObject>();
-
-        private Dictionary<Guid, IndirectObject> guidToIndirect = new Dictionary<Guid, IndirectObject>();
+        private readonly Dictionary<Guid, IndirectObject> guidToIndirect = new Dictionary<Guid, IndirectObject>();
         private readonly Dictionary<IndirectObject, DocumentTree> cache = new Dictionary<IndirectObject, DocumentTree>();
-
         private int lastNumber;
 
         internal IndirectObject CacheGuid(Guid guid) 
             => guidToIndirect.ContainsKey(guid) ? guidToIndirect[guid] : null;
 
         internal IndirectObject CreateIndirectObject(Guid guid) {
-            if (guidToIndirect.ContainsKey(guid))
+            if (guidToIndirect.ContainsKey(guid)) {
                 return guidToIndirect[guid];
+            }
 
             var indirect =  new IndirectObject(++lastNumber);
             

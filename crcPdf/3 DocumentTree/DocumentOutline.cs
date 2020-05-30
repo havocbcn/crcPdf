@@ -14,10 +14,6 @@
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
 namespace crcPdf {
     public class DocumentOutline : DocumentTree {
-        public DocumentOutline()
-        {
-            
-        }
         public override void Load(PDFObjects pdf, PdfObject pdfObject) { 
             var contents = pdf.GetObject<DictionaryObject>(pdfObject);
             foreach (var value in contents.Dictionary) {
@@ -58,10 +54,5 @@ namespace crcPdf {
         public DocumentOutline next { get; private set; }
         public int Count { get; private set; }
         public string title { get; private set; }
-
-        public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
-        {
-            // TODO
-        }
     }
 }

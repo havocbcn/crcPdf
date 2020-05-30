@@ -22,11 +22,10 @@ namespace crcPdf {
     public class DocumentPage : DocumentTree {        
         private DocumentText contents;
         private DocumentPageTree parent;
-        private readonly IndirectReferenceObject parentReference;
         private readonly Dictionary<DocumentFont, string> fonts = new Dictionary<DocumentFont, string>();
         private readonly Dictionary<DocumentImage, string> images = new Dictionary<DocumentImage, string>();        
         private readonly Dictionary<string, DocumentImage> reverseImages = new Dictionary<string, DocumentImage>();        
-        private List<string> procsets = new List<string>();
+        private readonly List<string> procsets = new List<string>();
         private Rectangle MediaBox;
         public DocumentFont[] Font => fonts.Keys.ToArray();
         public IReadOnlyDictionary<string, DocumentImage> Image => reverseImages;
@@ -248,10 +247,6 @@ namespace crcPdf {
                     lstObjects.Add(new NameObject(procSet));
                 }
                 resourceEntries.Add("ProcSet", new ArrayObject(lstObjects));
-            }
-
-            if (parentReference != null ) {
-                parent = pdfObjects.GetDocument<DocumentPageTree>(parentReference);            
             }
 
             var entries = new Dictionary<string, PdfObject> {

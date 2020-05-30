@@ -85,7 +85,7 @@ namespace crcPdf.Fonts {
                     m_lstFont.Add(name, font);
                     return font;
                 }
-            } else if (IsSubsetFont(pdf, dic)) {
+            } else if (IsSubsetFont(dic)) {
 				var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
                 lock (lck) {
 					if (m_lstFont.ContainsKey(name)) {
@@ -122,7 +122,7 @@ namespace crcPdf.Fonts {
                             dic.Dictionary.ContainsKey("Subtype") &&
                             pdf.GetObject<NameObject>(dic.Dictionary["Subtype"]).Value == "TrueType";
 
-		private static bool IsSubsetFont(PDFObjects pdf, DictionaryObject dic)
+		private static bool IsSubsetFont(DictionaryObject dic)
          	=> dic.Dictionary.ContainsKey("BaseFont") &&
                             dic.Dictionary.ContainsKey("ToUnicode");
 

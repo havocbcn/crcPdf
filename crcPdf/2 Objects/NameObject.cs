@@ -25,13 +25,13 @@ namespace crcPdf {
         public NameObject(Tokenizer tokenizer) {
             Token nextToken = tokenizer.TokenExcludedCommentsAndWhitespaces();
             
-            if (nextToken.ToString() != "/")
+            if (nextToken.ToString() != "/") {
                 throw new PdfException(PdfExceptionCodes.INVALID_NAMEOBJECT_TOKEN, "Name object must start with a /");
-            
-            StringBuilder sb = new StringBuilder();
+            }
 
-            while (tokenizer.IsNextTokenExcludedCommentsRegular())
-            {
+            var sb = new StringBuilder();
+
+            while (tokenizer.IsNextTokenExcludedCommentsRegular()) {
                 nextToken = tokenizer.TokenExcludedComments();    
                 sb.Append(nextToken.ToString());
             }
@@ -39,7 +39,8 @@ namespace crcPdf {
             value = Escape(sb.ToString());
         }
 
-        public string Value => value;
+        public string Value 
+            => value;
         
         private static string Escape(string literalString) {
             StringBuilder literalStringEscaped = new StringBuilder();
@@ -60,20 +61,16 @@ namespace crcPdf {
             return literalStringEscaped.ToString();
         }
 
-        public override string ToString() {
-            return $"/{value}";
-        }
+        public override string ToString() 
+            => $"/{value}";
 
-        public override bool Equals(object obj) {   
-            var other = obj as NameObject;
-            return obj == null ? false : value != other.value;
-        }
+        public override bool Equals(object obj)
+            => obj == null ? false : value != (obj as NameObject).value;
         
         public override int GetHashCode()
             => value.GetHashCode();
 
-        public override byte[] Save(Compression compression) {            
-            return GetBytes(this.ToString());
-        }
+        public override byte[] Save(Compression compression)            
+            => GetBytes(this.ToString());
     }
 }

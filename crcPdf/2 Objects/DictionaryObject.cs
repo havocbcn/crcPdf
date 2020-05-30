@@ -21,8 +21,7 @@ namespace crcPdf {
     public class DictionaryObject : PdfObject {
         private readonly Dictionary<string, PdfObject> dictionary = new Dictionary<string, PdfObject>();
         private readonly byte[] stream;
-
-        private string streamContent;
+        private readonly string streamContent;
 
         public DictionaryObject(string content) {
             streamContent = content;
@@ -119,7 +118,7 @@ namespace crcPdf {
 
             dictionary.Add(key.Value, value);
 
-            if (((NameObject)key).Value == "Length") {
+            if (key.Value == "Length") {
                 var lengthObject = value as IntegerObject;
                 if (lengthObject == null) {
                     throw new PdfException(PdfExceptionCodes.DICTIONARY_VALUE_LENGTH_INTEGER, "A length value must be an integer number");

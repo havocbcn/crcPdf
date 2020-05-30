@@ -29,7 +29,7 @@ namespace crcPdf {
         }
 
         internal List<PdfObject> ToArrayObject()
-            => new List<PdfObject>() {
+            => new List<PdfObject> {
                 new RealObject(X),
                 new RealObject(Y),
                 new RealObject(Width),

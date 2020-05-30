@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace crcPdf.Tests {
@@ -38,9 +39,7 @@ namespace crcPdf.Tests {
             MemoryStream ms = new MemoryStream();
             pdfWriter.Save(ms);
 
-            ms.Seek(0, SeekOrigin.Begin);
-            Console.Write(System.Text.UTF8Encoding.UTF8.GetString(ms.ToArray()));
-
+            LogInDebug(ms);
 
             ms.Seek(0, SeekOrigin.Begin);
             DocumentCatalog pdfRead = Pdf.Load(ms);
@@ -52,6 +51,13 @@ namespace crcPdf.Tests {
             if (Then != null) {
                 Then(pdfRead);
             }
+        }
+
+        [Conditional("DEBUG")]
+        private void LogInDebug(MemoryStream ms)
+        {            
+            ms.Seek(0, SeekOrigin.Begin);
+            Console.Write(System.Text.UTF8Encoding.UTF8.GetString(ms.ToArray()));
         }
     }
 }

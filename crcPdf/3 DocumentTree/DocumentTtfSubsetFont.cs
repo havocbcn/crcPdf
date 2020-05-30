@@ -125,8 +125,9 @@ namespace crcPdf  {
 
                 int fontOffset = Glypth[glyphChar.oldGlyphId].offsetFile;
                 int endPtsOfContours = GetUInt16(font, ref fontOffset);
-                if (endPtsOfContours >= 0)  // If numberOfContours is negative, a composite glyph description is used.
+                if (endPtsOfContours >= 0) { // If numberOfContours is negative, a composite glyph description is used.
                     continue;
+                }
                 fontOffset += 8;
 
                 while (true) {
@@ -190,10 +191,11 @@ namespace crcPdf  {
             List<int> glyphOffset;
             byte[] glyph = SetGlyph(out glyphOffset);
 
-            if (glyph.Length < 128000)
-                indexToLocFormat = 0;   // 0 for short offsets
-            else
+            if (glyph.Length < 128000) {
+                indexToLocFormat = 0;   // 0 for short offsets            
+            } else {
                 indexToLocFormat = 1;   // 1 for long
+            }
 
             byte[] head = SetHead(font);
             byte[] loca = SetLoca(glyphOffset, head);
@@ -526,8 +528,9 @@ namespace crcPdf  {
             int filePosition = 0;
             var nLongs = ((font.Length + 3) & ~3) >> 2;
 
-            while (nLongs-- > 0)
+            while (nLongs-- > 0) {
                 sum += GetUInt32(font, ref filePosition);
+            }
 
             return 0xB1B0AFBA - sum; 
         }
@@ -537,8 +540,9 @@ namespace crcPdf  {
             int filePosition = 0;
             var nLongs = ((block.Length + 3) & ~3) >> 2;
 
-            while (nLongs-- > 0)
+            while (nLongs-- > 0) {
                 sum += GetUInt32(block, ref filePosition);
+            }
 
             return sum;            
         }

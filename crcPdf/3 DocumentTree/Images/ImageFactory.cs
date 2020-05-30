@@ -51,8 +51,9 @@ namespace crcPdf.Images {
             string hash = string.Concat(hashBytes.Select(b => b.ToString("x2")));
 
             lock (lck) {
-                if (dct.ContainsKey(hash))
+                if (dct.ContainsKey(hash)) {
                     return dct[hash];
+                }
             }
 
             DocumentImage img;

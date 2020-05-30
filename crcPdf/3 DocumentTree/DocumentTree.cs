@@ -3,7 +3,7 @@ using System;
 namespace crcPdf {
     public abstract class DocumentTree : IDocumentTree {
         
-        internal Guid guid = Guid.NewGuid();
+        internal readonly Guid guid = Guid.NewGuid();
 
         public override bool Equals(object obj)
         {           
@@ -21,8 +21,9 @@ namespace crcPdf {
         public IndirectReferenceObject IndirectReferenceObject(PDFObjects pdfObjects) 
         {        
             var indirectObject = pdfObjects.CacheGuid(guid);
-            if (indirectObject != null)
+            if (indirectObject != null) {
                 return indirectObject;
+            }
 
             indirectObject = pdfObjects.CreateIndirectObject(guid);        
             OnSaveEvent(indirectObject, pdfObjects);                

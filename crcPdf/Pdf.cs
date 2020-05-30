@@ -19,7 +19,7 @@ namespace crcPdf {
     /// <summary>
     /// Class to choose: read or create a new Pdf (simple or expert mode)
     /// </summary>
-    public class Pdf {
+    public static class Pdf {
         /// <summary>
         /// Load a pdf and return its catalog
         /// </summary>

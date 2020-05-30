@@ -25,7 +25,7 @@ namespace crcPdf {
 
         internal Dictionary<string, TtfTable> dctTables = new Dictionary<string, TtfTable>();
 
-		public DocumentTtfFontBase() {
+		protected DocumentTtfFontBase() {
 			
 		}
 		
@@ -259,8 +259,7 @@ namespace crcPdf {
 				ushort offset = GetUInt16();
 
 				for (int i = 0; i < counts; i++) {
-					ushort platformId = GetUInt16();
-					GetUInt16();	// encodingId
+					Skip(4);		// platformId (16bits) & encodingId (16bits)
 					ushort languageId = GetUInt16();
 					ushort nameId = GetUInt16();
 					ushort length = GetUInt16();

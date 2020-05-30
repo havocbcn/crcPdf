@@ -20,8 +20,9 @@ namespace crcPdf {
     public class StringObject : PdfObject {
         public StringObject(Tokenizer tokenizer) {            
             Token delimiter = tokenizer.TokenExcludedCommentsAndWhitespaces();
-            if (delimiter.characterSetClass != CharacterSetType.Delimiter)
+            if (delimiter.characterSetClass != CharacterSetType.Delimiter) {
                 throw new PdfException(PdfExceptionCodes.EXPECTED_DELIMITER, "String without a delimiter");
+            }
 
             string initialDelimiter = delimiter.ToString();
             if (initialDelimiter == "(") {
