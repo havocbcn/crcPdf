@@ -126,8 +126,7 @@ namespace crcPdf.Fonts {
          	=> dic.Dictionary.ContainsKey("BaseFont") &&
                             dic.Dictionary.ContainsKey("ToUnicode");
 
-        internal static DocumentFont GetFont(string name, bool IsBold, bool IsItalic, Embedded embedded)
-		{	
+        public static DocumentFont GetFont(string name, bool IsBold, bool IsItalic, Embedded embedded) {	
 			string normalizedName = GetName(name, IsBold, IsItalic, embedded);
 
 			// base fonts

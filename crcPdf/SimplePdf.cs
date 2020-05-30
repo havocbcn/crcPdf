@@ -53,6 +53,11 @@ namespace crcPdf {
             actualPage.RestoreGraph();
         }
 
+        /// <summary>
+        /// Set current font
+        /// </summary>
+        /// <param name="font">A font</param>
+        /// <param name="size">Size</param>
         public void SetFont(DocumentFont font, int size) {
             actualPage.SetFont(font, size);
         }
