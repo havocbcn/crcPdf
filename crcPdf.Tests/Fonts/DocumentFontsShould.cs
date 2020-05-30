@@ -20,27 +20,27 @@ using crcPdf.Fonts;
 namespace crcPdf.Tests {
     public class DocumentFontShould : crcPdfTest {   
         [Theory]
-        [InlineData("Times-Roman", false, false)]
-        [InlineData("Times-Roman", false, true)]
-        [InlineData("Times-Roman", true, false)]
-        [InlineData("Times-Roman", true, true)]
-        [InlineData("Courier", false, false)]
-        [InlineData("Courier", false, true)]
-        [InlineData("Courier", true, false)]
-        [InlineData("Courier", true, true)]
-        [InlineData("Helvetica", false, false)]
-        [InlineData("Helvetica", false, true)]
-        [InlineData("Helvetica", true, false)]
-        [InlineData("Helvetica", true, true)]
-        [InlineData("Symbol", false, false)]
-        [InlineData("Symbol", false, true)]
-        [InlineData("Symbol", true, false)]
-        [InlineData("Symbol", true, true)]
-        [InlineData("ZapfDingbats", false, false)]
-        [InlineData("ZapfDingbats", false, true)]
-        [InlineData("ZapfDingbats", true, false)]
-        [InlineData("ZapfDingbats", true, true)]        
-        public void LoadBaseFonts(string fontName, bool bold, bool italic) =>
+        [InlineData("Times-Roman", false, false, "Times-Roman")]
+        [InlineData("Times Roman", false, true, "Times-Italic")]
+        [InlineData("Times-Roman", true, false, "Times-Bold")]
+        [InlineData("Times-Roman", true, true, "Times-BoldItalic")]
+        [InlineData("Courier", false, false, "Courier")]
+        [InlineData("Courier", false, true, "Courier-Oblique")]
+        [InlineData("Courier", true, false, "Courier-Bold")]
+        [InlineData("Courier", true, true, "Courier-BoldOblique")]
+        [InlineData("Helvetica", false, false, "Helvetica")]
+        [InlineData("Helvetica", false, true, "Helvetica-Oblique")]
+        [InlineData("Helvetica", true, false, "Helvetica-Bold")]
+        [InlineData("Helvetica", true, true, "Helvetica-BoldOblique")]
+        [InlineData("Symbol", false, false, "Symbol")]
+        [InlineData("Symbol", false, true, "Symbol")]
+        [InlineData("Symbol", true, false, "Symbol")]
+        [InlineData("Symbol", true, true, "Symbol")]
+        [InlineData("ZapfDingbats", false, false, "ZapfDingbats")]
+        [InlineData("ZapfDingbats", false, true, "ZapfDingbats")]
+        [InlineData("ZapfDingbats", true, false, "ZapfDingbats")]
+        [InlineData("ZapfDingbats", true, true, "ZapfDingbats")]
+        public void LoadBaseFonts(string fontName, bool bold, bool italic, string baseFontName) =>
             crcPdf(
                 Given: pdf => { pdf.Pages
                     .AddPage()                        
@@ -48,14 +48,8 @@ namespace crcPdf.Tests {
                         .SetPosition(10, 15)
                         .AddLabel("Hola"); },
                 Then: pdf => { 
-                    pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentBaseFont>();
-                    if (bold || italic)
-                        fontName += "-";
-                    if (bold)
-                        fontName += "Bold";
-                    if (italic)
-                        fontName += "Italic";
-                    pdf.Pages.PageSons[0].Font[0].Name.Should().Be(fontName);
+                    pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentBaseFont>();                    
+                    pdf.Pages.PageSons[0].Font[0].Name.Should().Be(baseFontName);
                     }
             );
 
@@ -99,7 +93,7 @@ namespace crcPdf.Tests {
                         .AddLabel("Α α:Alpha. Β β: Beta. Γ γ: Gamma. Δ δ: Delta"); },
                 Then: pdf => { 
                     pdf.Pages.PageSons[0].Font[0].Should().BeOfType<DocumentTtfSubsetFont>();
-                    pdf.Pages.PageSons[0].Font[0].Name.Should().Be("OpenSans");
+                    pdf.Pages.PageSons[0].Font[0].Name.Should().EndWith("OpenSans");
     
                     using (var fs = new FileStream("openSansSubset.pdf", FileMode.Create)) {
                         pdf.Save(fs);
