@@ -23,6 +23,12 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --verbosity normal /p:CollectCoverage="true" /p:CoverletOutputFormat="opencover"  /p:Exclude="[xunit.*]*"
+    
+    - name: Run codacy-coverage-reporter
+      uses: codacy/codacy-coverage-reporter-action@master
+      with:
+        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        coverage-reports: crcPdf.Tests/coverage.opencover.xml
     - name: publish on version change
       #id: publish_nuget
       uses: rohith/publish-nuget@v2
