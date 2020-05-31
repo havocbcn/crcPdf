@@ -38,15 +38,6 @@ namespace crcPdf.Fonts {
 			{ "timesromanb_N", "Times-Bold"},
 			{ "timesroman_iN", "Times-Italic"},
 			{ "timesroman__N", "Times-Roman"},
-			{ "times-romanbiN", "Times-BoldItalic"},
-			{ "times-romanb_N", "Times-Bold"},
-			{ "times-roman_iN", "Times-Italic"},
-			{ "times-roman__N", "Times-Roman"},
-			{ "times-romanN", "Times-Roman"},
-			{ "times romanbiN", "Times-BoldItalic"},
-			{ "times romanb_N", "Times-Bold"},
-			{ "times roman_iN", "Times-Italic"},
-			{ "times roman__N", "Times-Roman"},
 			{ "zapfdingbatsbiN", "ZapfDingbats"},
 			{ "zapfdingbatsb_N", "ZapfDingbats"},
 			{ "zapfdingbats_iN", "ZapfDingbats"},
@@ -65,44 +56,30 @@ namespace crcPdf.Fonts {
 			{ "symbol__N", "Symbol"},
 		};
 
+		private static string SimplifyBaseName(string fontName) 
+			=> fontName.Replace(" ","").Replace("-","");
+
 		private static string GetName(string name, bool IsBold, bool IsItalic, Embedded embedded) 
 			=> $"{name.ToLower(CultureInfo.InvariantCulture).Replace(" N","")}{(IsBold ? "b" : "_")}{(IsItalic ? "i" : "_")}{(embedded == Embedded.Yes ? "Y" : "N")}";
 
    		internal static DocumentFont GetFont(PDFObjects pdf, PdfObject pdfObject)
         {
-            var dic = pdf.GetObject<DictionaryObject>(pdfObject);
-			
-            if (IsBaseFont(pdf, dic)) {
-                var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
+            var dic = pdf.GetObject<DictionaryObject>(pdfObject);			
+			var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
 
-                lock (lck)
-                {
-                    if (m_lstFont.ContainsKey(name)) {
-                        return m_lstFont[name];
-                    }
-
-                    var font = new DocumentBaseFont(name);
-                    m_lstFont.Add(name, font);
-                    return font;
-                }
-            } else if (IsSubsetFont(dic)) {
-				var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
-                lock (lck) {
-					if (m_lstFont.ContainsKey(name)) {
-						return m_lstFont[name];
-					}
-
+			lock (lck) {
+				if (m_lstFont.ContainsKey(name)) {
+					return m_lstFont[name];
+				}
+				if (IsBaseFont(pdf, dic)) {                
+					var font = new DocumentBaseFont(name);
+					m_lstFont.Add(name, font);
+					return font;
+				} else if (IsSubsetFont(dic)) {
 					var font = pdf.GetDocument<DocumentTtfSubsetFont>(pdfObject);
 					m_lstFont.Add(name, font);
 					return font;
-				}
-			} else if (IsTrueTypeFont(pdf, dic)) {
-				var name = pdf.GetObject<NameObject>(dic.Dictionary["BaseFont"]).Value;
-                lock (lck) {
-					if (m_lstFont.ContainsKey(name)) {
-						return m_lstFont[name];
-					}
-
+				} else if (IsTrueTypeFont(pdf, dic)) {
 					var font = pdf.GetDocument<DocumentTtfFont>(pdfObject);
 					m_lstFont.Add(name, font);
 					return font;
@@ -130,8 +107,8 @@ namespace crcPdf.Fonts {
 			string normalizedName = GetName(name, IsBold, IsItalic, embedded);
 
 			// base fonts
-			if (baseFontsNames.ContainsKey(normalizedName)) {
-				var fontBaseName = baseFontsNames[normalizedName];
+			if (baseFontsNames.ContainsKey(SimplifyBaseName(normalizedName))) {
+				var fontBaseName = baseFontsNames[SimplifyBaseName(normalizedName)];
                 lock (lck) {					
 					if (m_lstFont.ContainsKey(fontBaseName)) {
 						return m_lstFont[fontBaseName];

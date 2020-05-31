@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace crcPdf {
     public class DocumentText : DocumentTree {        
         List<Operator> pageOperators = new List<Operator>();
-
      
         public override void Load(PDFObjects pdf, PdfObject pdfObject)  {            
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);
@@ -27,7 +25,7 @@ namespace crcPdf {
             }
 
             return textObject;
-        }
+        }      
 
         public void AddLabel(string text) 
             => GetOrAddLastTextObject().AddLabel(text);
@@ -101,5 +99,8 @@ namespace crcPdf {
 
         internal void AddNonStrokingColour(float r, float g, float b)
             => pageOperators.Add(new NonStrokingColourOperator(r, g, b));
+
+        internal void AddSetTextPositioning(float x, float y)
+            => pageOperators.Add(new TextPositioningOperator(x, y));
     }
 }

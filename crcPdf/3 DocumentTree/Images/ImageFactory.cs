@@ -54,22 +54,19 @@ namespace crcPdf.Images {
                 if (dct.ContainsKey(hash)) {
                     return dct[hash];
                 }
-            }
 
-            DocumentImage img;
-            // https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format
-            // SOI FF D8 Start of Image
-            if (image[0] == 0xFF && image[1] == 0xD8) {     
-                img = new DocumentImageJpeg(image);
-            } else {
-                throw new PdfException(PdfExceptionCodes.IMAGE_FORMAT_NOT_SUPPORTED, "Image format not supported");
-            }
-            
-            lock (lck) {
+                DocumentImage img;
+                // https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format
+                // SOI FF D8 Start of Image
+                if (image[0] == 0xFF && image[1] == 0xD8) {     
+                    img = new DocumentImageJpeg(image);
+                } else {
+                    throw new PdfException(PdfExceptionCodes.IMAGE_FORMAT_NOT_SUPPORTED, "Image format not supported");
+                }
+                
                 dct.Add(hash, img);
+                return img;
             }
-
-            return img;
         }
     }
 }

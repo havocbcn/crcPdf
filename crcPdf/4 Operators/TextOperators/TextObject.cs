@@ -6,20 +6,24 @@ namespace crcPdf {
     public class TextObject : Operator {
         readonly List<Operator> operators = new List<Operator>();
 
+
         public Operator[] Operators => operators.ToArray();
+        public T Operator<T>(int index) where T: Operator 
+            => operators[index] as T;
+        
 
         public void AddLabel(string text) => operators.Add(new TextOperator(text));
 
-        internal void SetPosition(int x, int y) => operators.Add(new TextPositioningOperator(x, y));
+        public void SetPosition(int x, int y) => operators.Add(new TextPositioningOperator(x, y));
 
-        internal void SetFont(string code, float size) => operators.Add(new FontOperator(code, size));
+        public void SetFont(string code, float size) => operators.Add(new FontOperator(code, size));
 
         internal void AddOperator(Operator textOperator) => operators.Add(textOperator);
 
         public override string ToString() => $"BT {string.Join(" ", operators)} ET";
 
-        internal void SetLineCap(LineCapStyle lineCap) => operators.Add(new LineCapOperator(lineCap));
+        public void SetLineCap(LineCapStyle lineCap) => operators.Add(new LineCapOperator(lineCap));
 
-        internal void SetNonStrokingColour(float r, float g, float b) => operators.Add(new NonStrokingColourOperator(r, g, b));
+        public void SetNonStrokingColour(float r, float g, float b) => operators.Add(new NonStrokingColourOperator(r, g, b));
     }
 }

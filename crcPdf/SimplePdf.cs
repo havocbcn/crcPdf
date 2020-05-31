@@ -22,9 +22,7 @@ namespace crcPdf {
 
         private DocumentPage actualPage;
 
-        private readonly int width;
-
-        private readonly int height;
+        private readonly Rectangle mediaBox;
 
         private float textAngle;
 
@@ -32,8 +30,7 @@ namespace crcPdf {
 
         public SimplePdf(int width, int height) {                  
             Catalog = new DocumentCatalog();
-            this.width = width;
-            this.height = height;
+            mediaBox = new Rectangle(0, 0, width, height);
         }
 
         public void Save(Stream ms) 
@@ -44,6 +41,7 @@ namespace crcPdf {
 
         public void NewPage() {
             actualPage = Catalog.Pages.AddPage();
+            actualPage.SetMediaBox(mediaBox);
         }
 
         public void DrawImage(byte[] image, float x, float y, float w, float h) {
@@ -73,14 +71,18 @@ namespace crcPdf {
             this.textAngle = textAngle;
         }
 
-        public void DrawText(string text, int x, int y) {
+        public void DrawText(string text, float x, float y) {
             if (textAngle > -0.0001 && textAngle < 0.0001) {
                 float sinus = (float)Math.Sin(textAngle * degreesToRadiant);
 				float cosinus = (float)Math.Cos(textAngle * degreesToRadiant);
+                //float fontHeight = (actualPage.CurrentFont.GetDescendent - actualPage.CurrentFont.GetHeight) * pageSize.GetDPI;
+				//x = x - sinus * fontHeight;
+				//y = y + cosinus * fontHeight - fontHeight;
 
 				actualPage.SetTextMatrix(cosinus, sinus, -sinus, cosinus, x, y);
+            } else {
+                actualPage.SetTextPositioning(x, y);
             }
-
             actualPage.AddLabel(text);
         }        
 

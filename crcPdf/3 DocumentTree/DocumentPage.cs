@@ -15,7 +15,6 @@
 
 using System.Collections.Generic;
 using crcPdf.Fonts;
-using System.Linq;
 using crcPdf.Images;
 
 namespace crcPdf {
@@ -23,18 +22,17 @@ namespace crcPdf {
         private DocumentText contents;
         private DocumentPageTree parent;
         private readonly Dictionary<DocumentFont, string> fonts = new Dictionary<DocumentFont, string>();
+        private readonly Dictionary<string, DocumentFont> reverseFonts = new Dictionary<string, DocumentFont>();
         private readonly Dictionary<DocumentImage, string> images = new Dictionary<DocumentImage, string>();        
         private readonly Dictionary<string, DocumentImage> reverseImages = new Dictionary<string, DocumentImage>();        
         private readonly List<string> procsets = new List<string>();
-        private Rectangle MediaBox;
-        public DocumentFont[] Font => fonts.Keys.ToArray();
+        public Rectangle MediaBox {get; private set; }
+        public IReadOnlyDictionary<string, DocumentFont> Font => reverseFonts;
         public IReadOnlyDictionary<string, DocumentImage> Image => reverseImages;
         public DocumentFont CurrentFont { get; private set;}
         public string[] Procsets => procsets.ToArray();
 
-        public DocumentPage()
-        {
-            
+        public DocumentPage(){            
         }        
         
         public DocumentPage(DocumentPageTree parent) {   
@@ -68,6 +66,7 @@ namespace crcPdf {
                             foreach (var font in pdf.GetObject<DictionaryObject>(resource.Value).Dictionary) {
                                 var documentFont = FontFactory.GetFont(pdf, font.Value);
                                 fonts.Add(documentFont, font.Key);
+                                reverseFonts.Add(font.Key, documentFont);
                             }
                             break;
                         case "XObject":
@@ -94,14 +93,23 @@ namespace crcPdf {
             contents = pdf.GetDocument<DocumentText>(dic.Dictionary["Contents"]);
         }
 
-        internal DocumentPage AddNonStrokingColour(float r, float g, float b)
-        {
+    
+        public DocumentPage SetMediaBox(Rectangle rectangle) {
+            MediaBox = rectangle;
+            return this;
+        }
+
+        public DocumentPage SetTextPositioning(float x, float y) {
+            contents.AddSetTextPositioning(x, y);
+            return this;
+        }
+
+        public DocumentPage AddNonStrokingColour(float r, float g, float b) {
             contents.AddNonStrokingColour(r, g, b);
             return this;
         }
 
-        internal DocumentPage SetTextMatrix(float a, float b, float c, float d, float e, float f)
-        {
+        public DocumentPage SetTextMatrix(float a, float b, float c, float d, float e, float f) {
             contents.SetTextMatrix(a, b, c, d, e, f);
             return this;
         }
@@ -110,7 +118,7 @@ namespace crcPdf {
         public DocumentText Contents 
             => contents;
       
-         public DocumentPage AddLabel(string text) {
+        public DocumentPage AddLabel(string text) {
             if (CurrentFont == null) {
                 throw new PdfException(PdfExceptionCodes.FONT_ERROR, $"A font must be set before writting");
             }
@@ -144,7 +152,9 @@ namespace crcPdf {
 
         public DocumentPage SetFont(DocumentFont font, int size) {
             if (!fonts.ContainsKey(font)) {
-                fonts.Add(font, "F" + fonts.Count);
+                var key = "F" + fonts.Count;
+                fonts.Add(font, key);
+                reverseFonts.Add(key, font);
             }
 
             CurrentFont = font;
@@ -253,7 +263,7 @@ namespace crcPdf {
                 { "Type", new NameObject("Page") },
                 { "Parent", parent.IndirectReferenceObject(pdfObjects)},
                 { "Contents", contents.IndirectReferenceObject (pdfObjects)}
-            };            
+            };                        
 
             if (resourceEntries.Count > 0) {                
                 entries.Add("Resources", new DictionaryObject(resourceEntries));

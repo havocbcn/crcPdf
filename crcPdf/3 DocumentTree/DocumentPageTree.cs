@@ -18,6 +18,7 @@ using System.Linq;
 namespace crcPdf {
     public class DocumentPageTree : DocumentTree {
         private DocumentPageTree parent;
+        public Rectangle MediaBox { get; private set; }
         private readonly List<DocumentPageTree> pageTreeSons = new List<DocumentPageTree>();
         private readonly List<DocumentPage> pageSons = new List<DocumentPage>();
 
@@ -35,6 +36,22 @@ namespace crcPdf {
                     pageSons.Add(pdf.GetDocument<DocumentPage>(kid));
                 }
             }
+
+             if (dic.Dictionary.ContainsKey("MediaBox")) {                
+                var mediaBox = pdf.GetObject<ArrayObject>(dic.Dictionary["MediaBox"]);
+                
+                MediaBox = new Rectangle(
+                    pdf.GetObject<RealObject>(mediaBox.childs[0]).floatValue,
+                    pdf.GetObject<RealObject>(mediaBox.childs[1]).floatValue,
+                    pdf.GetObject<RealObject>(mediaBox.childs[2]).floatValue,
+                    pdf.GetObject<RealObject>(mediaBox.childs[3]).floatValue);
+            }
+        }
+
+
+        public DocumentPageTree SetMediaBox(Rectangle rectangle) {
+            MediaBox = rectangle;
+            return this;
         }
 
         public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
@@ -43,14 +60,17 @@ namespace crcPdf {
             kids.AddRange(pageTreeSons.Select(p => p.IndirectReferenceObject(pdfObjects)));
             kids.AddRange(pageSons.Select(p => p.IndirectReferenceObject(pdfObjects)));            
 
-            indirectObject.SetChild(new DictionaryObject(
-                new Dictionary<string, PdfObject>
-                {
-                    { "Type", new NameObject("Pages") },
-                    { "Kids", new ArrayObject(kids) },
-                    { "Count", new IntegerObject(kids.Count) },
-                }
-            ));
+            var entries = new Dictionary<string, PdfObject> {
+                { "Type", new NameObject("Pages") },
+                { "Kids", new ArrayObject(kids) },
+                { "Count", new IntegerObject(kids.Count) },
+            };
+            
+            if (MediaBox != null) {
+                entries.Add("MediaBox", new ArrayObject(MediaBox.ToArrayObject()));
+            }
+
+            indirectObject.SetChild(new DictionaryObject(entries));
         }
 
         public DocumentPageTree[] PageTreeSons => pageTreeSons.ToArray();
