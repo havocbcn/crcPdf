@@ -95,12 +95,12 @@ namespace crcPdf {
             => pageOperators.Add(new CurrentTransformationMatrixOperator(a, b, c, d, e, f));
 
         internal void SetTextMatrix(float a, float b, float c, float d, float e, float f)
-            => pageOperators.Add(new TextMatrixOperation(a,b,c,d,e,f));
+            => GetOrAddLastTextObject().SetTextMatrix(a,b,c,d,e,f);
 
         internal void AddNonStrokingColour(float r, float g, float b)
             => pageOperators.Add(new NonStrokingColourOperator(r, g, b));
 
         internal void AddSetTextPositioning(float x, float y)
-            => pageOperators.Add(new TextPositioningOperator(x, y));
+            => GetOrAddLastTextObject().SetTextPositioning(x, y);
     }
 }

@@ -72,16 +72,16 @@ namespace crcPdf {
         }
 
         public void DrawText(string text, float x, float y) {
-            if (textAngle > -0.0001 && textAngle < 0.0001) {
+            if (textAngle > -0.0001 && textAngle < 0.0001) {            
+                actualPage.SetTextPositioning(x, y);
+            } else {
                 float sinus = (float)Math.Sin(textAngle * degreesToRadiant);
 				float cosinus = (float)Math.Cos(textAngle * degreesToRadiant);
                 //float fontHeight = (actualPage.CurrentFont.GetDescendent - actualPage.CurrentFont.GetHeight) * pageSize.GetDPI;
 				//x = x - sinus * fontHeight;
 				//y = y + cosinus * fontHeight - fontHeight;
-
 				actualPage.SetTextMatrix(cosinus, sinus, -sinus, cosinus, x, y);
-            } else {
-                actualPage.SetTextPositioning(x, y);
+                
             }
             actualPage.AddLabel(text);
         }        

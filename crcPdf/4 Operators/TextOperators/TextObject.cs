@@ -24,6 +24,13 @@ namespace crcPdf {
 
         public void SetLineCap(LineCapStyle lineCap) => operators.Add(new LineCapOperator(lineCap));
 
-        public void SetNonStrokingColour(float r, float g, float b) => operators.Add(new NonStrokingColourOperator(r, g, b));
+        public void SetNonStrokingColour(float r, float g, float b) 
+            => operators.Add(new NonStrokingColourOperator(r, g, b));
+
+        public void SetTextPositioning(float x, float y) 
+            => operators.Add(new TextPositioningOperator(x, y));
+
+        public void SetTextMatrix(float a, float b, float c, float d, float e, float f)
+            => operators.Add(new TextMatrixOperation(a, b, c, d, e, f));
     }
 }
