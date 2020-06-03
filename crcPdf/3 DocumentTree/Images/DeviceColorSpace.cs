@@ -12,11 +12,12 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
-namespace crcPdf {
-    public abstract class DocumentImage : DocumentTree {
-        public abstract int Width { get; }
-        public abstract int Height { get; }
-        public abstract int BitsPerComponent { get; }
-        public abstract int Components { get; }
+namespace crcPdf.Images
+{
+    public enum DeviceColorSpace
+    {
+        DeviceGray = 0,
+        DeviceRGB = 1,
+        DeviceCMYK = 2
     }
 }

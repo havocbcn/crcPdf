@@ -139,13 +139,13 @@ namespace crcPdf {
         /// Bits the per component.
         /// </summary>
         /// <returns>1 = black&amp;white, 8, 16, 25...</returns>
-        public int BitsPerComponent => m_bitsPerComponent;
+        public override int BitsPerComponent => m_bitsPerComponent;
 
         /// <summary>
         /// How much components
         /// </summary>
         /// <returns>1 = black&amp;white, 3=RGB</returns>
-        public int Components => m_component;
+        public override int Components => m_component;
 
         public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
         {

@@ -30,5 +30,20 @@ namespace crcPdf.Tests.Image {
                 }
             );
 
+                [Fact]
+        public void ReadAndSaveRawImage() =>
+            // 12.3.3 Document outline
+            crcPdfShould(
+                Given: File.ReadAllBytes("samples/rawImage.pdf"),
+                Then: pdf => { 
+                    pdf.Pages.PageSons.Should().HaveCount(1);
+
+                    using (var fs = new FileStream("rawImage_output.pdf", FileMode.Create)) {
+                        pdf.Save(fs, Compression.Compress | Compression.Optimize);
+                    }
+                }
+            );
+            
+
     }
 }

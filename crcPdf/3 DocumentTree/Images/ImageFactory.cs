@@ -12,6 +12,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,7 +31,16 @@ namespace crcPdf.Images {
 
         public static DocumentImage GetImage(PDFObjects pdf, PdfObject pdfObject) {
             var dic = pdf.GetObject<DictionaryObject>(pdfObject);
-            return GetImageInternal(dic.Stream);
+
+            if (dic.Dictionary.ContainsKey("Filter") && pdf.GetObject<NameObject>(dic.Dictionary["Filter"]).Value == "DCTDecode")
+                return GetImageInternal(dic.Stream);
+
+            int width = pdf.GetObject<IntegerObject>(dic.Dictionary["Width"]).IntValue;
+            int height = pdf.GetObject<IntegerObject>(dic.Dictionary["Height"]).IntValue;
+            int bitsPerComponents = pdf.GetObject<IntegerObject>(dic.Dictionary["BitsPerComponent"]).IntValue;
+            string colorSpace = pdf.GetObject<NameObject>(dic.Dictionary["ColorSpace"]).Value;
+
+            return GetRawImage(dic.Stream, width, height, bitsPerComponents, Enum.Parse<DeviceColorSpace>(colorSpace));
         }
 
         public static DocumentImage GetImage(string fullFilePath) {
@@ -43,8 +53,25 @@ namespace crcPdf.Images {
             return GetImageInternal(image);
         }
 
-        public static  DocumentImage GetImage(byte[] image) 
+        public static DocumentImage GetImage(byte[] image) 
             => GetImageInternal(image);
+
+        public static DocumentImage GetRawImage(byte[] image, int widht, int height, int bitsPerComponent, DeviceColorSpace colorSpace) 
+        {
+            byte[] hashBytes = sha1.ComputeHash(image);
+            string hash = string.Concat(hashBytes.Select(b => b.ToString("x2")));
+
+            lock (lck) {
+                if (dct.ContainsKey(hash)) {
+                    return dct[hash];
+                }
+
+                var img = new DocumentImageRaw(image, widht, height, bitsPerComponent, colorSpace);
+                dct.Add(hash, img);
+                return img;
+            }
+
+        }
 
         private static DocumentImage GetImageInternal(byte[] image) {
             byte[] hashBytes = sha1.ComputeHash(image);
