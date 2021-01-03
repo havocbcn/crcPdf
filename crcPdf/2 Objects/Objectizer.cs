@@ -27,6 +27,7 @@ namespace crcPdf {
         private readonly Dictionary<string, Func<Tokenizer, PdfObject>> tokenToObject = 
             new Dictionary<string, Func<Tokenizer, PdfObject>>
         {
+            { "null", (t) => { return new NullObject(t); }},
             { "true", (t) => { return new BooleanObject(t); }},
             { "false", (t) => { return new BooleanObject(t); }},
             { "[", (t) => { return new ArrayObject(t); }},

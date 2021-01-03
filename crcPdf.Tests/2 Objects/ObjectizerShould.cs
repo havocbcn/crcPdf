@@ -103,7 +103,7 @@ namespace crcPdf.Tests
             var objectizer = new Objectizer(feed); 
 
             var actual = (RealObject)objectizer.NextObject();
-            Assert.Equal(expected, actual.FloatValue);
+            Assert.Equal(expected, actual.Value);
         }
 
          [Theory]
@@ -370,7 +370,7 @@ are the same.)", "These two strings are the same.")]
             Assert.Equal(5, actual.Childs<PdfObject>().Length);
 
             Assert.Equal(549, actual.Child<IntegerObject>(0).IntValue);
-            Assert.Equal(3.14f, actual.Child<RealObject>(1).FloatValue);
+            Assert.Equal(3.14f, actual.Child<RealObject>(1).Value);
             Assert.False(actual.Child<BooleanObject>(2).Value);
             Assert.Equal("Ralph", actual.Child<StringObject>(3).Value);
             Assert.Equal("SomeName", actual.Child<NameObject>(4).Value);        

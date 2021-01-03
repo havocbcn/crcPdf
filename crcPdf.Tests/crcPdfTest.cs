@@ -57,7 +57,7 @@ namespace crcPdf.Tests {
         private void LogInDebug(MemoryStream ms)
         {            
             ms.Seek(0, SeekOrigin.Begin);
-            Console.Write(System.Text.UTF8Encoding.UTF8.GetString(ms.ToArray()));
+            //   Console.Write(System.Text.UTF8Encoding.UTF8.GetString(ms.ToArray()));
         }
     }
 }

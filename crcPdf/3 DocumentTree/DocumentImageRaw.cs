@@ -17,15 +17,14 @@ using crcPdf.Images;
 
 namespace crcPdf
 {
-    internal class DocumentImageRaw: DocumentImage {    
+    internal class DocumentImageRaw : DocumentImage {    
         private byte[] image;
         private int width;
         private int height;
         private int bitsPerComponent;
         private DeviceColorSpace colorSpace;
 
-        public DocumentImageRaw(byte[] image, int width, int height, int bitsPerComponent, DeviceColorSpace colorSpace)
-        {
+        public DocumentImageRaw(byte[] image, int width, int height, int bitsPerComponent, DeviceColorSpace colorSpace) {
             this.image = image;
             this.width = width;
             this.height = height;
@@ -38,9 +37,7 @@ namespace crcPdf
         /// Get the image byte array
         /// </summary>
         /// <returns>The image.</returns>
-        public byte[] Image() {
-            return image;
-        }
+        public byte[] Image() => image;
 
         /// <summary>
         /// Image height
@@ -57,21 +54,23 @@ namespace crcPdf
         /// <summary>
         /// Bits the per component.
         /// </summary>
-        /// <returns>1 = black&amp;white, 8, 16, 25...</returns>
+        /// <returns>1 = black&amp;white, 8, 16, 24...</returns>
         public override int BitsPerComponent => bitsPerComponent;
 
         /// <summary>
         /// How much components
         /// </summary>
         /// <returns>1 = black&amp;white, 3=RGB</returns>
-        public override int Components { get { 
-            switch(colorSpace) {
-            case  DeviceColorSpace.DeviceRGB:
-                return 3;            
-            default:
-                throw new PdfException(PdfExceptionCodes.IMAGE_FORMAT_NOT_SUPPORTED, "Colorspace not implemented");
+        public override int Components { 
+            get { 
+                switch(colorSpace) {
+                    case DeviceColorSpace.DeviceRGB:
+                        return 3;            
+                    default:
+                        throw new PdfException(PdfExceptionCodes.IMAGE_FORMAT_NOT_SUPPORTED, "Colorspace not implemented");
+                }
             }
-         }}
+         }
 
         public override void OnSaveEvent(IndirectObject indirectObject, PDFObjects pdfObjects)
         {

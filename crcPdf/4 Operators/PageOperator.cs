@@ -41,24 +41,24 @@ namespace crcPdf {
                     ExpectedParameters(t, 2);
                     var x = GetParameter<RealObject>(t, 0);
                     var y = GetParameter<RealObject>(t, 1);                                    
-                    return new TextPositioningOperator(x.FloatValue, y.FloatValue);
+                    return new TextPositioningOperator(x.Value, y.Value);
                 }
             },
             { "Tm", (t) => { 
                     ExpectedParameters(t, 6);
-                    var a = GetParameter<RealObject>(t, 0).FloatValue;
-                    var b = GetParameter<RealObject>(t, 1).FloatValue;
-                    var c = GetParameter<RealObject>(t, 2).FloatValue;
-                    var d = GetParameter<RealObject>(t, 3).FloatValue;
-                    var e = GetParameter<RealObject>(t, 4).FloatValue;
-                    var f = GetParameter<RealObject>(t, 5).FloatValue;
+                    var a = GetParameter<RealObject>(t, 0).Value;
+                    var b = GetParameter<RealObject>(t, 1).Value;
+                    var c = GetParameter<RealObject>(t, 2).Value;
+                    var d = GetParameter<RealObject>(t, 3).Value;
+                    var e = GetParameter<RealObject>(t, 4).Value;
+                    var f = GetParameter<RealObject>(t, 5).Value;
                     return new TextMatrixOperation(a, b, c, d, e, f);
                 }
             },
             { "Tf", (t) => { 
                     ExpectedParameters(t, 2);
                     var font = GetParameter<NameObject>(t, 0).Value;
-                    var size = GetParameter<RealObject>(t, 1).floatValue;                                
+                    var size = GetParameter<RealObject>(t, 1).Value;                                
                     return new FontOperator(font, size);
                 }
             },
@@ -72,9 +72,9 @@ namespace crcPdf {
             // Table 74 – Colour Operators
             { "rg", (t) => { 
                     ExpectedParameters(t, 3);
-                    var r = GetParameter<RealObject>(t, 0).floatValue;
-                    var g = GetParameter<RealObject>(t, 1).floatValue;
-                    var b = GetParameter<RealObject>(t, 2).floatValue;                                
+                    var r = GetParameter<RealObject>(t, 0).Value;
+                    var g = GetParameter<RealObject>(t, 1).Value;
+                    var b = GetParameter<RealObject>(t, 2).Value;                                
                     return new NonStrokingColourOperator(r, g, b);
                 }
             },
@@ -93,9 +93,9 @@ namespace crcPdf {
             // Table 74 – Colour Operators
             { "rg", (objectizer, parameters) => { 
                     ExpectedParameters(parameters, 3);
-                    var r = GetParameter<RealObject>(parameters, 0).floatValue;
-                    var g = GetParameter<RealObject>(parameters, 1).floatValue;
-                    var b = GetParameter<RealObject>(parameters, 2).floatValue;                                
+                    var r = GetParameter<RealObject>(parameters, 0).Value;
+                    var g = GetParameter<RealObject>(parameters, 1).Value;
+                    var b = GetParameter<RealObject>(parameters, 2).Value;                                
                     return new NonStrokingColourOperator(r, g, b);
                 }
             },
@@ -128,10 +128,10 @@ namespace crcPdf {
             { "re", (objectizer, tParameters) => {                 
                     ExpectedParameters(tParameters, 4);
 
-                    var x = GetParameter<RealObject>(tParameters, 0).floatValue;
-                    var y = GetParameter<RealObject>(tParameters, 1).floatValue;
-                    var width = GetParameter<RealObject>(tParameters, 2).floatValue;
-                    var height = GetParameter<RealObject>(tParameters, 3).floatValue;
+                    var x = GetParameter<RealObject>(tParameters, 0).Value;
+                    var y = GetParameter<RealObject>(tParameters, 1).Value;
+                    var width = GetParameter<RealObject>(tParameters, 2).Value;
+                    var height = GetParameter<RealObject>(tParameters, 3).Value;
 
                     return new RectangleOperator(x, y, width, height);
                 }
@@ -170,25 +170,20 @@ namespace crcPdf {
             },
             { "cm", (objectizer, parameters) => {    
                     ExpectedParameters(parameters, 6);
-                    var a = GetParameter<RealObject>(parameters, 0).FloatValue;
-                    var b = GetParameter<RealObject>(parameters, 1).FloatValue;
-                    var c = GetParameter<RealObject>(parameters, 2).FloatValue;
-                    var d = GetParameter<RealObject>(parameters, 3).FloatValue;
-                    var e = GetParameter<RealObject>(parameters, 4).FloatValue;
-                    var f = GetParameter<RealObject>(parameters, 5).FloatValue;
+                    var a = GetParameter<RealObject>(parameters, 0).Value;
+                    var b = GetParameter<RealObject>(parameters, 1).Value;
+                    var c = GetParameter<RealObject>(parameters, 2).Value;
+                    var d = GetParameter<RealObject>(parameters, 3).Value;
+                    var e = GetParameter<RealObject>(parameters, 4).Value;
+                    var f = GetParameter<RealObject>(parameters, 5).Value;
                     return new CurrentTransformationMatrixOperator(a, b, c, d, e, f);
                 }
             },
-
         };
 
         internal List<Operator> ReadObjects() {
             List<Operator> objs = new List<Operator>();
             List<PdfObject> parameters = new List<PdfObject>();
-
-            if (reader.IsEOF()) {
-                return null;
-            }
                             
             while (!reader.IsEOF()) {
                 var o = reader.NextObject(true);

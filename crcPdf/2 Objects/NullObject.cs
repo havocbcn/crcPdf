@@ -12,41 +12,25 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with crcPdf.  If not, see <http://www.gnu.org/licenses/>.
-using System.Globalization;
-
 namespace crcPdf {
-    public class RealObject : PdfObject {
-        protected float floatValue;
-
-        public float Value => floatValue;
-
-        public RealObject(float value) {
-            this.floatValue = value;
+    public class NullObject : PdfObject {
+        public NullObject() {
         }
 
-        public RealObject(Tokenizer tokenizer) {
+        public NullObject(Tokenizer tokenizer) {
             string tokenContent = tokenizer.TokenExcludedCommentsAndWhitespaces().ToString();
 
-            float aFloat;                        
-            if (!float.TryParse(tokenContent, 
-                                NumberStyles.AllowDecimalPoint |
-                                NumberStyles.AllowLeadingSign |
-                                NumberStyles.AllowTrailingSign |
-                                NumberStyles.AllowThousands, 
-                                CultureInfo.InvariantCulture, 
-                                out aFloat)) {
+            if (tokenContent != "null") {
                 throw new PdfException(PdfExceptionCodes.INVALID_NUMBER_TOKEN, $"Number {tokenContent} cannot be cast to a float number");
             }
-
-            floatValue = aFloat;
         }
 
         public override string ToString() {
-            return Value.ToString(CultureInfo.InvariantCulture);
+            return "null";
         }
 
         public override byte[] Save(Compression compression) {            
-            return GetBytes(this.ToString());
+            return GetBytes("null");
         }
     }
 }

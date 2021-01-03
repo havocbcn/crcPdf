@@ -51,10 +51,10 @@ namespace crcPdf {
                 var mediaBox = pdf.GetObject<ArrayObject>(dic.Dictionary["MediaBox"]);
                 
                 MediaBox = new Rectangle(
-                    pdf.GetObject<RealObject>(mediaBox.childs[0]).floatValue,
-                    pdf.GetObject<RealObject>(mediaBox.childs[1]).floatValue,
-                    pdf.GetObject<RealObject>(mediaBox.childs[2]).floatValue,
-                    pdf.GetObject<RealObject>(mediaBox.childs[3]).floatValue);
+                    pdf.GetObject<RealObject>(mediaBox.childs[0]).Value,
+                    pdf.GetObject<RealObject>(mediaBox.childs[1]).Value,
+                    pdf.GetObject<RealObject>(mediaBox.childs[2]).Value,
+                    pdf.GetObject<RealObject>(mediaBox.childs[3]).Value);
             }
 
             if (dic.Dictionary.ContainsKey("Resources")) {
@@ -168,8 +168,7 @@ namespace crcPdf {
             return this;
         }
 
-        public DocumentPage AddRectangle(float x, float y, float width, float height)
-        {
+        public DocumentPage AddRectangle(float x, float y, float width, float height) {
             contents.AddRectangle(x, y, width, height);
             return this;
         }

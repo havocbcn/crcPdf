@@ -68,7 +68,7 @@ namespace crcPdf.Tests {
             Assert.Equal("DictionaryExample", actual.Child<NameObject>(3).Value);
 
             Assert.Equal("Version", actual.Child<NameObject>(4).Value);
-            Assert.Equal(0.01f, actual.Child<RealObject>(5).FloatValue);        
+            Assert.Equal(0.01f, actual.Child<RealObject>(5).Value);        
 
             Assert.Equal("IntegerItem", actual.Child<NameObject>(6).Value);
             Assert.Equal(12, actual.Child<IntegerObject>(7).IntValue); 
@@ -79,7 +79,7 @@ namespace crcPdf.Tests {
             Assert.Equal("Subdictionary", actual.Child<NameObject>(10).Value);
 
             Assert.Equal("Item1", actual.Child<DictionaryObject>(11).Child<NameObject>(0).Value);
-            Assert.Equal(0.4f, actual.Child<DictionaryObject>(11).Child<RealObject>(1).FloatValue);
+            Assert.Equal(0.4f, actual.Child<DictionaryObject>(11).Child<RealObject>(1).Value);
 
             Assert.Equal("Item2", actual.Child<DictionaryObject>(11).Child<NameObject>(2).Value);
             Assert.True(actual.Child<DictionaryObject>(11).Child<BooleanObject>(3).Value);

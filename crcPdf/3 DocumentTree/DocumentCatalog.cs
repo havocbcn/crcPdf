@@ -19,11 +19,12 @@ namespace crcPdf {
     // 7.7.2 Document Catalog
     public class DocumentCatalog : DocumentTree {
         private DocumentPageTree pageTree;
-        private DocumentOutline outlines;
+        private DocumentOutlines outlines;
         
         public DocumentCatalog() {            
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);      
             this.pageTree = new DocumentPageTree();
+            this.outlines = new DocumentOutlines();
         }
 
         public override void Load(PDFObjects pdf, PdfObject pdfObject) {
@@ -32,7 +33,7 @@ namespace crcPdf {
             pageTree = pdf.GetDocument<DocumentPageTree>(dictionary.Dictionary["Pages"]);
 
             if (dictionary.Dictionary.ContainsKey("Outlines")) {
-                outlines = pdf.GetDocument<DocumentOutline>(dictionary.Dictionary["Outlines"]);
+                outlines = pdf.GetDocument<DocumentOutlines>(dictionary.Dictionary["Outlines"]);
             }
         }
 
@@ -51,10 +52,8 @@ namespace crcPdf {
         }
 
         public DocumentPageTree Pages => pageTree;
-        public DocumentOutline Outlines => outlines;
 
-
-
+        public DocumentOutlines Outlines => outlines;
 
         public void Save(Stream ms) 
             => new PDFObjects().WriteTo(ms, this, Compression.Compress);        
