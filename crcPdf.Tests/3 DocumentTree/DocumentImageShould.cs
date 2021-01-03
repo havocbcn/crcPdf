@@ -30,7 +30,7 @@ namespace crcPdf.Tests.Image {
                 }
             );
 
-                [Fact]
+        [Fact]
         public void ReadAndSaveRawImage() =>
             // 12.3.3 Document outline
             crcPdfShould(
@@ -44,6 +44,22 @@ namespace crcPdf.Tests.Image {
                 }
             );
             
+         [Fact]
+        public void CreateAColorImage() =>            
+           crcPdf(
+                Given: pdf => { pdf.Pages
+                    .AddPage()        
+                        .SaveGraph() 
+                        .CurrentTransformationMatrix(300, 0, 0, 500, 50, 100)
+                        .AddImage("samples/colorImage.jpeg")
+                        .RestoreGraph();
+                    },
+                Then: pdf => {                   
 
+                     using (var fs = new FileStream("colorImage.pdf", FileMode.Create)) {
+                        pdf.Save(fs);
+                    }
+                }
+            );
     }
 }
